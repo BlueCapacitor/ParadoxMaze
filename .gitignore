@@ -2,3 +2,4 @@ __pycache__
 *.pyc
 .project
 .pydevproject
+.DS_Store
