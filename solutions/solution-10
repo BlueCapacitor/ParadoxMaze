@@ -1,0 +1,19 @@
+forever{
+	rt;
+	look;
+	ifClosed{
+		lt;
+		look;
+		ifClosed{
+			lt;
+			look;
+			ifClosed{
+				lt;
+				fd;
+			}
+		}
+	}
+	ifOpen{
+		fd;
+	}
+}
