@@ -74,12 +74,12 @@ class State(object):
                 if(not self.board.checkBounds(robotTrace)):
                     out |= Result.FAIL
                     break
-                if(out.value < Result.RECOVERABLE_PARADOX.value and isinstance(tile, TargetTile)):
+                if(isinstance(tile, TargetTile)):
                     targets[tile] = True
                     continue
 
         if(out == Result.NO_SUCCESS and all(targets.values())):
-            out = Result.POTENTIAL_SUCCESS
+            out |= Result.POTENTIAL_SUCCESS
 
         return(out)
 

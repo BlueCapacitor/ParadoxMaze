@@ -27,9 +27,7 @@ class CSVMap(object):
 
     robotStartSymbols = {Direction.RIGHT: "$R", Direction.UP: "$U", Direction.LEFT: "$L", Direction.DOWN: "$D"}
 
-    def __init__(self, fileName):
-        file = open(fileName, 'r')
-        text = file.read()
+    def __init__(self, text):
         self.cells = [[cell for cell in line.split(',')] for line in text.split('\n')]
 
         self.tiles = []
@@ -49,7 +47,7 @@ class CSVMap(object):
                     self.tiles[y].append((DestinationTile, {"letter": cell}))
                 elif(cell in CSVMap.portalSymbols):
                     destination = self.findCell(cell.lower())
-                    assert destination is not None, "No '%s' found in csv file"
+                    assert destination is not None, "No '%s' found in csv file" % (cell.lower())
                     self.tiles[y].append((PortalTile, destination[0: 2]))
                 elif(cell == CSVMap.timeGateSymbol):
                     self.tiles[y].append((TimeGateTile, {"dt": int(args[0])}))
