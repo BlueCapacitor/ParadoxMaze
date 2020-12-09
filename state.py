@@ -79,7 +79,7 @@ class State(object):
                     continue
 
         if(out == Result.NO_SUCCESS and all(targets.values())):
-            out |= Result.POTENTIAL_SUCCESS
+            out = Result.POTENTIAL_SUCCESS
 
         return(out)
 

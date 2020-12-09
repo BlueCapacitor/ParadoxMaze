@@ -67,11 +67,12 @@ class WallTile(EmptyTile):
 class TargetTile(EmptyTile):
 
     def getColors(self, state, time):
-        for robotTrace in state.getRobotsAtTime(time):
-            if(robotTrace.x == self.x and robotTrace.y == self.y):
-                return(((0.5, 0.5, 0.5),
-                        (0.5, 0.5, 0.5),
-                        (1, 1, 1)))
+        for checkTime in range(state.minTime, time + 1):
+            for robotTrace in state.getRobotsAtTime(checkTime):
+                if(robotTrace.x == self.x and robotTrace.y == self.y):
+                    return(((0.5, 0.5, 0.5),
+                            (0.5, 0.5, 0.5),
+                            (1, 1, 1)))
         return((0.5, 0.5, 0.5),
                (0.75, 0.75, 0.75),
                (1, 1, 1))

@@ -1,0 +1,18 @@
+repeat(4){
+	repeat(4){fd;}
+	rt;
+	repeat(3){
+		fd; fd;
+		rt;
+		repeat(3){
+			fd;
+			rt; rt;
+			fd;
+			rt;
+		}
+		fd; fd;
+		rt;
+	}
+	repeat(4){fd;}
+	rt;
+}

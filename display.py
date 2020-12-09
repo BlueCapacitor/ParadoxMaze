@@ -469,7 +469,6 @@ class Display(tk.Tk):
         def getColors(self):
             colorFile = open("%s/set-colors.txt" % self.resourcePath, 'r')
             colors = tuple(map(lambda s: tuple(map(float, s.split(", "))), colorFile.read().split('\n')))
-            print(colors)
             return(colors)
 
         def redraw(self):
@@ -509,35 +508,10 @@ class Display(tk.Tk):
             self.levelButtons.append(button)
 
         def loadLevel(self, number, csvMapText, codeFilePath):
-            print("\nLoading level %s-%s" % (self.set, number))
-
             self.display.currentPage = self.display.Page.CODING
             self.display.Page.CODING.value.csvMap = CSVMap(csvMapText)
             self.display.Page.CODING.value.codeFilePath = codeFilePath
             self.display.Page.CODING.value.draw()
-
-#             csvMap = CSVMap(csvMapText)
-#
-#             board = csvMap.buildBoard()
-#
-#             instructions = InstructionSet(code)
-#
-#             robot = csvMap.buildRobot()
-#             controller = Controller(board, robot, instructions)
-#
-#             self.display.currentPage = self.display.Page.CALCULATING
-#
-#             results = controller.run()
-#             print(results)
-#
-#             robotLog = controller.state.robotLog
-#             for time in sorted(robotLog.keys()):
-#                 print("%s: %s" % (time, robotLog[time]))
-#
-#             self.display.board = board
-#             self.display.results = results
-#             self.display.currentPage = self.display.Page.STEP
-#             self.display.currentPage.page.draw()
 
     class CodingPage(tk.Frame):
 
@@ -556,10 +530,12 @@ class Display(tk.Tk):
             self.grid_columnconfigure(2, weight = 1)
 
             self.previewCanvas = None
+            self.menuBar = None
 
         def draw(self):
-            self.menuBar = Display.MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, runAction = self.run)
-            self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
+            if(self.menuBar is None):
+                self.menuBar = Display.MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, runAction = self.run)
+                self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
 
             self.board = self.csvMap.buildBoard()
 
@@ -570,8 +546,6 @@ class Display(tk.Tk):
             self.previewCanvas.grid(row = 1, column = 0, sticky = tk.NSEW)
 
             self.previewCanvas.draw()
-
-        def openFile(self):
             self.codeBox.loadFile()
 
         def run(self, *_):
@@ -583,11 +557,6 @@ class Display(tk.Tk):
             self.display.currentPage = self.display.Page.CALCULATING
 
             results = controller.run()
-            print(results)
-
-            robotLog = controller.state.robotLog
-            for time in sorted(robotLog.keys()):
-                print("%s: %s" % (time, robotLog[time]))
 
             self.display.board = self.board
             self.display.results = results
@@ -598,7 +567,11 @@ class Display(tk.Tk):
 
         def __init__(self, codingPage):
             super().__init__(codingPage)
-            self.textBox = tk.Text(self, wrap = tk.NONE, font = Display.Font.NORMAL, tabs = (Display.Font.NORMAL.measure(self, ' ' * 2),))
+            self.codingPage = codingPage
+
+            self.doNotOverwriteFile = False
+
+            self.textBox = Display.TextWithModifiedCallback(self, wrap = tk.NONE, font = Display.Font.NORMAL, tabs = (Display.Font.NORMAL.measure(self, ' ' * 2),))
             self.textBox.grid(row = 0, column = 0, sticky = tk.NSEW)
             self.scrollV = tk.Scrollbar(self, orient = tk.VERTICAL, command = self.textBox.yview)
             self.scrollV.grid(row = 0, column = 1, sticky = tk.NSEW)
@@ -611,6 +584,8 @@ class Display(tk.Tk):
 
             self.textBox.bind("<Return>", self.enter)
             self.textBox.bind('}', self.closeBrace)
+
+            self.textBox.bind("<<TextModified>>", self.save)
 
         def currentIndentation(self):
             text = self.textBox.get("0.0", tk.INSERT)
@@ -631,14 +606,50 @@ class Display(tk.Tk):
                 self.textBox.delete("insert - 1 char", tk.INSERT)
 
         def loadFile(self):
+            self.doNotOverwriteFile = True
             filePath = self.codingPage.codeFilePath
             file = open(filePath, 'r')
-            self.textBox.config(text = file.read())
+            self.textBox.delete("0.0", tk.END)
+            self.textBox.insert(tk.END, file.read())
             file.close()
+            self.doNotOverwriteFile = False
+
+        def save(self, *_):
+            if(not(self.doNotOverwriteFile)):
+                filePath = self.codingPage.codeFilePath
+                file = open(filePath, 'w')
+                file.flush()
+                file.write(self.text)
+                file.close()
 
         @property
         def text(self):
-            return(self.textBox.get("0.0", "end"))
+            text = self.textBox.get("0.0", "end")
+            if(len(text) > 0 and text[-1] == '\n'):
+                text = text[:-1]
+            return(text)
+
+    class TextWithModifiedCallback(tk.Text):
+
+        def __init__(self, *args, **kwargs):
+            tk.Text.__init__(self, *args, **kwargs)
+
+            self._orig = self._w + "_orig"
+            self.tk.call("rename", self._w, self._orig)
+            self.tk.createcommand(self._w, self._proxy)
+
+        def _proxy(self, command, *args):
+            cmd = (self._orig, command) + args
+
+            try:
+                result = self.tk.call(cmd)
+            except Exception:
+                return
+
+            if command in ("insert", "delete", "replace"):
+                self.event_generate("<<TextModified>>")
+
+            return(result)
 
     class MenuBar(tk.Frame):
 
