@@ -144,17 +144,17 @@ class Display(tk.Tk):
             self.display = display
             self.drawn = False
 
-        def draw(self):
+        def draw(self, colors):
             if(self.drawn):
-                self.redraw()
+                self.redraw(colors)
             else:
-                self.menuBar = Display.MenuBar(self, self.display, self.display.Page.CODING)
+                self.menuBar = Display.MenuBar(self, self.display, self.display.Page.CODING, colors)
                 self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
 
                 self.gameCanvas = Display.GameCanvas(self)
                 self.gameCanvas.grid(row = 2, column = 1, columnspan = 2, sticky = tk.NSEW)
 
-                self.resultSelector = Display.ResultSelector(self)
+                self.resultSelector = Display.ResultSelector(self, colors)
                 self.resultSelector.grid(row = 2, column = 0, rowspan = 4, sticky = tk.NSEW)
 
                 modes = ("Global Time", "Charge Remaining")
@@ -192,9 +192,13 @@ class Display(tk.Tk):
 
                 self.drawn = True
 
-        def redraw(self):
+        def redraw(self, colors):
+            self.menuBar.destroy()
+            self.menuBar = Display.MenuBar(self, self.display, self.display.Page.CODING, colors)
+            self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
+
             self.resultSelector.destroy()
-            self.resultSelector = Display.ResultSelector(self)
+            self.resultSelector = Display.ResultSelector(self, colors)
             self.resultSelector.grid(row = 2, column = 0, rowspan = 4, sticky = tk.NSEW)
 
             self.updateMode()
@@ -269,13 +273,13 @@ class Display(tk.Tk):
 
     class ResultSelector(tk.Frame):
 
-        def __init__(self, parent):
-            super().__init__(parent, bg = "#888")
+        def __init__(self, parent, colors):
+            super().__init__(parent, bg = Display.tkColor(colors[1]))
             self.parent = parent
             self.alternativeTKVar = tk.IntVar()
             self.alternativeTKVar.trace('w', self.parent.alternativeResultChange)
 
-            self.buttonContainer = tk.Frame(self, bg = "#888")
+            self.buttonContainer = tk.Frame(self, bg = Display.tkColor(colors[1]))
             self.buttonContainer.grid(row = 0, column = 0, sticky = tk.NSEW)
             self.grid_rowconfigure(0, weight = 1)
             self.grid_columnconfigure(0, weight = 1)
@@ -296,9 +300,6 @@ class Display(tk.Tk):
             self.tileCenterSize = tileCenterSize
             self.tileFlareHorizontalVerticalSize = tileFlareHorizontalVerticalSize
             self.tileFlareDiagonalSize = tileFlareDiagonalSize
-
-#             self.infoBox = Display.InfoBox(self)
-#             self.infoBox.grid(row = 0, column = 0, sticky = tk.NSEW)
 
             self.grid_rowconfigure(0, weight = 1)
             self.grid_columnconfigure(0, weight = 1)
@@ -337,6 +338,9 @@ class Display(tk.Tk):
         @property
         def time(self):
             return(self.parent.time)
+
+        def setColors(self, colors):
+            self.canvas.config(bg = Display.tkColor(colors[0]), highlightcolor = Display.tkColor(colors[1]))
 
         def screenCoords(self, x, y):
             outX = (x + 1) * self.tileSize
@@ -438,8 +442,8 @@ class Display(tk.Tk):
 
     class LevelSelectPage(tk.Frame):
 
-        def __init__(self, display, buttonsPerRow = 3):
-            super().__init__(display)
+        def __init__(self, display, buttonsPerRow = 5):
+            super().__init__(display, padx = 4, pady = 4)
             self.display = display
 
             self.set = 1
@@ -447,12 +451,18 @@ class Display(tk.Tk):
 
             self.levelButtons = []
             self.setLabel = tk.Label(self, font = Display.Font.LARGE.value)
-            self.setLabel.grid(row = 0, column = 0, columnspan = 5, sticky = tk.NSEW)
+            self.setLabel.grid(row = 0, column = 1, columnspan = self.buttonsPerRow - 2, sticky = tk.NSEW, padx = 8, pady = 8)
 
-            self.grid_columnconfigure(0, weight = 0)
-            for column in range(buttonsPerRow):
-                self.grid_columnconfigure(column + 1, weight = 1)
-            self.grid_columnconfigure(0, weight = 0)
+            self.leftButton = tk.Label(self, font = Display.Font.LARGE.value, text = "-")
+            self.leftButton.grid(row = 0, column = 0, sticky = tk.NSEW, padx = 8, pady = 8)
+            self.leftButton.bind("<Button-1>", self.left)
+
+            self.rightButton = tk.Label(self, font = Display.Font.LARGE.value, text = "+")
+            self.rightButton.grid(row = 0, column = self.buttonsPerRow - 1, sticky = tk.NSEW, padx = 8, pady = 8)
+            self.rightButton.bind("<Button-1>", self.right)
+
+            for column in range(self.buttonsPerRow):
+                self.grid_columnconfigure(column, weight = 1)
 
             self.redraw()
 
@@ -466,6 +476,31 @@ class Display(tk.Tk):
         def resourcePath(self):
             return("%s/resources" % (self.setPath))
 
+        @property
+        def validSet(self):
+            return(os.path.isdir(self.setPath))
+
+        @property
+        def isFirstSet(self):
+            return(self.set == 1)
+
+        @property
+        def isLastSet(self):
+            self.set += 1
+            out = not(self.validSet)
+            self.set -= 1
+            return(out)
+
+        def left(self, *_):
+            if(not(self.isFirstSet)):
+                self.set -= 1
+                self.redraw()
+
+        def right(self, *_):
+            if(not(self.isLastSet)):
+                self.set += 1
+                self.redraw()
+
         def getColors(self):
             colorFile = open("%s/set-colors.txt" % self.resourcePath, 'r')
             colors = tuple(map(lambda s: tuple(map(float, s.split(", "))), colorFile.read().split('\n')))
@@ -473,10 +508,14 @@ class Display(tk.Tk):
 
         def redraw(self):
             self.colors = self.getColors()
+
             self.config(bg = Display.tkColor(self.colors[0]))
             self.setLabel.config(bg = Display.tkColor(self.colors[0]), fg = Display.tkColor(self.colors[1]))
 
             self.setLabel.config(text = "Set %s" % (self.set))
+
+            self.leftButton.config(bg = Display.tkColor(self.colors[3]) if self.isFirstSet else Display.tkColor(self.colors[1]), fg = Display.tkColor(self.colors[2]))
+            self.rightButton.config(bg = Display.tkColor(self.colors[3]) if self.isLastSet else Display.tkColor(self.colors[1]), fg = Display.tkColor(self.colors[2]))
 
             for button in self.levelButtons:
                 button.destroy()
@@ -501,9 +540,9 @@ class Display(tk.Tk):
                 self.addButton(number, csvMapText, codeFilePath)
 
         def addButton(self, number, csvMapText, codeFilePath):
-            button = tk.Label(self, text = "%s-%s" % (self.set, number), font = Display.Font.LARGE.value, bg = Display.tkColor(self.colors[2]), fg = Display.tkColor(self.colors[3]))
+            button = tk.Label(self, text = "%s-%s" % (self.set, number), font = Display.Font.LARGE.value, bg = Display.tkColor(self.colors[1]), fg = Display.tkColor(self.colors[2]))
             button.bind("<Button-1>", lambda *_: self.loadLevel(number, csvMapText, codeFilePath))
-            button.grid(row = (number - 1) // self.buttonsPerRow + 1, column = (number - 1) % self.buttonsPerRow + 1, sticky = tk.NSEW, padx = 8, pady = 8)
+            button.grid(row = (number - 1) // self.buttonsPerRow + 1, column = (number - 1) % self.buttonsPerRow, sticky = tk.NSEW, padx = 8, pady = 8)
             self.grid_rowconfigure((number - 1) // self.buttonsPerRow + 1, weight = 1)
             self.levelButtons.append(button)
 
@@ -511,7 +550,7 @@ class Display(tk.Tk):
             self.display.currentPage = self.display.Page.CODING
             self.display.Page.CODING.value.csvMap = CSVMap(csvMapText)
             self.display.Page.CODING.value.codeFilePath = codeFilePath
-            self.display.Page.CODING.value.draw()
+            self.display.Page.CODING.value.draw(self.colors)
 
     class CodingPage(tk.Frame):
 
@@ -532,9 +571,13 @@ class Display(tk.Tk):
             self.previewCanvas = None
             self.menuBar = None
 
-        def draw(self):
+        def draw(self, colors):
+            self.colors = colors
+
+            self.bg = Display.tkColor(self.colors[0])
+
             if(self.menuBar is None):
-                self.menuBar = Display.MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, runAction = self.run)
+                self.menuBar = Display.MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, self.colors, runAction = self.run)
                 self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
 
             self.board = self.csvMap.buildBoard()
@@ -561,7 +604,7 @@ class Display(tk.Tk):
             self.display.board = self.board
             self.display.results = results
             self.display.currentPage = self.display.Page.STEP
-            self.display.currentPage.page.draw()
+            self.display.currentPage.page.draw(self.colors)
 
     class CodeBox(tk.Frame):
 
@@ -653,8 +696,8 @@ class Display(tk.Tk):
 
     class MenuBar(tk.Frame):
 
-        def __init__(self, parent, display, backPage, height = 32, color = (0.5, 0.5, 0.5), runAction = None):
-            super().__init__(parent, bg = Display.tkColor(color))
+        def __init__(self, parent, display, backPage, colors, height = 32, runAction = None):
+            super().__init__(parent, bg = Display.tkColor(colors[1]))
 
             self.parent = parent
             self.display = display
@@ -665,7 +708,7 @@ class Display(tk.Tk):
             self.grid_columnconfigure(0, weight = 0)
             self.grid_columnconfigure(1, weight = 1)
 
-            self.backButton = tk.Canvas(self, width = self.height, height = self.height, bg = Display.tkColor(color), highlightthickness = 0, relief = tk.RAISED, bd = 2)
+            self.backButton = tk.Canvas(self, width = self.height, height = self.height, bg = Display.tkColor(colors[1]), highlightthickness = 0, relief = tk.RAISED, bd = 2)
 
             arrowSize = self.height * 3 / 4
             arrowTL = self.height * 1 / 8
@@ -677,7 +720,7 @@ class Display(tk.Tk):
                                            arrowTL + arrowSize / 2, arrowTL + arrowSize * 3 / 4,
                                            arrowTL + arrowSize / 2, arrowTL + arrowSize,
                                            arrowTL, arrowTL + arrowSize / 2,
-                                           fill = "#000")
+                                           fill = Display.tkColor(colors[2]))
 
             self.backButton.xview_moveto(0)
             self.backButton.yview_moveto(0)
@@ -686,7 +729,7 @@ class Display(tk.Tk):
             self.backButton.bind("<Button-1>", self.goBack)
 
             if(runAction is not None):
-                self.runButton = tk.Canvas(self, width = self.height, height = self.height, bg = Display.tkColor(color), highlightthickness = 0, relief = tk.RAISED, bd = 2)
+                self.runButton = tk.Canvas(self, width = self.height, height = self.height, bg = Display.tkColor(colors[1]), highlightthickness = 0, relief = tk.RAISED, bd = 2)
 
                 arrowSize = self.height * 3 / 4
                 arrowTL = self.height * 1 / 8
@@ -694,7 +737,7 @@ class Display(tk.Tk):
                                               arrowTL + arrowSize, arrowTL + arrowSize / 2,
                                               arrowTL, arrowTL + arrowSize,
                                               arrowTL, arrowTL,
-                                              fill = "#000")
+                                              fill = Display.tkColor(colors[2]))
 
                 self.runButton.xview_moveto(0)
                 self.runButton.yview_moveto(0)
