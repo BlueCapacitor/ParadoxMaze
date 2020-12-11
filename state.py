@@ -68,7 +68,7 @@ class State(object):
         for time in self.robotLog.keys():
             for robotTrace in self.robotLog[time]:
                 tile = self.board.getTile(robotTrace.x, robotTrace.y)
-                if(tile.isSolid(self, time) and tile.isStatic):
+                if(tile.isFatal(self, time) and tile.isStatic):
                     out |= Result.FAIL
                     break
                 if(not self.board.checkBounds(robotTrace)):

@@ -7,13 +7,15 @@ from board import Board
 from robot import Direction, Robot
 from tile import EmptyTile, WallTile, DestinationTile, PortalTile, TargetTile, \
     TimeGateTile, CloseTimedDoorTile, OpenTimedDoorTile, TimePortalTile, \
-    ButtonTile, OpenLogicalDoorTile
+    ButtonTile, OpenLogicalDoorTile, LavaTile, HologramTile
 
 
 class CSVMap(object):
 
     emptySymbol = ''
     wallSymbol = '0'
+    lavaSymbol = '1'
+    hologramSymbol = '2'
     targetSymbol = '@'
     timeGateSymbol = '*'
     closeTimedDoorSymbol = ')'
@@ -41,6 +43,10 @@ class CSVMap(object):
                     self.tiles[y].append(EmptyTile)
                 elif(cell == CSVMap.wallSymbol):
                     self.tiles[y].append(WallTile)
+                elif(cell == CSVMap.lavaSymbol):
+                    self.tiles[y].append(LavaTile)
+                elif(cell == CSVMap.hologramSymbol):
+                    self.tiles[y].append(HologramTile)
                 elif(cell == CSVMap.targetSymbol):
                     self.tiles[y].append(TargetTile)
                 elif(cell in CSVMap.destinationSymbols):

@@ -133,6 +133,10 @@ class InstructionSet(object):
 
         out = self.getStackItem(self.stack, self.instructions)
 
+        if(out == Instruction.STOP):
+            self.done = True
+            return(Instruction.SLEEP)
+
         return(out)
 
     def stepStack(self, robot):
@@ -140,6 +144,13 @@ class InstructionSet(object):
 
         while(True):
             if(isinstance((item := self.getStackItem(self.stack, self.instructions)), Conditional) and not item.evaluateCondition(robot)):  # @IgnorePep8
+                self.stepAndPop()
+
+            if(self.getStackItem(self.stack, self.instructions) == Instruction.BREAK and len(self.stack) > 1):
+                self.stack = self.stack[:-1]
+                while(len(self.stack) > 1 and not(isinstance(self.getStackItem(self.stack, self.instructions), Loop))):
+                    self.stack = self.stack[:-1]
+
                 self.stepAndPop()
 
             needed = self.stepUpStackIfNeeded()
@@ -282,6 +293,8 @@ class Instruction(Enum):
     RIGHT = "rt"
     LOOK = "look"
     DEBUG = "debug"
+    BREAK = "break"
+    STOP = "stop"
 
     def copy(self):
         return(self)

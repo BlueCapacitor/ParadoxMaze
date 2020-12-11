@@ -46,6 +46,9 @@ class EmptyTile(object):
     def isSolid(self, _state, _time):
         return(False)
 
+    def isFatal(self, state, time):
+        return(self.isSolid(state, time))
+
     def getColors(self, _state, _time):
         return(((0.75, 0.75, 0.75),
                 (1, 1, 1)))
@@ -62,6 +65,29 @@ class WallTile(EmptyTile):
     def getColors(self, _state, _time):
         return(((0.25, 0.25, 0.25),
                 (0, 0, 0)))
+
+
+class LavaTile(EmptyTile):
+
+    def isFatal(self, _state, _time):
+        return(True)
+
+    def getColors(self, _state, _time):
+        return(((1, 0, 0),
+                (1, 0.25, 0)))
+
+
+class HologramTile(EmptyTile):
+
+    def isFatal(self, _state, _time):
+        return(False)
+
+    def isSolid(self, _state, _time):
+        return(True)
+
+    def getColors(self, _state, _time):
+        return(((0.5, 0.5, 1),
+                (0.75, 0.75, 1)))
 
 
 class TargetTile(EmptyTile):
