@@ -1,0 +1,10 @@
+fd;
+forever{
+	look;
+	ifClosed{slp;}
+	ifOpen{break;}
+}
+
+repeat(3){
+	fd;
+}

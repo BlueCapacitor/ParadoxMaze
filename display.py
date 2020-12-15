@@ -576,9 +576,11 @@ class Display(tk.Tk):
 
             self.bg = Display.tkColor(self.colors[0])
 
-            if(self.menuBar is None):
-                self.menuBar = Display.MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, self.colors, runAction = self.run)
-                self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
+            if(self.menuBar is not None):
+                self.menuBar.destroy()
+
+            self.menuBar = Display.MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, self.colors, runAction = self.run)
+            self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
 
             self.board = self.csvMap.buildBoard()
 

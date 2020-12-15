@@ -1,0 +1,11 @@
+fd;
+fd;
+forever{
+	look;
+	ifOpen{
+		break;
+	}
+}
+repeat(3){
+	fd;
+}
