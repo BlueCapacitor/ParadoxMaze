@@ -7,7 +7,8 @@ from board import Board
 from robot import Direction, Robot
 from tile import EmptyTile, WallTile, DestinationTile, PortalTile, TargetTile, \
     TimeGateTile, CloseTimedDoorTile, OpenTimedDoorTile, TimePortalTile, \
-    ButtonTile, OpenLogicalDoorTile, LavaTile, HologramTile
+    ButtonTile, OpenLogicalDoorTile, LavaTile, HologramTile, \
+    CloseLogicalDoorTile, OnToggleTile, OffToggleTile
 
 
 class CSVMap(object):
@@ -24,6 +25,8 @@ class CSVMap(object):
     closeLogicalDoorSymbol = ']'
     timePortalSymbol = '>'
     buttonSymbol = '^'
+    onToggleSymbol = '+'
+    offToggleSymbol = '-'
     destinationSymbols = tuple("abcdefghijklmnopqrstuvwxyz")
     portalSymbols = tuple("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -67,6 +70,12 @@ class CSVMap(object):
                     self.tiles[y].append((ButtonTile, {"controlID": int(args[0])}))
                 elif(cell == CSVMap.openLogicalDoorSymbol):
                     self.tiles[y].append((OpenLogicalDoorTile, {"controlID": int(args[0])}))
+                elif(cell == CSVMap.closeLogicalDoorSymbol):
+                    self.tiles[y].append((CloseLogicalDoorTile, {"controlID": int(args[0])}))
+                elif(cell == CSVMap.onToggleSymbol):
+                    self.tiles[y].append((OnToggleTile, {"controlID": int(args[0])}))
+                elif(cell == CSVMap.offToggleSymbol):
+                    self.tiles[y].append((OffToggleTile, {"controlID": int(args[0])}))
                 else:
                     self.tiles[y].append(EmptyTile)
 

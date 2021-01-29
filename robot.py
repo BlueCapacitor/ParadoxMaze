@@ -49,6 +49,10 @@ class Robot(StaticRobot):
         tile = state.board.getTile(self.forwardX, self.forwardY)
         return(tile.look(state, time) if not(tile.isStatic) else not(tile.isSolid(state, time)))
 
+    def crashLook(self, state, time):
+        tile = state.board.getTile(self.x, self.y)
+        return(tile.crashLook(state, time) if not(tile.isStatic) else not(tile.isFatal(state, time)))
+
     def turnLeft(self):
         self.direction = self.direction.left()
         self.chargeRemaining -= 1

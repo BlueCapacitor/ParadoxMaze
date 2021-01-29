@@ -249,12 +249,13 @@ class Forever(Loop):
 
 class Repeat(Loop):
 
-    def __init__(self, repeatNum, code = []):
+    def __init__(self, repeatNum, code = [], remaining = None):
         super().__init__(code = code)
         self.repeatNum = repeatNum
+        self.remaining = remaining
 
     def copy(self):
-        return(type(self)(self.repeatNum, code = list(map(lambda block: block.copy(), self.code))))
+        return(type(self)(self.repeatNum, code = list(map(lambda block: block.copy(), self.code)), remaining = self.remaining))
 
     def loopDone(self):
         self.remaining -= 1

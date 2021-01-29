@@ -38,6 +38,7 @@ def shiftNextHue(prev):
 class EmptyTile(object):
 
     isStatic = True
+    isTimeTravel = False
 
     def __init__(self, x, y):
         self.x = x
@@ -55,6 +56,9 @@ class EmptyTile(object):
 
     def getText(self, _state, _time):
         return('', (0, 0, 0))
+
+    def couldBeFatal(self, _state, _time):
+        return(False)
 
 
 class WallTile(EmptyTile):
@@ -159,6 +163,8 @@ class PortalTile(TransportTile):
 
 class TimeGateTile(TransportTile):
 
+    isTimeTravel = True
+
     def __init__(self, x, y, dt):
         super().__init__(x, y)
         self.dt = dt
@@ -210,6 +216,8 @@ class OpenTimedDoorTile(EmptyTile):
 
 class TimePortalTile(TransportTile):
 
+    isTimeTravel = True
+
     def __init__(self, x, y, destT):
         super().__init__(x, y)
         self.destT = destT
@@ -242,7 +250,7 @@ class ButtonTile(ControlTile):
 
     def trigger(self, state, time):
         controlValue = state.getControlValue(self.controlID, time)
-        controlValue.setState(True, True)
+        controlValue.setCurrentValue(True, True)
 
     def getColors(self, state, time):
         for robotTrace in state.getRobotsAtTime(time):
@@ -258,12 +266,64 @@ class ButtonTile(ControlTile):
         return((self.controlID, (0, 0, 0)))
 
 
+class OnToggleTile(ControlTile):
+
+    def __init__(self, x, y, controlID):
+        super().__init__(x, y)
+        self.controlID = controlID
+
+        self.color = getColorForId(controlID)
+
+    def trigger(self, state, time):
+        state.setStickyValue(self.controlID, time, True)
+
+    def getColors(self, state, time):
+        if(state.getControlValue(self.controlID, time).curentValue):
+            return(((0.5, 0.5, 0.5),
+                    (0.5, 0.75, 0.5),
+                    self.color))
+        return((0.5, 0.5, 0.5),
+               (0.75, 1, 0.75),
+               self.color)
+
+    def getText(self, _state, _time):
+        return((self.controlID, (0, 0, 0)))
+
+
+class OffToggleTile(ControlTile):
+
+    def __init__(self, x, y, controlID):
+        super().__init__(x, y)
+        self.controlID = controlID
+
+        self.color = getColorForId(controlID)
+
+    def trigger(self, state, time):
+        state.setStickyValue(self.controlID, time, False)
+
+    def getColors(self, state, time):
+        if(not(state.getControlValue(self.controlID, time).curentValue)):
+            return(((0.5, 0.5, 0.5),
+                    (0.5, 0.75, 0.5),
+                    self.color))
+        return((0.5, 0.5, 0.5),
+               (0.75, 1, 0.75),
+               self.color)
+
+    def getText(self, _state, _time):
+        return((self.controlID, (0, 0, 0)))
+
+
 class NonStaticDoorTile(EmptyTile, ABC):
 
     isStatic = False
 
     @abstractmethod
     def look(self, _state, _time):
+        pass  # return(controlValue, looksOpenOnValue)
+
+    @abstractmethod
+    def crashLook(self, _state, _time):
         pass  # return(controlValue, openOnValue)
 
 
@@ -276,15 +336,58 @@ class OpenLogicalDoorTile(NonStaticDoorTile):
         self.color = getColorForId(controlID)
 
     def isSolid(self, state, time):
-        return(not state.getControlValue(self.controlID, time).curentValue)
+        return(not(state.getControlValue(self.controlID, time).curentValue))
 
     def getColors(self, state, time):
         return(((0.25, 0.5, 0.25),
-                (0, 0, 0) if not state.getControlValue(self.controlID, time).curentValue else (1, 1, 1),
+                (0, 0, 0) if self.isSolid(state, time) else (1, 1, 1),
                 self.color))
 
     def getText(self, _state, _time):
         return((self.controlID, (0, 0, 0)))
 
     def look(self, state, time):
-        return((state.getControlValue(self.controlID, time), True))
+        if(state.board.hasTimeTravel):
+            return((state.getControlValue(self.controlID, time), True))
+        else:
+            return(state.getControlValue(self.controlID, time).curentValue)
+
+    def crashLook(self, state, time):
+        return(self.look(state, time))
+
+    def couldBeFatal(self, state, time):
+        controlValue = state.getControlValue(self.controlID, time)
+        return(False in controlValue.possibleValues)
+
+
+class CloseLogicalDoorTile(NonStaticDoorTile):
+
+    def __init__(self, x, y, controlID):
+        super().__init__(x, y)
+        self.controlID = controlID
+
+        self.color = getColorForId(controlID)
+
+    def isSolid(self, state, time):
+        return(state.getControlValue(self.controlID, time).curentValue)
+
+    def getColors(self, state, time):
+        return(((0.5, 0.25, 0.25),
+                (0, 0, 0) if self.isSolid(state, time) else (1, 1, 1),
+                self.color))
+
+    def getText(self, _state, _time):
+        return((self.controlID, (0, 0, 0)))
+
+    def look(self, state, time):
+        if(state.board.hasTimeTravel):
+            return((state.getControlValue(self.controlID, time), False))
+        else:
+            return(not(state.getControlValue(self.controlID, time).curentValue))
+
+    def crashLook(self, state, time):
+        return(self.look(state, time))
+
+    def couldBeFatal(self, state, time):
+        controlValue = state.getControlValue(self.controlID, time)
+        return(False in controlValue.possibleValues)

@@ -11,7 +11,7 @@ from tile import TargetTile
 
 class State(object):
 
-    def __init__(self, board, robotLog = None, controlValueLog = None):
+    def __init__(self, board, robotLog = None, controlValueLog = None, stickyValues = None):
         self.board = board
         if(robotLog is None):
             self.robotLog = {}
@@ -21,10 +21,18 @@ class State(object):
         if(controlValueLog is None):
             self.controlValueLog = {}
         else:
-            self.controlValueLog = controlValueLog
+            self.controlValueLog = dict(map(lambda entry: (entry[0], entry[1].copy(state = self)), controlValueLog.items()))
+
+        if(stickyValues is None):
+            self.stickyValues = {}
+        else:
+            self.stickyValues = stickyValues
 
     def copy(self):
-        return(State(self.board, dict(map(lambda entry: (entry[0], entry[1].copy()), self.robotLog.items())), dict(map(lambda entry: (entry[0], entry[1].copy()), self.controlValueLog.items()))))
+        return(State(self.board,
+                     dict(map(lambda entry: (entry[0], entry[1].copy()), self.robotLog.items())),
+                     self.controlValueLog,
+                     dict(self.stickyValues)))
 
     def getRobotsAtTime(self, time):
         return(self.robotLog[time] if time in self.robotLog.keys() else [])
@@ -46,7 +54,9 @@ class State(object):
 
     def getControlValue(self, controlID, time):
         if((controlID, time) not in self.controlValueLog.keys()):
-            self.controlValueLog[(controlID, time)] = ControlValue()
+            currentValue = False
+
+            self.controlValueLog[(controlID, time)] = ControlValue(self, time, controlID, currentValue)
 
         return(self.controlValueLog[(controlID, time)])
 
@@ -54,6 +64,9 @@ class State(object):
         for key in self.controlValueLog.keys():
             if(self.controlValueLog[key] == controlValue):
                 return(key)
+
+    def setStickyValue(self, controlID, time, value):
+        self.stickyValues[(controlID, time)] = value
 
     @property
     def isValid(self):
@@ -69,10 +82,19 @@ class State(object):
             for robotTrace in self.robotLog[time]:
                 tile = self.board.getTile(robotTrace.x, robotTrace.y)
                 if(tile.isFatal(self, time) and tile.isStatic):
-                    out |= Result.FAIL
+                    out = self.failAndFinalize(out)
                     break
+                if(not(tile.isStatic)):
+                    if(not(self.board.hasTimeTravel)):
+                        if(not(tile.crashLook(self, time))):
+                            out = self.failAndFinalize(out)
+                    else:
+                        controlValue, safeValue = tile.crashLook(self, time)
+                        if(controlValue.static and controlValue.curentValue != safeValue):
+                            out = self.failAndFinalize(out)
+
                 if(not self.board.checkBounds(robotTrace)):
-                    out |= Result.FAIL
+                    out = self.failAndFinalize(out)
                     break
                 if(isinstance(tile, TargetTile)):
                     targets[tile] = True
@@ -82,6 +104,12 @@ class State(object):
             out = Result.POTENTIAL_SUCCESS
 
         return(out)
+
+    def failAndFinalize(self, result):
+        result |= Result.FAIL
+        if(result == Result.RECOVERABLE_PARADOX):
+            result = Result.UNRECOVERABLE_PARADOX
+        return(result)
 
     @property
     def maxTime(self):
@@ -114,18 +142,35 @@ class Result(Enum):
 
 class ControlValue():
 
-    def __init__(self, currentValue = False, possibleValues = {True, False}, static = False):
-        self.curentValue = currentValue
+    def __init__(self, state, time, controlID, currentValue, possibleValues = {True, False}, static = False):
+        self.state = state
+        self.time = time
+        self.controlID = controlID
+        self._curentValue = currentValue
         self.possibleValues = possibleValues
         self.static = static
 
-    def setState(self, value, static):
+    def setCurrentValue(self, value, static):
         if(not(self.static)):
-            self.curentValue = value
+            self._curentValue = value
             self.static = static
 
     @property
+    def curentValue(self):
+        value = self._curentValue
+
+        maxTime = None
+        for ((controlID, time), stickyValue) in self.state.stickyValues.items():
+            if(controlID == self.controlID and (maxTime is None or time > maxTime) and time <= self.time):
+                value = stickyValue
+                maxTime = time
+
+        return(value)
+
+    @property
     def validity(self):
+        if(not(self.state.board.hasTimeTravel)):
+            return(Result.SUCCESS)
         if(self.curentValue in self.possibleValues):
             return(Result.SUCCESS)
         else:
@@ -137,5 +182,5 @@ class ControlValue():
     def assumeValue(self, value):
         self.possibleValues &= {value}
 
-    def copy(self):
-        return(ControlValue(self.curentValue, set(self.possibleValues), self.static))
+    def copy(self, state = None, time = None):
+        return(ControlValue(self.state if state is None else state, self.time if time is None else time, self.controlID, self.curentValue, set(self.possibleValues), self.static))

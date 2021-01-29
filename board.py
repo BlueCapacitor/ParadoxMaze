@@ -36,6 +36,12 @@ class Board(object):
 
         assert self.isValid(), "Invalid board"
 
+        self.hasTimeTravel = False
+        for tile in self.listTiles:
+            if(tile.isTimeTravel):
+                self.hasTimeTravel = True
+                break
+
     @property
     def width(self):
         return(len(self.tiles[0]))
