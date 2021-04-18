@@ -4,7 +4,7 @@ Created on Oct 10, 2020
 @author: gosha
 """
 
-from tile import EmptyTile, TargetTile
+from core.tile import EmptyTile, TargetTile
 
 
 class Board(object):
@@ -57,9 +57,11 @@ class Board(object):
     def is_valid(self):
         for row in self.tiles:
             if len(row) != self.width:
+                print("test 1")
                 return False
             for tile in row:
                 if not(isinstance(tile, EmptyTile)):
+                    print("test 2", tile)
                     return False
         return True
 

@@ -21,8 +21,8 @@ class InstructionSet(object):
             self.instruction_names["function:"] = ParseObject
             self.instruction_names["repeat"] = Repeat
             self.instruction_names["forever"] = Forever
-            self.instruction_names["if_open"] = IfOpen
-            self.instruction_names["if_closed"] = IfClosed
+            self.instruction_names["ifOpen"] = IfOpen
+            self.instruction_names["ifClosed"] = IfClosed
 
             self.instructions = ParseObject()
             self.parse(self.instructions, instruction_str)
@@ -89,7 +89,7 @@ class InstructionSet(object):
                         parse_object.add_block(block)
 
                     elif block_type == IfOpen:
-                        assert code[location] == "{", "if_open should be followed by {, not %s" % (code[location])
+                        assert code[location] == "{", "ifOpen should be followed by {, not %s" % (code[location])
                         block_code = self.isolate_delimited_range(code[location + 1:], "{", "}")
                         location += 2 + len(block_code)
 
@@ -98,7 +98,7 @@ class InstructionSet(object):
                         parse_object.add_block(block)
 
                     elif block_type == IfClosed:
-                        assert code[location] == "{", "if_closed should be followed by {, not %s" % (code[location])
+                        assert code[location] == "{", "ifClosed should be followed by {, not %s" % (code[location])
                         block_code = self.isolate_delimited_range(code[location + 1:], "{", "}")
                         location += 2 + len(block_code)
 

@@ -4,9 +4,9 @@ Created on Oct 10, 2020
 @author: gosha
 """
 
-from instruction_set import Instruction
-from state import State, Result
-from tile import TransportTile, ControlTile
+from core.instruction_set import Instruction
+from core.state import State, Result
+from core.tile import TransportTile, ControlTile
 
 number_of_robots = 1
 

@@ -6,7 +6,7 @@ Created on Oct 10, 2020
 
 from enum import Enum
 
-from tile import TargetTile
+from core.tile import TargetTile
 
 
 class State(object):
@@ -19,9 +19,9 @@ class State(object):
             self.robot_log = robot_log
 
         if control_value_log is None:
-            self.control_valueLog = {}
+            self.control_value_log = {}
         else:
-            self.control_valueLog = dict(
+            self.control_value_log = dict(
                 map(lambda entry: (entry[0], entry[1].copy(state=self)), control_value_log.items()))
 
         if sticky_values is None:
@@ -32,7 +32,7 @@ class State(object):
     def copy(self):
         return (State(self.board,
                       dict(map(lambda entry: (entry[0], entry[1].copy()), self.robot_log.items())),
-                      self.control_valueLog,
+                      self.control_value_log,
                       dict(self.sticky_values)))
 
     def get_robots_at_time(self, time):
@@ -54,16 +54,16 @@ class State(object):
         self.robot_log[time].append(robot.make_trace())
 
     def get_control_value(self, control_id, time):
-        if (control_id, time) not in self.control_valueLog.keys():
+        if (control_id, time) not in self.control_value_log.keys():
             current_value = False
 
-            self.control_valueLog[(control_id, time)] = ControlValue(self, time, control_id, current_value)
+            self.control_value_log[(control_id, time)] = ControlValue(self, time, control_id, current_value)
 
-        return self.control_valueLog[(control_id, time)]
+        return self.control_value_log[(control_id, time)]
 
     def get_key_for_control_value(self, control_value):
-        for key in self.control_valueLog.keys():
-            if self.control_valueLog[key] == control_value:
+        for key in self.control_value_log.keys():
+            if self.control_value_log[key] == control_value:
                 return key
 
     def set_sticky_value(self, control_id, time, value):
@@ -73,8 +73,8 @@ class State(object):
     def is_valid(self):
         out = Result.NO_SUCCESS
 
-        for control_id, time in self.control_valueLog.keys():
-            control_value = self.control_valueLog[(control_id, time)]
+        for control_id, time in self.control_value_log.keys():
+            control_value = self.control_value_log[(control_id, time)]
             out |= control_value.validity
 
         targets = {tile: False for tile in self.board.get_targets()}
@@ -86,7 +86,7 @@ class State(object):
                     out = self.fail_and_finalize(out)
                     break
                 if not tile.is_static:
-                    if not self.board.has_timeTravel:
+                    if not self.board.has_time_travel:
                         if not (tile.crash_look(self, time)):
                             out = self.fail_and_finalize(out)
                     else:
@@ -174,7 +174,7 @@ class ControlValue:
 
     @property
     def validity(self):
-        if not self.state.board.has_timeTravel:
+        if not self.state.board.has_time_travel:
             return Result.SUCCESS
         if self.current_value in self.possible_values:
             return Result.SUCCESS

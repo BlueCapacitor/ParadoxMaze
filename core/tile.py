@@ -350,7 +350,7 @@ class OpenLogicalDoorTile(NonStaticDoorTile):
         return self.control_id, (0, 0, 0)
 
     def look(self, state, time):
-        if state.board.hasTimeTravel:
+        if state.board.has_time_travel:
             return state.get_control_value(self.control_id, time), True
         else:
             return state.get_control_value(self.control_id, time).current_value
@@ -360,7 +360,7 @@ class OpenLogicalDoorTile(NonStaticDoorTile):
 
     def could_be_fatal(self, state, time):
         control_value = state.get_control_value(self.control_id, time)
-        return False in control_value.possibleValues
+        return False in control_value.possible_values
 
 
 class CloseLogicalDoorTile(NonStaticDoorTile):
@@ -383,7 +383,7 @@ class CloseLogicalDoorTile(NonStaticDoorTile):
         return self.control_id, (0, 0, 0)
 
     def look(self, state, time):
-        if state.board.hasTimeTravel:
+        if state.board.has_time_travel:
             return state.get_control_value(self.control_id, time), False
         else:
             return not state.get_control_value(self.control_id, time).current_value
@@ -393,4 +393,4 @@ class CloseLogicalDoorTile(NonStaticDoorTile):
 
     def could_be_fatal(self, state, time):
         control_value = state.get_control_value(self.control_id, time)
-        return False in control_value.possibleValues
+        return False in control_value.possible_values

@@ -8,13 +8,15 @@ from enum import Enum
 from math import ceil
 import os
 
-from controller import Controller
-from csv_map import CSVMap
-from instruction_set import InstructionSet
-from state import Result, State
+from core.controller import Controller
+from display.csv_map import CSVMap
+from core.instruction_set import InstructionSet
+from core.state import Result, State
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.ttk as ttk
+
+from display import tk_color, charge_color, inactive_charge_color, inactive_border_charge_color, border_charge_color
 
 
 class Display(tk.Tk):
@@ -69,55 +71,6 @@ class Display(tk.Tk):
         self.grid_rowconfigure(0, weight=1)
 
         self.update()
-
-    @staticmethod
-    def tk_color(color):
-        return "#{:02X}{:02X}{:02X}".format(*map(lambda v: ceil(v * 255), color))
-
-    @staticmethod
-    def charge_color(charge, initial_charge):
-        parts_charged = charge / initial_charge
-        if parts_charged > 0.5:
-            return 2 - parts_charged * 2, 1, 0
-        else:
-            return 1, parts_charged * 2, 0
-
-    @staticmethod
-    def border_charge_color(charge, initial_charge):
-        return tuple(map(lambda x: x / 2, Display.charge_color(charge, initial_charge)))
-
-    @staticmethod
-    def inactive_charge_color(*_):
-        return 0.5, 0.5, 0.5
-
-    @staticmethod
-    def inactive_border_charge_color(*_):
-        return 0.75, 0.75, 0.75
-
-    @staticmethod
-    def draw_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
-        points = [x1 + radius, y1,
-                  x1 + radius, y1,
-                  x2 - radius, y1,
-                  x2 - radius, y1,
-                  x2, y1,
-                  x2, y1 + radius,
-                  x2, y1 + radius,
-                  x2, y2 - radius,
-                  x2, y2 - radius,
-                  x2, y2,
-                  x2 - radius, y2,
-                  x2 - radius, y2,
-                  x1 + radius, y2,
-                  x1 + radius, y2,
-                  x1, y2,
-                  x1, y2 - radius,
-                  x1, y2 - radius,
-                  x1, y1 + radius,
-                  x1, y1 + radius,
-                  x1, y1]
-
-        return canvas.create_polygon(points, **kwargs, smooth=True)
 
     class Font(Enum):
         HUGE = ("Veranda", 64)
@@ -282,8 +235,8 @@ class Display(tk.Tk):
                 self.charge_mode_time_display.config(text="", bg="#FFF")
             else:
                 time = self.state.get_robot_with_charge(self.time)[1]
-                self.charge_mode_time_display.config(text="Time: %s" % time, bg=Display.tk_color(
-                    Display.charge_color(self.time, self.state.max_charge)))
+                self.charge_mode_time_display.config(text="Time: %s" % time, bg=tk_color(
+                    charge_color(self.time, self.state.max_charge)))
             self.game_canvas.draw()
 
         def alternative_result_change(self, *_):
@@ -292,12 +245,12 @@ class Display(tk.Tk):
     class ResultSelector(tk.Frame):
 
         def __init__(self, parent, colors):
-            super().__init__(parent, bg=Display.tk_color(colors[1]))
+            super().__init__(parent, bg=tk_color(colors[1]))
             self.parent = parent
             self.alternative_tkvar = tk.IntVar()
             self.alternative_tkvar.trace('w', self.parent.alternative_result_change)
 
-            self.button_container = tk.Frame(self, bg=Display.tk_color(colors[1]))
+            self.button_container = tk.Frame(self, bg=tk_color(colors[1]))
             self.button_container.grid(row=0, column=0, sticky=tk.NSEW)
             self.grid_rowconfigure(0, weight=1)
             self.grid_columnconfigure(0, weight=1)
@@ -311,7 +264,7 @@ class Display(tk.Tk):
                 button = tk.Radiobutton(self.button_container,
                                         text="Alternative %s - %s" % (alternative_number, result_status_text),
                                         variable=self.alternative_tkvar, value=alternative_number, indicatoron=False,
-                                        bg=Display.tk_color(button_color))
+                                        bg=tk_color(button_color))
                 button.grid(row=alternative_number, column=0, sticky=tk.E + tk.N + tk.W)
 
     class GameCanvas(tk.Frame):
@@ -367,7 +320,7 @@ class Display(tk.Tk):
             return self.parent.time
 
         def set_colors(self, colors):
-            self.canvas.config(bg=Display.tk_color(colors[0]), highlightcolor=Display.tk_color(colors[1]))
+            self.canvas.config(bg=tk_color(colors[0]), highlightcolor=tk_color(colors[1]))
 
         def screen_coords(self, x, y):
             out_x = (x + 1) * self.tile_size
@@ -395,8 +348,8 @@ class Display(tk.Tk):
                 current_robot, time = self.state.get_robot_with_charge(self.time)
                 for robot in self.state.get_robots_at_time(time):
                     if robot != current_robot:
-                        self.draw_robot(robot, color_function=Display.inactive_charge_color,
-                                        border_color_function=Display.inactive_border_charge_color)
+                        self.draw_robot(robot, color_function=inactive_charge_color,
+                                        border_color_function=inactive_border_charge_color)
                 self.draw_robot(current_robot)
 
         def draw_tile(self, tile, time):
@@ -407,25 +360,25 @@ class Display(tk.Tk):
                 self.draw_flare(*self.screen_coords(tile.x, tile.y), self.tile_flare_diagonal_size,
                                 self.tile_flare_horizontal_verticalSize, colors[2])
             text = tile.get_text(self.state, time)
-            self.canvas.create_text(*self.screen_coords(tile.x, tile.y), text=text[0], fill=Display.tk_color(text[1]),
+            self.canvas.create_text(*self.screen_coords(tile.x, tile.y), text=text[0], fill=tk_color(text[1]),
                                     width=self.tile_center_size)
 
         def draw_square(self, x, y, side, color, border=0):
             self.canvas.create_rectangle(x + side / 2, y - side / 2,
                                          x - side / 2, y + side / 2,
-                                         fill=Display.tk_color(color),
+                                         fill=tk_color(color),
                                          width=border, outline="#000")
 
         def draw_flare(self, x, y, d, hv, color):
             self.canvas.create_polygon(x + hv / 2, y, x + d / 2, y + d / 2, x, y + hv / 2, x - d / 2, y + d / 2,
                                        x - hv / 2, y, x - d / 2, y - d / 2, x, y - hv / 2, x + d / 2, y - d / 2,
-                                       fill=Display.tk_color(color), width=0)
+                                       fill=tk_color(color), width=0)
 
         def draw_robot(self, robot, color_function=None, border=2, border_color_function=None, scale=0.75):
             if color_function is None:
-                color_function = Display.charge_color
+                color_function = charge_color
             if border_color_function is None:
-                border_color_function = Display.border_charge_color
+                border_color_function = border_charge_color
             color = color_function(robot.charge_remaining, robot.initial_charge)
             border_color = border_color_function(robot.charge_remaining, robot.initial_charge)
 
@@ -438,8 +391,8 @@ class Display(tk.Tk):
             x2, y2 = x + half_length * (-1 * dx + 0.5 * dy), y + half_length * (-0.5 * dx - 1 * dy)
             x3, y3 = x + half_length * dx, y + half_length * dy
 
-            self.canvas.create_polygon(x0, y0, x1, y1, x2, y2, x3, y3, fill=Display.tk_color(color), width=border,
-                                       outline=Display.tk_color(border_color))
+            self.canvas.create_polygon(x0, y0, x1, y1, x2, y2, x3, y3, fill=tk_color(color), width=border,
+                                       outline=tk_color(border_color))
             self.canvas.create_text(*self.screen_coords(robot.x, robot.y), text=str(robot.charge_remaining),
                                     fill="#000",
                                     width=self.tile_center_size, font=Display.Font.SMALL.value)
@@ -553,17 +506,17 @@ class Display(tk.Tk):
         def redraw(self):
             self.colors = self.get_colors()
 
-            self.config(bg=Display.tk_color(self.colors[0]))
-            self.set_label.config(bg=Display.tk_color(self.colors[0]), fg=Display.tk_color(self.colors[1]))
+            self.config(bg=tk_color(self.colors[0]))
+            self.set_label.config(bg=tk_color(self.colors[0]), fg=tk_color(self.colors[1]))
 
             self.set_label.config(text="Set %s" % self.set)
 
             self.left_button.config(
-                bg=Display.tk_color(self.colors[3]) if self.is_first_set else Display.tk_color(self.colors[1]),
-                fg=Display.tk_color(self.colors[2]))
+                bg=tk_color(self.colors[3]) if self.is_first_set else tk_color(self.colors[1]),
+                fg=tk_color(self.colors[2]))
             self.right_button.config(
-                bg=Display.tk_color(self.colors[3]) if self.is_last_set else Display.tk_color(self.colors[1]),
-                fg=Display.tk_color(self.colors[2]))
+                bg=tk_color(self.colors[3]) if self.is_last_set else tk_color(self.colors[1]),
+                fg=tk_color(self.colors[2]))
 
             for button in self.level_buttons:
                 button.destroy()
@@ -589,7 +542,7 @@ class Display(tk.Tk):
 
         def add_button(self, number, csv_map_text, code_file_path):
             button = tk.Label(self, text="%s-%s" % (self.set, number), font=Display.Font.LARGE.value,
-                              bg=Display.tk_color(self.colors[1]), fg=Display.tk_color(self.colors[2]))
+                              bg=tk_color(self.colors[1]), fg=tk_color(self.colors[2]))
             button.bind("<Button-1>", lambda *_: self.load_level(csv_map_text, code_file_path))
             button.grid(row=(number - 1) // self.buttons_per_row + 1, column=(number - 1) % self.buttons_per_row,
                         sticky=tk.NSEW, padx=8, pady=8)
@@ -632,7 +585,7 @@ class Display(tk.Tk):
         def draw(self, colors):
             self.colors = colors
 
-            self.bg = Display.tk_color(self.colors[0])
+            self.bg = tk_color(self.colors[0])
 
             if self.menu_bar is not None:
                 self.menu_bar.destroy()
@@ -760,7 +713,7 @@ class Display(tk.Tk):
     class MenuBar(tk.Frame):
 
         def __init__(self, parent, display, back_page, colors, height=32, run_action=None):
-            super().__init__(parent, bg=Display.tk_color(colors[1]))
+            super().__init__(parent, bg=tk_color(colors[1]))
 
             self.parent = parent
             self.display = display
@@ -771,7 +724,7 @@ class Display(tk.Tk):
             self.grid_columnconfigure(0, weight=0)
             self.grid_columnconfigure(1, weight=1)
 
-            self.back_button = tk.Canvas(self, width=self.height, height=self.height, bg=Display.tk_color(colors[1]),
+            self.back_button = tk.Canvas(self, width=self.height, height=self.height, bg=tk_color(colors[1]),
                                          highlightthickness=0, relief=tk.RAISED, bd=2)
 
             arrow_size = self.height * 3 / 4
@@ -784,7 +737,7 @@ class Display(tk.Tk):
                                             arrow_tl + arrow_size / 2, arrow_tl + arrow_size * 3 / 4,
                                             arrow_tl + arrow_size / 2, arrow_tl + arrow_size,
                                             arrow_tl, arrow_tl + arrow_size / 2,
-                                            fill=Display.tk_color(colors[2]))
+                                            fill=tk_color(colors[2]))
 
             self.back_button.xview_moveto(0)
             self.back_button.yview_moveto(0)
@@ -793,7 +746,7 @@ class Display(tk.Tk):
             self.back_button.bind("<Button-1>", self.go_back)
 
             if run_action is not None:
-                self.run_button = tk.Canvas(self, width=self.height, height=self.height, bg=Display.tk_color(colors[1]),
+                self.run_button = tk.Canvas(self, width=self.height, height=self.height, bg=tk_color(colors[1]),
                                             highlightthickness=0, relief=tk.RAISED, bd=2)
 
                 arrow_size = self.height * 3 / 4
@@ -802,7 +755,7 @@ class Display(tk.Tk):
                                                arrow_tl + arrow_size, arrow_tl + arrow_size / 2,
                                                arrow_tl, arrow_tl + arrow_size,
                                                arrow_tl, arrow_tl,
-                                               fill=Display.tk_color(colors[2]))
+                                               fill=tk_color(colors[2]))
 
                 self.run_button.xview_moveto(0)
                 self.run_button.yview_moveto(0)
