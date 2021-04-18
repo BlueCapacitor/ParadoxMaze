@@ -8,10 +8,10 @@ from enum import Enum
 from math import ceil
 import os
 
-from controller import Controller
+from core.controller import Controller
 from csv_map import CSVMap
-from instruction_set import InstructionSet
-from state import Result, State
+from core.instruction_set import InstructionSet
+from core.state import Result, State
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.ttk as ttk
@@ -509,7 +509,7 @@ class Display(tk.Tk):
             self.colors = None
             self.redraw()
 
-        levels_path = "levels"
+        levels_path = "../levels"
 
         @property
         def set_path(self):

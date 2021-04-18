@@ -3,9 +3,9 @@ Created on Oct 21, 2020
 
 @author: gosha
 """
-from board import Board
-from robot import Direction, Robot
-from tile import EmptyTile, WallTile, DestinationTile, PortalTile, TargetTile, \
+from core.board import Board
+from core.robot import Direction, Robot
+from core.tile import EmptyTile, WallTile, DestinationTile, PortalTile, TargetTile, \
     TimeGateTile, CloseTimedDoorTile, OpenTimedDoorTile, TimePortalTile, \
     ButtonTile, OpenLogicalDoorTile, LavaTile, HologramTile, \
     CloseLogicalDoorTile, OnToggleTile, OffToggleTile
