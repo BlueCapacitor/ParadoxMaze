@@ -1,8 +1,8 @@
-'''
+"""
 Created on Oct 10, 2020
 
 @author: gosha
-'''
+"""
 
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -10,220 +10,219 @@ from enum import Enum
 
 class InstructionSet(object):
 
-    def __init__(self, instructionStr, done = False, instructions = None, stack = None):
-        self.instructionStr = instructionStr
+    def __init__(self, instruction_str, done=False, instructions=None, stack=None):
+        self.instruction_str = instruction_str
         self.done = done
 
-        if(instructions is None):
-            self.instructionNames = {}
+        if instructions is None:
+            self.instruction_names = {}
             for instruction in Instruction:
-                self.instructionNames[instruction.value] = instruction
-            self.instructionNames["function:"] = ParseObject
-            self.instructionNames["repeat"] = Repeat
-            self.instructionNames["forever"] = Forever
-            self.instructionNames["ifOpen"] = IfOpen
-            self.instructionNames["ifClosed"] = IfClosed
+                self.instruction_names[instruction.value] = instruction
+            self.instruction_names["function:"] = ParseObject
+            self.instruction_names["repeat"] = Repeat
+            self.instruction_names["forever"] = Forever
+            self.instruction_names["if_open"] = IfOpen
+            self.instruction_names["if_closed"] = IfClosed
 
             self.instructions = ParseObject()
-            self.parse(self.instructions, instructionStr)
+            self.parse(self.instructions, instruction_str)
         else:
             self.instructions = instructions
 
-        if(stack is None):
+        if stack is None:
             self.stack = [-1]
         else:
             self.stack = stack
 
     def copy(self):
-        return(InstructionSet(self.instructionStr, done = self.done, instructions = self.instructions.copy(), stack = list(self.stack)))
+        return (InstructionSet(self.instruction_str, done=self.done, instructions=self.instructions.copy(),
+                               stack=list(self.stack)))
 
-    def parse(self, parseObject, code):
+    def parse(self, parse_object, code):
         location = 0
 
-        while(location < len(code)):
-            readBuffer = ''
-            while(code[location] not in (';', '{', '}', '(', ')')):
+        while location < len(code):
+            read_buffer = ""
+            while code[location] not in (";", "{", "}", "(", ")"):
 
-                if(code[location] not in (' ', '\n', '\t')):
-                    readBuffer += code[location]
+                if code[location] not in (" ", "\n", "\t"):
+                    read_buffer += code[location]
 
-                if(len(readBuffer) >= 2 and readBuffer[-2:] == "//"):
-                    readBuffer = readBuffer[:-2]
-                    while(location < len(code) and code[location] != '\n'):
+                if len(read_buffer) >= 2 and read_buffer[-2:] == "//":
+                    read_buffer = read_buffer[:-2]
+                    while location < len(code) and code[location] != "\n":
                         location += 1
 
                 location += 1
 
-                if(location >= len(code) and readBuffer == ''):
+                if location >= len(code) and read_buffer == "":
                     break
 
                 assert (location <= len(code) - 1), "unexpected end of phrase"
 
             else:
-                if(readBuffer in self.instructionNames.keys()):
-                    blockType = self.instructionNames[readBuffer]
-                    if(blockType in tuple(Instruction)):
-                        parseObject.addBlock(blockType)
+                if read_buffer in self.instruction_names.keys():
+                    block_type = self.instruction_names[read_buffer]
+                    if block_type in tuple(Instruction):
+                        parse_object.add_block(block_type)
                         location += 1
 
-                    elif(blockType == Forever):
-                        assert code[location] == '{', "forever should be followed by {, not %s" % (code[location])
-                        blockCode = self.isolateDelimitedRange(code[location + 1:], '{', '}')
-                        location += 2 + len(blockCode)
+                    elif block_type == Forever:
+                        assert code[location] == "{", "forever should be followed by {, not %s" % (code[location])
+                        block_code = self.isolate_delimited_range(code[location + 1:], "{", "}")
+                        location += 2 + len(block_code)
 
                         block = Forever()
-                        self.parse(block, blockCode)
-                        parseObject.addBlock(block)
+                        self.parse(block, block_code)
+                        parse_object.add_block(block)
 
-                    elif(blockType == Repeat):
-                        assert code[location] == '(', "repeat should be followed by (, not %s" % (code[location])
-                        repeatNumberString = self.isolateDelimitedRange(code[location + 1:], '(', ')')
-                        location += 2 + len(repeatNumberString)
-                        assert code[location] == '{', "repeat(_) should be followed by {, not %s" % (code[location])
-                        blockCode = self.isolateDelimitedRange(code[location + 1:], '{', '}')
-                        location += 2 + len(blockCode)
+                    elif block_type == Repeat:
+                        assert code[location] == "(", "repeat should be followed by (, not %s" % (code[location])
+                        repeat_number_string = self.isolate_delimited_range(code[location + 1:], "(", ")")
+                        location += 2 + len(repeat_number_string)
+                        assert code[location] == "{", "repeat(_) should be followed by {, not %s" % (code[location])
+                        block_code = self.isolate_delimited_range(code[location + 1:], "{", "}")
+                        location += 2 + len(block_code)
 
-                        block = Repeat(int(repeatNumberString))
-                        self.parse(block, blockCode)
-                        parseObject.addBlock(block)
+                        block = Repeat(int(repeat_number_string))
+                        self.parse(block, block_code)
+                        parse_object.add_block(block)
 
-                    elif(blockType == IfOpen):
-                        assert code[location] == '{', "ifOpen should be followed by {, not %s" % (code[location])
-                        blockCode = self.isolateDelimitedRange(code[location + 1:], '{', '}')
-                        location += 2 + len(blockCode)
+                    elif block_type == IfOpen:
+                        assert code[location] == "{", "if_open should be followed by {, not %s" % (code[location])
+                        block_code = self.isolate_delimited_range(code[location + 1:], "{", "}")
+                        location += 2 + len(block_code)
 
                         block = IfOpen()
-                        self.parse(block, blockCode)
-                        parseObject.addBlock(block)
+                        self.parse(block, block_code)
+                        parse_object.add_block(block)
 
-                    elif(blockType == IfClosed):
-                        assert code[location] == '{', "ifClosed should be followed by {, not %s" % (code[location])
-                        blockCode = self.isolateDelimitedRange(code[location + 1:], '{', '}')
-                        location += 2 + len(blockCode)
+                    elif block_type == IfClosed:
+                        assert code[location] == "{", "if_closed should be followed by {, not %s" % (code[location])
+                        block_code = self.isolate_delimited_range(code[location + 1:], "{", "}")
+                        location += 2 + len(block_code)
 
                         block = IfClosed()
-                        self.parse(block, blockCode)
-                        parseObject.addBlock(block)
+                        self.parse(block, block_code)
+                        parse_object.add_block(block)
 
                 else:
-                    assert False, "Unrecognized command: '%s'" % (readBuffer)
+                    assert False, "Unrecognized command: \"%s\"" % read_buffer
 
-    def isolateDelimitedRange(self, code, openDelimiter, closeDelimiter):
+    @staticmethod
+    def isolate_delimited_range(code, open_delimiter, close_delimiter):
         depth = 1
         for i in range(len(code)):
             char = code[i]
-            if(char == closeDelimiter):
+            if char == close_delimiter:
                 depth -= 1
 
-            if(char == openDelimiter):
+            if char == open_delimiter:
                 depth += 1
 
-            if(depth == 0):
-                return(code[:i])
+            if depth == 0:
+                return code[:i]
 
-    def nextInstruction(self, robot):
-        if(self.done):
-            return(Instruction.SLEEP)
+    def next_instruction(self, robot):
+        if self.done:
+            return Instruction.SLEEP
 
         try:
-            self.stepStack(robot)
+            self.step_stack(robot)
         except StopIteration:
             self.done = True
-            return(Instruction.SLEEP)
+            return Instruction.SLEEP
 
-        out = self.getStackItem(self.stack, self.instructions)
+        out = self.get_stack_item(self.stack, self.instructions)
 
-        if(out == Instruction.STOP):
+        if out == Instruction.STOP:
             self.done = True
-            return(Instruction.SLEEP)
+            return Instruction.SLEEP
 
-        return(out)
+        return out
 
-    def stepStack(self, robot):
-        self.stepAndPop()
+    def step_stack(self, robot):
+        self.step_and_pop()
 
-        while(True):
-            if(isinstance((item := self.getStackItem(self.stack, self.instructions)), Conditional) and not item.evaluateCondition(robot)):  # @IgnorePep8
-                self.stepAndPop()
+        while True:
+            if (isinstance((item := self.get_stack_item(self.stack, self.instructions)),
+                           Conditional) and not item.evaluate_condition(robot)):  # @IgnorePep8
+                self.step_and_pop()
 
-            if(self.getStackItem(self.stack, self.instructions) == Instruction.BREAK and len(self.stack) > 1):
+            if self.get_stack_item(self.stack, self.instructions) == Instruction.BREAK and len(self.stack) > 1:
                 self.stack = self.stack[:-1]
-                while(len(self.stack) > 1 and not(isinstance(self.getStackItem(self.stack, self.instructions), Loop))):
+                while len(self.stack) > 1 and not\
+                        (isinstance(self.get_stack_item(self.stack, self.instructions), Loop)):
                     self.stack = self.stack[:-1]
 
-                self.stepAndPop()
+                self.step_and_pop()
 
-            needed = self.stepUpStackIfNeeded()
-            if(not(needed)):
+            needed = self.step_up_stack_if_needed()
+            if not needed:
                 break
 
-    def stepAndPop(self):
+    def step_and_pop(self):
         self.stack[-1] += 1
 
-        while(self.popStackIfNeeded()):
+        while self.pop_stack_if_needed():
             pass
 
-    def popStackIfNeeded(self):
-        if(len(self.stack) == 0):
+    def pop_stack_if_needed(self):
+        if len(self.stack) == 0:
             raise StopIteration
-        containerObject = self.getStackItem(self.stack[:-1], self.instructions)
-        if(self.stack[-1] >= len(containerObject.code)):
-            if(isinstance(containerObject, Loop) and not containerObject.done):
-                containerObject.loopDone()
+        container_object = self.get_stack_item(self.stack[:-1], self.instructions)
+        if self.stack[-1] >= len(container_object.code):
+            if isinstance(container_object, Loop) and not container_object.done:
+                container_object.loop_done()
                 self.stack[-1] = 0
             else:
-                self.popStack()
-            return(True)
-        return(False)
+                self.pop_stack()
+            return True
+        return False
 
-    def popStack(self):
+    def pop_stack(self):
         self.stack = self.stack[:-1]
-        if(len(self.stack) == 0):
+        if len(self.stack) == 0:
             raise StopIteration
         self.stack[-1] += 1
 
-    def stepUpStackIfNeeded(self):
-        if(len(self.stack) == 0):
+    def step_up_stack_if_needed(self):
+        if len(self.stack) == 0:
             raise StopIteration
-        block = self.getStackItem(self.stack, self.instructions)
-        if(isinstance(block, ParseObject)):
-            self.stepUpStack()
-            if(isinstance(block, Loop)):
-                block.loopEntered()
+        block = self.get_stack_item(self.stack, self.instructions)
+        if isinstance(block, ParseObject):
+            self.step_up_stack()
+            if isinstance(block, Loop):
+                block.loop_entered()
 
-            return(True)
+            return True
 
-        return(False)
+        return False
 
-    def stepUpStack(self):
+    def step_up_stack(self):
         self.stack.append(0)
 
-    def getStackItem(self, stack, instruction):
-        for blockNum in stack:
-            instruction = instruction.code[blockNum]
-        return(instruction)
-
-    def syntaxError(self, message = ''):
-        lineNumber = len(self.instructionStr[:self.readPointer].split('\n'))
-        offset = len(self.instructionStr[:self.readPointer].split('\n')[-1])
-        lineText = self.instructionStr.split('\n')[lineNumber - 1]
-
-        raise SyntaxError(message, ("<instructions>", lineNumber, offset, lineText))
+    @staticmethod
+    def get_stack_item(stack, instruction):
+        for block_num in stack:
+            instruction = instruction.code[block_num]
+        return instruction
 
 
 class ParseObject(object):
 
-    def __init__(self, code = []):
+    def __init__(self, code=()):
         self.code = list(code)
 
     def copy(self):
-        return(type(self)(code = list(map(lambda block: block.copy(), self.code))))
+        return type(self)(code=list(map(lambda block: block.copy(), self.code)))
 
-    def addBlock(self, block):
+    def add_block(self, block):
         self.code.append(block)
 
     def __str__(self):
-        return(type(self).__name__ + '\n' + '\n'.join(map(lambda block: "  " + "\n  ".join(str(block).split('\n')), self.code)))
+        return (type(self).__name__ + "\n" + "\n".join(
+            map(lambda block: "  " + "\n  ".join(str(block).split("\n")), self.code)))
 
 
 class Loop(ABC, ParseObject):
@@ -233,10 +232,10 @@ class Loop(ABC, ParseObject):
     def done(self):
         pass
 
-    def loopDone(self):
+    def loop_done(self):
         pass
 
-    def loopEntered(self):
+    def loop_entered(self):
         pass
 
 
@@ -244,47 +243,50 @@ class Forever(Loop):
 
     @property
     def done(self):
-        return(False)
+        return False
 
 
 class Repeat(Loop):
 
-    def __init__(self, repeatNum, code = [], remaining = None):
-        super().__init__(code = code)
-        self.repeatNum = repeatNum
+    def __init__(self, repeat_num, code=(), remaining=None):
+        super().__init__(code=code)
+        self.repeat_num = repeat_num
         self.remaining = remaining
 
     def copy(self):
-        return(type(self)(self.repeatNum, code = list(map(lambda block: block.copy(), self.code)), remaining = self.remaining))
+        return (
+            type(self)(self.repeat_num,
+                       code=list(map(lambda block: block.copy(), self.code)),
+                       remaining=self.remaining))
 
-    def loopDone(self):
+    def loop_done(self):
         self.remaining -= 1
 
-    def loopEntered(self):
-        self.remaining = self.repeatNum - 1
+    def loop_entered(self):
+        self.remaining = self.repeat_num - 1
 
     @property
     def done(self):
-        return(self.remaining <= 0)
+        return self.remaining <= 0
 
 
 class Conditional(ABC, ParseObject):
 
     @abstractmethod
-    def evaluateCondition(self, _robot):
+    def evaluate_condition(self, _robot):
         pass
 
 
 class IfOpen(Conditional):
 
-    def evaluateCondition(self, robot):
-        return(robot.lookValue)
+    def evaluate_condition(self, robot):
+        return robot.look_value
 
 
 class IfClosed(Conditional):
 
-    def evaluateCondition(self, robot):
-        return(not(robot.lookValue))
+    def evaluate_condition(self, robot):
+        return not robot.look_value
 
 
 class Instruction(Enum):
@@ -298,7 +300,7 @@ class Instruction(Enum):
     STOP = "stop"
 
     def copy(self):
-        return(self)
+        return self
 
     def __str__(self):
-        return(self.value)
+        return self.value

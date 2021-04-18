@@ -1,8 +1,8 @@
-'''
+"""
 Created on Oct 14, 2020
 
 @author: gosha
-'''
+"""
 
 from enum import Enum
 from math import ceil
@@ -27,75 +27,75 @@ class Display(tk.Tk):
         class Page(Enum):
             LOADING = Display.SimpleTextPage(self, "Loading...")
             CALCULATING = Display.SimpleTextPage(self, "Calculating...")
-            NO_POSIBILITIES = Display.SimpleTextPage(self, "Fail: All possibilities lead to paradox")
+            NO_POSSIBILITIES = Display.SimpleTextPage(self, "Fail: All possibilities lead to paradox")
             STEP = Display.StepPage(self)
             LEVEL_SELECT = Display.LevelSelectPage(self)
             CODING = Display.CodingPage(self)
 
             def __init__(self, page):
                 self.page = page
-                self.page.grid(row = 0, column = 0, sticky = tk.NSEW)
+                self.page.grid(row=0, column=0, sticky=tk.NSEW)
 
         self.Page = Page
 
-        self.currentPage = self.Page.LOADING
+        self.current_page = self.Page.LOADING
 
     @property
     def results(self):
-        return(self._results)
+        return self._results
 
     @results.setter
     def results(self, results):
         self._results = []
 
-        self.overallResult = Result.SUCCESS
+        self.overall_result = Result.SUCCESS
         for result in results:
-            if(result[0] != Result.UNRECOVERABLE_PARADOX):
+            if result[0] != Result.UNRECOVERABLE_PARADOX:
                 self._results.append(result)
-                self.overallResult |= result[0]
+                self.overall_result |= result[0]
 
-        if(len(self._results) == 0):
+        if len(self._results) == 0:
             self._results = results
 
     @property
-    def currentPage(self):
-        return(self._currentPage)
+    def current_page(self):
+        return self._current_page
 
-    @currentPage.setter
-    def currentPage(self, page):
-        self._currentPage = page
-        self._currentPage.page.tkraise()
-        self.grid_columnconfigure(0, weight = 1)
-        self.grid_rowconfigure(0, weight = 1)
+    @current_page.setter
+    def current_page(self, page):
+        self._current_page = page
+        self._current_page.page.tkraise()
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
         self.update()
 
     @staticmethod
-    def tkColor(color):
-        return("#{:02X}{:02X}{:02X}".format(*map(lambda v: ceil(v * 255), color)))
+    def tk_color(color):
+        return "#{:02X}{:02X}{:02X}".format(*map(lambda v: ceil(v * 255), color))
 
     @staticmethod
-    def chargeColor(charge, initialCharge):
-        partsCharged = charge / initialCharge
-        if(partsCharged > 0.5):
-            return((2 - partsCharged * 2, 1, 0))
+    def charge_color(charge, initial_charge):
+        parts_charged = charge / initial_charge
+        if parts_charged > 0.5:
+            return 2 - parts_charged * 2, 1, 0
         else:
-            return((1, partsCharged * 2, 0))
+            return 1, parts_charged * 2, 0
 
     @staticmethod
-    def borderChargeColor(charge, initialCharge):
-        return(tuple(map(lambda x: x / 2, Display.chargeColor(charge, initialCharge))))
+    def border_charge_color(charge, initial_charge):
+        return tuple(map(lambda x: x / 2, Display.charge_color(charge, initial_charge)))
 
     @staticmethod
-    def inactiveChargeColor(*_):
-        return((0.5, 0.5, 0.5))
+    def inactive_charge_color(*_):
+        return 0.5, 0.5, 0.5
 
     @staticmethod
-    def inactiveBorderChargeColor(*_):
-        return((0.75, 0.75, 0.75))
+    def inactive_border_charge_color(*_):
+        return 0.75, 0.75, 0.75
 
     @staticmethod
-    def drawRoundedRectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
+    def draw_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
         points = [x1 + radius, y1,
                   x1 + radius, y1,
                   x2 - radius, y1,
@@ -117,7 +117,7 @@ class Display(tk.Tk):
                   x1, y1 + radius,
                   x1, y1]
 
-        return(canvas.create_polygon(points, **kwargs, smooth = True))
+        return canvas.create_polygon(points, **kwargs, smooth=True)
 
     class Font(Enum):
         HUGE = ("Veranda", 64)
@@ -126,16 +126,16 @@ class Display(tk.Tk):
         SMALL = ("Veranda", 8)
 
         def measure(self, window, text):
-            return(tk_font.Font(root = window, font = self.value).measure(text))
+            return tk_font.Font(root=window, font=self.value).measure(text)
 
     class SimpleTextPage(tk.Frame):
 
         def __init__(self, display, text):
             super().__init__(display)
-            self.label = tk.Label(self, text = text, font = Display.Font.HUGE.value)
-            self.label.grid(row = 0, column = 0, padx = 10, pady = 10, sticky = tk.NSEW)
-            self.grid_columnconfigure(0, weight = 1)
-            self.grid_rowconfigure(0, weight = 1)
+            self.label = tk.Label(self, text=text, font=Display.Font.HUGE.value)
+            self.label.grid(row=0, column=0, padx=10, pady=10, sticky=tk.NSEW)
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_rowconfigure(0, weight=1)
 
     class StepPage(tk.Frame):
 
@@ -144,297 +144,339 @@ class Display(tk.Tk):
             self.display = display
             self.drawn = False
 
+            self.menu_bar = None
+            self.game_canvas = None
+            self.result_selector = None
+            self.mode_tkvar = None
+            self.tk_frame = None
+            self.time_slider = None
+            self.playing_tkvar = None
+            self.play_checkbox = None
+            self.charge_mode_time_display = None
+
         def draw(self, colors):
-            if(self.drawn):
+            if self.drawn:
                 self.redraw(colors)
             else:
-                self.menuBar = Display.MenuBar(self, self.display, self.display.Page.CODING, colors)
-                self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
+                self.menu_bar = Display.MenuBar(self, self.display, self.display.Page.CODING, colors)
+                self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
 
-                self.gameCanvas = Display.GameCanvas(self)
-                self.gameCanvas.grid(row = 2, column = 1, columnspan = 2, sticky = tk.NSEW)
+                self.game_canvas = Display.GameCanvas(self)
+                self.game_canvas.grid(row=2, column=1, columnspan=2, sticky=tk.NSEW)
 
-                self.resultSelector = Display.ResultSelector(self, colors)
-                self.resultSelector.grid(row = 2, column = 0, rowspan = 4, sticky = tk.NSEW)
+                self.result_selector = Display.ResultSelector(self, colors)
+                self.result_selector.grid(row=2, column=0, rowspan=4, sticky=tk.NSEW)
 
                 modes = ("Global Time", "Charge Remaining")
-                self.modeTKVar = tk.StringVar(self, value = modes[0])
-                self.modeTKVar.trace('w', self.updateMode)
-                self.tkFrame = tk.Frame(self)
+                self.mode_tkvar = tk.StringVar(self, value=modes[0])
+                self.mode_tkvar.trace('w', self.update_mode)
+                self.tk_frame = tk.Frame(self)
                 for column, mode in enumerate(modes):
-                    button = tk.Radiobutton(self.tkFrame, text = mode, variable = self.modeTKVar, value = mode, indicatoron = False)
-                    button.grid(row = 2, column = column, sticky = tk.NSEW)
-                    self.tkFrame.grid_columnconfigure(column, weight = 1)
-                self.tkFrame.grid_rowconfigure(0, weight = 1)
-                self.tkFrame.grid(row = 3, column = 1, columnspan = 2, sticky = tk.NSEW)
+                    button = tk.Radiobutton(self.tk_frame, text=mode, variable=self.mode_tkvar, value=mode,
+                                            indicatoron=False)
+                    button.grid(row=2, column=column, sticky=tk.NSEW)
+                    self.tk_frame.grid_columnconfigure(column, weight=1)
+                self.tk_frame.grid_rowconfigure(0, weight=1)
+                self.tk_frame.grid(row=3, column=1, columnspan=2, sticky=tk.NSEW)
 
-                tickInterval = max(1, ceil((self.state.maxTime - self.state.minTime) / 25))
-                self.timeSlider = tk.Scale(self, from_ = self.state.minTime, to = self.state.maxTime, orient = tk.HORIZONTAL, command = self.timeChange, tickinterval = tickInterval)
-                self.timeSlider.grid(row = 4, column = 2, sticky = tk.NSEW)
+                tick_interval = max(1, ceil((self.state.max_time - self.state.min_time) / 25))
+                self.time_slider = tk.Scale(self, from_=self.state.min_time, to=self.state.max_time,
+                                            orient=tk.HORIZONTAL, command=self.time_change, tickinterval=tick_interval)
+                self.time_slider.grid(row=4, column=2, sticky=tk.NSEW)
 
-                self.playingTKVar = tk.BooleanVar(self, False, "playingTKVar")
-                self.playCheckbox = tk.Checkbutton(self, variable = self.playingTKVar, text = "play")
-                self.playCheckbox.grid(row = 4, column = 1, sticky = tk.NSEW)
+                self.playing_tkvar = tk.BooleanVar(self, False, "playing_tkvar")
+                self.play_checkbox = tk.Checkbutton(self, variable=self.playing_tkvar, text="play")
+                self.play_checkbox.grid(row=4, column=1, sticky=tk.NSEW)
 
-                self.chargeModeTimeDisplay = tk.Label(self, text = "", bg = "#FFF")
-                self.chargeModeTimeDisplay.grid(row = 5, column = 1, columnspan = 2, sticky = tk.NSEW)
+                self.charge_mode_time_display = tk.Label(self, text="", bg="#FFF")
+                self.charge_mode_time_display.grid(row=5, column=1, columnspan=2, sticky=tk.NSEW)
 
-                self.grid_columnconfigure(0, weight = 0)
-                self.grid_columnconfigure(1, weight = 0)
-                self.grid_columnconfigure(2, weight = 1)
-                self.grid_rowconfigure(2, weight = 1)
-                self.grid_rowconfigure(3, weight = 0)
-                self.grid_rowconfigure(4, weight = 0)
-                self.grid_rowconfigure(5, weight = 0)
+                self.grid_columnconfigure(0, weight=0)
+                self.grid_columnconfigure(1, weight=0)
+                self.grid_columnconfigure(2, weight=1)
+                self.grid_rowconfigure(2, weight=1)
+                self.grid_rowconfigure(3, weight=0)
+                self.grid_rowconfigure(4, weight=0)
+                self.grid_rowconfigure(5, weight=0)
 
-                self.gameCanvas.draw()
+                self.game_canvas.draw()
                 self.tick()
 
                 self.drawn = True
 
         def redraw(self, colors):
-            self.menuBar.destroy()
-            self.menuBar = Display.MenuBar(self, self.display, self.display.Page.CODING, colors)
-            self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
+            self.menu_bar.destroy()
+            self.menu_bar = Display.MenuBar(self, self.display, self.display.Page.CODING, colors)
+            self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
 
-            self.resultSelector.destroy()
-            self.resultSelector = Display.ResultSelector(self, colors)
-            self.resultSelector.grid(row = 2, column = 0, rowspan = 4, sticky = tk.NSEW)
+            self.result_selector.destroy()
+            self.result_selector = Display.ResultSelector(self, colors)
+            self.result_selector.grid(row=2, column=0, rowspan=4, sticky=tk.NSEW)
 
-            self.updateMode()
+            self.update_mode()
 
-            self.gameCanvas.draw()
+            self.game_canvas.draw()
 
         @property
         def board(self):
-            return(self.display.board)
+            return self.display.board
 
         @property
         def results(self):
-            return(self.display.results)
+            return self.display.results
 
         @property
-        def activeResultIndex(self):
-            return(self.resultSelector.alternativeTKVar.get())
+        def active_result_index(self):
+            return self.result_selector.alternative_tkvar.get()
 
         @property
-        def activeResult(self):
-            return(self.results[self.activeResultIndex] if len(self.results) > self.activeResultIndex else None)
+        def active_result(self):
+            return self.results[self.active_result_index] if len(self.results) > self.active_result_index else None
 
         @property
         def time(self):
-            return(self.timeSlider.get())
+            return self.time_slider.get()
 
         @property
         def mode(self):
-            return(self.modeTKVar.get())
+            return self.mode_tkvar.get()
 
         @property
         def state(self):
-            return(self.activeResult[1])
+            return self.active_result[1]
 
-        def updateMode(self, *_args, **_kwargs):
-            if(self.mode == "Global Time"):
-                tickInterval = max(1, ceil((self.state.maxTime - self.state.minTime) / 25))
-                self.timeSlider.config(from_ = self.state.minTime, to = self.state.maxTime, tickinterval = tickInterval)
-                self.time = self.state.minTime
+        def update_mode(self, *_args, **_kwargs):
+            if self.mode == "Global Time":
+                tick_interval = max(1, ceil((self.state.max_time - self.state.min_time) / 25))
+                self.time_slider.config(from_=self.state.min_time,
+                                        to=self.state.max_time,
+                                        tickinterval=tick_interval)
+                self.time = self.state.min_time
 
-            elif(self.mode == "Charge Remaining"):
-                tickInterval = max(1, ceil((self.state.minCharge - self.state.maxCharge) / 25))
-                self.timeSlider.config(from_ = self.state.maxCharge, to = self.state.minCharge, tickinterval = tickInterval)
-                self.time = self.state.maxCharge
+            elif self.mode == "Charge Remaining":
+                tick_interval = max(1, ceil((self.state.min_charge - self.state.max_charge) / 25))
+                self.time_slider.config(from_=self.state.max_charge,
+                                        to=self.state.min_charge,
+                                        tickinterval=tick_interval)
+                self.time = self.state.max_charge
 
         @time.setter
         def time(self, value):
-            self.timeSlider.set(value)
+            self.time_slider.set(value)
 
         def tick(self, *_):
-            if(self.playingTKVar.get()):
-                if((self.time < self.state.maxTime) if self.mode == "Global Time" else (self.time > self.state.minCharge)):
+            if self.playing_tkvar.get():
+                if ((self.time < self.state.max_time) if self.mode == "Global Time" else (
+                        self.time > self.state.min_charge)):
                     self.time += 1 if self.mode == "Global Time" else -1
                 else:
-                    self.playCheckbox.deselect()
+                    self.play_checkbox.deselect()
 
-            if(self.state.maxTime - self.state.minTime > 100):
-                self.after(ceil(75000 / (self.state.maxTime - self.state.minTime)), self.tick)
+            if self.state.max_time - self.state.min_time > 100:
+                self.after(ceil(75000 / (self.state.max_time - self.state.min_time)), self.tick)
             else:
                 self.after(750, self.tick)
 
-        def timeChange(self, *_):
-            if(self.mode == "Global Time"):
-                self.chargeModeTimeDisplay.config(text = "", bg = "#FFF")
+        def time_change(self, *_):
+            if self.mode == "Global Time":
+                self.charge_mode_time_display.config(text="", bg="#FFF")
             else:
-                time = self.state.getRobotWithCharge(self.time)[1]
-                self.chargeModeTimeDisplay.config(text = "Time: %s" % (time), bg = Display.tkColor(Display.chargeColor(self.time, self.state.maxCharge)))
-            self.gameCanvas.draw()
+                time = self.state.get_robot_with_charge(self.time)[1]
+                self.charge_mode_time_display.config(text="Time: %s" % time, bg=Display.tk_color(
+                    Display.charge_color(self.time, self.state.max_charge)))
+            self.game_canvas.draw()
 
-        def alternativeResultChange(self, *_):
-            self.gameCanvas.draw()
+        def alternative_result_change(self, *_):
+            self.game_canvas.draw()
 
     class ResultSelector(tk.Frame):
 
         def __init__(self, parent, colors):
-            super().__init__(parent, bg = Display.tkColor(colors[1]))
+            super().__init__(parent, bg=Display.tk_color(colors[1]))
             self.parent = parent
-            self.alternativeTKVar = tk.IntVar()
-            self.alternativeTKVar.trace('w', self.parent.alternativeResultChange)
+            self.alternative_tkvar = tk.IntVar()
+            self.alternative_tkvar.trace('w', self.parent.alternative_result_change)
 
-            self.buttonContainer = tk.Frame(self, bg = Display.tkColor(colors[1]))
-            self.buttonContainer.grid(row = 0, column = 0, sticky = tk.NSEW)
-            self.grid_rowconfigure(0, weight = 1)
-            self.grid_columnconfigure(0, weight = 1)
+            self.button_container = tk.Frame(self, bg=Display.tk_color(colors[1]))
+            self.button_container.grid(row=0, column=0, sticky=tk.NSEW)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_columnconfigure(0, weight=1)
 
-            for alternativeNumber, result in enumerate(parent.results):
-                resultStatusText = {Result.SUCCESS: "Success", Result.UNRECOVERABLE_PARADOX: "Paradox", Result.FAIL: "Fail"}[result[0]]
-                buttonColor = {Result.SUCCESS: (0, 1, 0), Result.UNRECOVERABLE_PARADOX: (0, 0, 1), Result.FAIL: (1, 0, 0)}[result[0]]
-                button = tk.Radiobutton(self.buttonContainer, text = "Alternative %s - %s" % (alternativeNumber, resultStatusText), variable = self.alternativeTKVar, value = alternativeNumber, indicatoron = False, bg = Display.tkColor(buttonColor))
-                button.grid(row = alternativeNumber, column = 0, sticky = tk.E + tk.N + tk.W)
+            for alternative_number, result in enumerate(parent.results):
+                result_status_text = \
+                    {Result.SUCCESS: "Success", Result.UNRECOVERABLE_PARADOX: "Paradox", Result.FAIL: "Fail"}[result[0]]
+                button_color = \
+                    {Result.SUCCESS: (0, 1, 0), Result.UNRECOVERABLE_PARADOX: (0, 0, 1), Result.FAIL: (1, 0, 0)}[
+                        result[0]]
+                button = tk.Radiobutton(self.button_container,
+                                        text="Alternative %s - %s" % (alternative_number, result_status_text),
+                                        variable=self.alternative_tkvar, value=alternative_number, indicatoron=False,
+                                        bg=Display.tk_color(button_color))
+                button.grid(row=alternative_number, column=0, sticky=tk.E + tk.N + tk.W)
 
     class GameCanvas(tk.Frame):
 
-        def __init__(self, parent, tileSize = 45, tileCenterSize = 30, tileFlareHorizontalVerticalSize = 20, tileFlareDiagonalSize = 10):
+        def __init__(self, parent, tile_size=45, tile_center_size=30, tile_flare_horizontal_vertical_size=20,
+                     tile_flare_diagonal_size=10):
             super().__init__(parent)
 
             self.parent = parent
-            self.tileSize = tileSize
-            self.tileCenterSize = tileCenterSize
-            self.tileFlareHorizontalVerticalSize = tileFlareHorizontalVerticalSize
-            self.tileFlareDiagonalSize = tileFlareDiagonalSize
+            self.tile_size = tile_size
+            self.tile_center_size = tile_center_size
+            self.tile_flare_horizontal_verticalSize = tile_flare_horizontal_vertical_size
+            self.tile_flare_diagonal_size = tile_flare_diagonal_size
 
-            self.grid_rowconfigure(0, weight = 1)
-            self.grid_columnconfigure(0, weight = 1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_columnconfigure(0, weight=1)
 
-            self.canvas = tk.Canvas(self, width = (self.board.width + 1) * self.tileSize, height = (self.board.height + 1) * self.tileSize, scrollregion = (0, 0, (self.board.width + 1) * self.tileSize, (self.board.height + 1) * self.tileSize))
-            self.canvas.grid(row = 0, column = 0, sticky = tk.NSEW)
+            self.canvas = tk.Canvas(self, width=(self.board.width + 1) * self.tile_size,
+                                    height=(self.board.height + 1) * self.tile_size, scrollregion=(
+                    0, 0, (self.board.width + 1) * self.tile_size, (self.board.height + 1) * self.tile_size))
+            self.canvas.grid(row=0, column=0, sticky=tk.NSEW)
 
-            self.scrollV = tk.Scrollbar(self, orient = tk.VERTICAL, command = self.canvas.yview)
-            self.scrollV.grid(row = 0, column = 1, sticky = tk.NSEW)
+            self.scroll_v = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.canvas.yview)
+            self.scroll_v.grid(row=0, column=1, sticky=tk.NSEW)
 
-            self.scrollH = tk.Scrollbar(self, orient = tk.HORIZONTAL, command = self.canvas.xview)
-            self.scrollH.grid(row = 1, column = 0, sticky = tk.NSEW)
+            self.scroll_h = tk.Scrollbar(self, orient=tk.HORIZONTAL, command=self.canvas.xview)
+            self.scroll_h.grid(row=1, column=0, sticky=tk.NSEW)
 
-            self.canvas.config(xscrollcommand = self.scrollH.set, yscrollcommand = self.scrollV.set)
+            self.canvas.config(xscrollcommand=self.scroll_h.set, yscrollcommand=self.scroll_v.set)
 
         @property
         def display(self):
-            return(self.parent.display)
+            return self.parent.display
 
         @property
         def board(self):
-            return(self.display.board)
+            return self.display.board
 
         @property
         def result(self):
-            return(self.parent.activeResult[0])
+            return self.parent.active_result[0]
 
         @property
         def state(self):
-            return(self.parent.state)
+            return self.parent.state
 
         @property
         def mode(self):
-            return(self.parent.mode)
+            return self.parent.mode
 
         @property
         def time(self):
-            return(self.parent.time)
+            return self.parent.time
 
-        def setColors(self, colors):
-            self.canvas.config(bg = Display.tkColor(colors[0]), highlightcolor = Display.tkColor(colors[1]))
+        def set_colors(self, colors):
+            self.canvas.config(bg=Display.tk_color(colors[0]), highlightcolor=Display.tk_color(colors[1]))
 
-        def screenCoords(self, x, y):
-            outX = (x + 1) * self.tileSize
-            outY = (y + 1) * self.tileSize
-            return((outX, outY))
+        def screen_coords(self, x, y):
+            out_x = (x + 1) * self.tile_size
+            out_y = (y + 1) * self.tile_size
+            return out_x, out_y
 
         def draw(self):
             self.canvas.delete(tk.ALL)
-            self.canvas.config(scrollregion = (0, 0, (self.board.width + 1) * self.tileSize, (self.board.height + 1) * self.tileSize))
+            self.canvas.config(
+                scrollregion=(0, 0, (self.board.width + 1) * self.tile_size, (self.board.height + 1) * self.tile_size))
 
-            self.drawBoard()
-            self.drawRobots()
+            self.draw_board()
+            self.draw_robots()
 
-        def drawBoard(self):
-            time = self.time if self.mode == "Global Time" else self.state.getRobotWithCharge(self.time)[1]
-            for tile in self.board.listTiles:
-                self.drawTile(tile, time)
+        def draw_board(self):
+            time = self.time if self.mode == "Global Time" else self.state.get_robot_with_charge(self.time)[1]
+            for tile in self.board.list_tiles:
+                self.draw_tile(tile, time)
 
-        def drawRobots(self):
-            if(self.mode == "Global Time"):
-                for robot in self.state.getRobotsAtTime(self.time):
-                    self.drawRobot(robot)
-            if(self.mode == "Charge Remaining"):
-                currentRobot, time = self.state.getRobotWithCharge(self.time)
-                for robot in self.state.getRobotsAtTime(time):
-                    if(robot != currentRobot):
-                        self.drawRobot(robot, colorFunction = Display.inactiveChargeColor, borderColorFunction = Display.inactiveBorderChargeColor)
-                self.drawRobot(currentRobot)
+        def draw_robots(self):
+            if self.mode == "Global Time":
+                for robot in self.state.get_robots_at_time(self.time):
+                    self.draw_robot(robot)
+            if self.mode == "Charge Remaining":
+                current_robot, time = self.state.get_robot_with_charge(self.time)
+                for robot in self.state.get_robots_at_time(time):
+                    if robot != current_robot:
+                        self.draw_robot(robot, color_function=Display.inactive_charge_color,
+                                        border_color_function=Display.inactive_border_charge_color)
+                self.draw_robot(current_robot)
 
-        def drawTile(self, tile, time):
-            colors = tile.getColors(self.state, time)
-            self.drawSquare(*self.screenCoords(tile.x, tile.y), self.tileSize, colors[0], border = 1)
-            self.drawSquare(*self.screenCoords(tile.x, tile.y), self.tileCenterSize, colors[1])
-            if(len(colors) >= 3):
-                self.drawFlare(*self.screenCoords(tile.x, tile.y), self.tileFlareDiagonalSize, self.tileFlareHorizontalVerticalSize, colors[2])
-            text = tile.getText(self.state, time)
-            self.canvas.create_text(*self.screenCoords(tile.x, tile.y), text = text[0], fill = Display.tkColor(text[1]), width = self.tileCenterSize)
+        def draw_tile(self, tile, time):
+            colors = tile.get_colors(self.state, time)
+            self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_size, colors[0], border=1)
+            self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_center_size, colors[1])
+            if len(colors) >= 3:
+                self.draw_flare(*self.screen_coords(tile.x, tile.y), self.tile_flare_diagonal_size,
+                                self.tile_flare_horizontal_verticalSize, colors[2])
+            text = tile.get_text(self.state, time)
+            self.canvas.create_text(*self.screen_coords(tile.x, tile.y), text=text[0], fill=Display.tk_color(text[1]),
+                                    width=self.tile_center_size)
 
-        def drawSquare(self, x, y, l, color, border = 0):
-            self.canvas.create_rectangle(x + l / 2, y - l / 2, x - l / 2, y + l / 2, fill = Display.tkColor(color), width = border, outline = "#000")
+        def draw_square(self, x, y, side, color, border=0):
+            self.canvas.create_rectangle(x + side / 2, y - side / 2,
+                                         x - side / 2, y + side / 2,
+                                         fill=Display.tk_color(color),
+                                         width=border, outline="#000")
 
-        def drawFlare(self, x, y, d, hv, color):
-            self.canvas.create_polygon(x + hv / 2, y, x + d / 2, y + d / 2, x, y + hv / 2, x - d / 2, y + d / 2, x - hv / 2, y, x - d / 2, y - d / 2, x, y - hv / 2, x + d / 2, y - d / 2, fill = Display.tkColor(color), width = 0)
+        def draw_flare(self, x, y, d, hv, color):
+            self.canvas.create_polygon(x + hv / 2, y, x + d / 2, y + d / 2, x, y + hv / 2, x - d / 2, y + d / 2,
+                                       x - hv / 2, y, x - d / 2, y - d / 2, x, y - hv / 2, x + d / 2, y - d / 2,
+                                       fill=Display.tk_color(color), width=0)
 
-        def drawRobot(self, robot, colorFunction = None, border = 2, borderColorFunction = None, scale = 0.75):
-            if(colorFunction is None):
-                colorFunction = Display.chargeColor
-            if(borderColorFunction is None):
-                borderColorFunction = Display.borderChargeColor
-            color = colorFunction(robot.chargeRemaining, robot.initialCharge)
-            borderColor = borderColorFunction(robot.chargeRemaining, robot.initialCharge)
+        def draw_robot(self, robot, color_function=None, border=2, border_color_function=None, scale=0.75):
+            if color_function is None:
+                color_function = Display.charge_color
+            if border_color_function is None:
+                border_color_function = Display.border_charge_color
+            color = color_function(robot.charge_remaining, robot.initial_charge)
+            border_color = border_color_function(robot.charge_remaining, robot.initial_charge)
 
-            x, y = self.screenCoords(robot.x, robot.y)
+            x, y = self.screen_coords(robot.x, robot.y)
             dx, dy = robot.direction.dx, robot.direction.dy
-            halfLength = self.tileSize / 2 * scale
+            half_length = self.tile_size / 2 * scale
 
-            x0, y0 = x + halfLength * (-1 * dx - 0.5 * dy), y + halfLength * (0.5 * dx - 1 * dy)
-            x1, y1 = x - halfLength * dx * 0.5, y - halfLength * dy * 0.5
-            x2, y2 = x + halfLength * (-1 * dx + 0.5 * dy), y + halfLength * (-0.5 * dx - 1 * dy)
-            x3, y3 = x + halfLength * dx, y + halfLength * dy
+            x0, y0 = x + half_length * (-1 * dx - 0.5 * dy), y + half_length * (0.5 * dx - 1 * dy)
+            x1, y1 = x - half_length * dx * 0.5, y - half_length * dy * 0.5
+            x2, y2 = x + half_length * (-1 * dx + 0.5 * dy), y + half_length * (-0.5 * dx - 1 * dy)
+            x3, y3 = x + half_length * dx, y + half_length * dy
 
-            self.canvas.create_polygon(x0, y0, x1, y1, x2, y2, x3, y3, fill = Display.tkColor(color), width = border, outline = Display.tkColor(borderColor))
-            self.canvas.create_text(*self.screenCoords(robot.x, robot.y), text = str(robot.chargeRemaining), fill = "#000", width = self.tileCenterSize, font = Display.Font.SMALL.value)
+            self.canvas.create_polygon(x0, y0, x1, y1, x2, y2, x3, y3, fill=Display.tk_color(color), width=border,
+                                       outline=Display.tk_color(border_color))
+            self.canvas.create_text(*self.screen_coords(robot.x, robot.y), text=str(robot.charge_remaining),
+                                    fill="#000",
+                                    width=self.tile_center_size, font=Display.Font.SMALL.value)
 
     class PreviewCanvas(GameCanvas):
 
-        def __init__(self, parent, board, robotStart, tileSize = 45, tileCenterSize = 30, tileFlareHorizontalVerticalSize = 20, tileFlareDiagonalSize = 10):
+        def __init__(self, parent, board, robot_start, tile_size=45, tile_center_size=30,
+                     tile_flare_horizontal_vertical_size=20, tile_flare_diagonal_size=10):
             self._board = board
-            self.robotStart = robotStart
+            self.robot_start = robot_start
 
             self._state = State(board)
-            self.state.robotLog = {0: [robotStart]}
+            self.state.robot_log = {0: [robot_start]}
             self._time = 0
 
-            super().__init__(parent, tileSize = tileSize, tileCenterSize = tileCenterSize, tileFlareHorizontalVerticalSize = tileFlareHorizontalVerticalSize, tileFlareDiagonalSize = tileFlareDiagonalSize)
+            super().__init__(parent, tile_size=tile_size, tile_center_size=tile_center_size,
+                             tile_flare_horizontal_vertical_size=tile_flare_horizontal_vertical_size,
+                             tile_flare_diagonal_size=tile_flare_diagonal_size)
 
         @property
         def board(self):
-            return(self._board)
+            return self._board
 
         @property
         def state(self):
-            return(self._state)
+            return self._state
 
         @property
         def time(self):
-            return(self._time)
+            return self._time
 
-        def drawRobots(self):
-            self.drawRobot(self.robotStart)
+        def draw_robots(self):
+            self.draw_robot(self.robot_start)
 
-        def drawBoard(self):
-            for tile in self.board.listTiles:
-                self.drawTile(tile, self.time)
+        def draw_board(self):
+            for tile in self.board.list_tiles:
+                self.draw_tile(tile, self.time)
 
         def destroy(self):
             self.canvas.delete(tk.ALL)
@@ -442,115 +484,121 @@ class Display(tk.Tk):
 
     class LevelSelectPage(tk.Frame):
 
-        def __init__(self, display, buttonsPerRow = 5):
-            super().__init__(display, padx = 4, pady = 4)
+        def __init__(self, display, buttons_per_row=5):
+            super().__init__(display, padx=4, pady=4)
             self.display = display
 
             self.set = 1
-            self.buttonsPerRow = buttonsPerRow
+            self.buttons_per_row = buttons_per_row
 
-            self.levelButtons = []
-            self.setLabel = tk.Label(self, font = Display.Font.LARGE.value)
-            self.setLabel.grid(row = 0, column = 1, columnspan = self.buttonsPerRow - 2, sticky = tk.NSEW, padx = 8, pady = 8)
+            self.level_buttons = []
+            self.set_label = tk.Label(self, font=Display.Font.LARGE.value)
+            self.set_label.grid(row=0, column=1, columnspan=self.buttons_per_row - 2, sticky=tk.NSEW, padx=8, pady=8)
 
-            self.leftButton = tk.Label(self, font = Display.Font.LARGE.value, text = "-")
-            self.leftButton.grid(row = 0, column = 0, sticky = tk.NSEW, padx = 8, pady = 8)
-            self.leftButton.bind("<Button-1>", self.left)
+            self.left_button = tk.Label(self, font=Display.Font.LARGE.value, text="-")
+            self.left_button.grid(row=0, column=0, sticky=tk.NSEW, padx=8, pady=8)
+            self.left_button.bind("<Button-1>", self.left)
 
-            self.rightButton = tk.Label(self, font = Display.Font.LARGE.value, text = "+")
-            self.rightButton.grid(row = 0, column = self.buttonsPerRow - 1, sticky = tk.NSEW, padx = 8, pady = 8)
-            self.rightButton.bind("<Button-1>", self.right)
+            self.right_button = tk.Label(self, font=Display.Font.LARGE.value, text="+")
+            self.right_button.grid(row=0, column=self.buttons_per_row - 1, sticky=tk.NSEW, padx=8, pady=8)
+            self.right_button.bind("<Button-1>", self.right)
 
-            for column in range(self.buttonsPerRow):
-                self.grid_columnconfigure(column, weight = 1)
+            for column in range(self.buttons_per_row):
+                self.grid_columnconfigure(column, weight=1)
 
+            self.colors = None
             self.redraw()
 
-        levelsPath = "levels"
+        levels_path = "levels"
 
         @property
-        def setPath(self):
-            return("%s/set-%02d" % (self.levelsPath, self.set))
+        def set_path(self):
+            return "%s/set-%02d" % (self.levels_path, self.set)
 
         @property
-        def resourcePath(self):
-            return("%s/resources" % (self.setPath))
+        def resource_path(self):
+            return "%s/resources" % self.set_path
 
         @property
-        def validSet(self):
-            return(os.path.isdir(self.setPath))
+        def valid_set(self):
+            return os.path.isdir(self.set_path)
 
         @property
-        def isFirstSet(self):
-            return(self.set == 1)
+        def is_first_set(self):
+            return self.set == 1
 
         @property
-        def isLastSet(self):
+        def is_last_set(self):
             self.set += 1
-            out = not(self.validSet)
+            out = not self.valid_set
             self.set -= 1
-            return(out)
+            return out
 
         def left(self, *_):
-            if(not(self.isFirstSet)):
+            if not self.is_first_set:
                 self.set -= 1
                 self.redraw()
 
         def right(self, *_):
-            if(not(self.isLastSet)):
+            if not self.is_last_set:
                 self.set += 1
                 self.redraw()
 
-        def getColors(self):
-            colorFile = open("%s/set-colors.txt" % self.resourcePath, 'r')
-            colors = tuple(map(lambda s: tuple(map(float, s.split(", "))), colorFile.read().split('\n')))
-            return(colors)
+        def get_colors(self):
+            color_file = open("%s/set-colors.txt" % self.resource_path, 'r')
+            colors = tuple(map(lambda s: tuple(map(float, s.split(", "))), color_file.read().split('\n')))
+            color_file.close()
+            return colors
 
         def redraw(self):
-            self.colors = self.getColors()
+            self.colors = self.get_colors()
 
-            self.config(bg = Display.tkColor(self.colors[0]))
-            self.setLabel.config(bg = Display.tkColor(self.colors[0]), fg = Display.tkColor(self.colors[1]))
+            self.config(bg=Display.tk_color(self.colors[0]))
+            self.set_label.config(bg=Display.tk_color(self.colors[0]), fg=Display.tk_color(self.colors[1]))
 
-            self.setLabel.config(text = "Set %s" % (self.set))
+            self.set_label.config(text="Set %s" % self.set)
 
-            self.leftButton.config(bg = Display.tkColor(self.colors[3]) if self.isFirstSet else Display.tkColor(self.colors[1]), fg = Display.tkColor(self.colors[2]))
-            self.rightButton.config(bg = Display.tkColor(self.colors[3]) if self.isLastSet else Display.tkColor(self.colors[1]), fg = Display.tkColor(self.colors[2]))
+            self.left_button.config(
+                bg=Display.tk_color(self.colors[3]) if self.is_first_set else Display.tk_color(self.colors[1]),
+                fg=Display.tk_color(self.colors[2]))
+            self.right_button.config(
+                bg=Display.tk_color(self.colors[3]) if self.is_last_set else Display.tk_color(self.colors[1]),
+                fg=Display.tk_color(self.colors[2]))
 
-            for button in self.levelButtons:
+            for button in self.level_buttons:
                 button.destroy()
 
-            self.levelButtons = []
+            self.level_buttons = []
 
-            self.readStateFromFileSystem()
+            self.read_state_from_file_system()
 
-        def readStateFromFileSystem(self):
-            levelFolders = os.listdir(self.setPath)
-            levelFolders.sort()
-            for levelFolder in levelFolders:
-                if(levelFolder.split('-')[0] != "level"):
+        def read_state_from_file_system(self):
+            level_folders = os.listdir(self.set_path)
+            level_folders.sort()
+            for level_folder in level_folders:
+                if level_folder.split('-')[0] != "level":
                     continue
 
-                number = int(levelFolder.split('-')[-1])
-                csvMapFile = open("%s/%s/%s-%s-map.csv" % (self.setPath, levelFolder, self.set, number), 'r')
-                codeFilePath = "%s/%s/code.txt" % (self.setPath, levelFolder)
-                csvMapText = csvMapFile.read()
-                csvMapFile.close()
+                number = int(level_folder.split('-')[-1])
+                csv_map_file = open("%s/%s/%s-%s-map.csv" % (self.set_path, level_folder, self.set, number), 'r')
+                code_file_path = "%s/%s/code.txt" % (self.set_path, level_folder)
+                csv_map_text = csv_map_file.read()
+                csv_map_file.close()
 
-                self.addButton(number, csvMapText, codeFilePath)
+                self.add_button(number, csv_map_text, code_file_path)
 
-        def addButton(self, number, csvMapText, codeFilePath):
-            button = tk.Label(self, text = "%s-%s" % (self.set, number), font = Display.Font.LARGE.value, bg = Display.tkColor(self.colors[1]), fg = Display.tkColor(self.colors[2]))
-            button.bind("<Button-1>", lambda *_: self.loadLevel(number, csvMapText, codeFilePath))
-            button.grid(row = (number - 1) // self.buttonsPerRow + 1, column = (number - 1) % self.buttonsPerRow, sticky = tk.NSEW, padx = 8, pady = 8)
-            self.grid_rowconfigure((number - 1) // self.buttonsPerRow + 1, weight = 1)
-            self.levelButtons.append(button)
+        def add_button(self, number, csv_map_text, code_file_path):
+            button = tk.Label(self, text="%s-%s" % (self.set, number), font=Display.Font.LARGE.value,
+                              bg=Display.tk_color(self.colors[1]), fg=Display.tk_color(self.colors[2]))
+            button.bind("<Button-1>", lambda *_: self.load_level(csv_map_text, code_file_path))
+            button.grid(row=(number - 1) // self.buttons_per_row + 1, column=(number - 1) % self.buttons_per_row,
+                        sticky=tk.NSEW, padx=8, pady=8)
+            self.grid_rowconfigure((number - 1) // self.buttons_per_row + 1, weight=1)
+            self.level_buttons.append(button)
 
-        def loadLevel(self, number, csvMapText, codeFilePath):
-            self.display.currentPage = self.display.Page.CODING
-            self.display.Page.CODING.value.csvMap = CSVMap(csvMapText)
-            self.display.Page.CODING.value.codeFilePath = codeFilePath
-            self.display.Page.CODING.value.draw(self.colors)
+        def load_level(self, csv_map_text, code_file_path):
+            self.display.current_page = self.display.Page.CODING
+            self.display.Page.CODING.value.load_level(CSVMap(csv_map_text), code_file_path, self.colors)
 
     class CodingPage(tk.Frame):
 
@@ -558,121 +606,133 @@ class Display(tk.Tk):
             super().__init__(display)
             self.display = display
 
-            self.codeBox = Display.CodeBox(self)
-            self.codeBox.grid(row = 1, column = 2, sticky = tk.NSEW)
+            self.code_box = Display.CodeBox(self)
+            self.code_box.grid(row=1, column=2, sticky=tk.NSEW)
 
-            self.separator = ttk.Separator(self, orient = tk.VERTICAL)
-            self.separator.grid(row = 1, column = 1)
+            self.separator = ttk.Separator(self, orient=tk.VERTICAL)
+            self.separator.grid(row=1, column=1)
 
-            self.grid_rowconfigure(1, weight = 1)
-            self.grid_columnconfigure(0, weight = 1)
-            self.grid_columnconfigure(2, weight = 1)
+            self.grid_rowconfigure(1, weight=1)
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_columnconfigure(2, weight=1)
 
-            self.previewCanvas = None
-            self.menuBar = None
+            self.preview_canvas = None
+            self.menu_bar = None
+            self.csv_map = None
+            self.code_file_path = None
+            self.colors = None
+            self.bg = None
+            self.board = None
+
+        def load_level(self, csv_map, code_file_path, colors):
+            self.csv_map = csv_map
+            self.code_file_path = code_file_path
+            self.draw(colors)
 
         def draw(self, colors):
             self.colors = colors
 
-            self.bg = Display.tkColor(self.colors[0])
+            self.bg = Display.tk_color(self.colors[0])
 
-            if(self.menuBar is not None):
-                self.menuBar.destroy()
+            if self.menu_bar is not None:
+                self.menu_bar.destroy()
 
-            self.menuBar = Display.MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, self.colors, runAction = self.run)
-            self.menuBar.grid(row = 0, column = 0, columnspan = 3, sticky = tk.NSEW)
+            self.menu_bar = Display.MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, self.colors,
+                                            run_action=self.run)
+            self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
 
-            self.board = self.csvMap.buildBoard()
+            self.board = self.csv_map.build_board()
 
-            if(self.previewCanvas is not None):
-                self.previewCanvas.destroy()
+            if self.preview_canvas is not None:
+                self.preview_canvas.destroy()
 
-            self.previewCanvas = Display.PreviewCanvas(self, self.board, self.csvMap.buildRobot())
-            self.previewCanvas.grid(row = 1, column = 0, sticky = tk.NSEW)
+            self.preview_canvas = Display.PreviewCanvas(self, self.board, self.csv_map.build_robot())
+            self.preview_canvas.grid(row=1, column=0, sticky=tk.NSEW)
 
-            self.previewCanvas.draw()
-            self.codeBox.loadFile()
+            self.preview_canvas.draw()
+            self.code_box.load_file()
 
         def run(self, *_):
-            instructions = InstructionSet(self.codeBox.text)
+            instructions = InstructionSet(self.code_box.text)
 
-            robot = self.csvMap.buildRobot()
+            robot = self.csv_map.build_robot()
             controller = Controller(self.board, robot, instructions)
 
-            self.display.currentPage = self.display.Page.CALCULATING
+            self.display.current_page = self.display.Page.CALCULATING
 
             results = controller.run()
 
             self.display.board = self.board
             self.display.results = results
-            self.display.currentPage = self.display.Page.STEP
-            self.display.currentPage.page.draw(self.colors)
+            self.display.current_page = self.display.Page.STEP
+            self.display.current_page.page.draw(self.colors)
 
     class CodeBox(tk.Frame):
 
-        def __init__(self, codingPage):
-            super().__init__(codingPage)
-            self.codingPage = codingPage
+        def __init__(self, coding_page):
+            super().__init__(coding_page)
+            self.coding_page = coding_page
 
-            self.doNotOverwriteFile = False
+            self.do_not_overwrite_file = False
 
-            self.textBox = Display.TextWithModifiedCallback(self, wrap = tk.NONE, font = Display.Font.NORMAL, tabs = (Display.Font.NORMAL.measure(self, ' ' * 2),))
-            self.textBox.grid(row = 0, column = 0, sticky = tk.NSEW)
-            self.scrollV = tk.Scrollbar(self, orient = tk.VERTICAL, command = self.textBox.yview)
-            self.scrollV.grid(row = 0, column = 1, sticky = tk.NSEW)
-            self.scrollH = tk.Scrollbar(self, orient = tk.HORIZONTAL, command = self.textBox.xview)
-            self.scrollH.grid(row = 1, column = 0, sticky = tk.NSEW)
-            self.textBox.config(yscrollcommand = self.scrollV.set, xscrollcommand = self.scrollH.set)
+            self.text_box = Display.TextWithModifiedCallback(self, wrap=tk.NONE, font=Display.Font.NORMAL,
+                                                             tabs=(Display.Font.NORMAL.measure(self, ' ' * 2),))
+            self.text_box.grid(row=0, column=0, sticky=tk.NSEW)
+            self.scroll_v = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.text_box.yview)
+            self.scroll_v.grid(row=0, column=1, sticky=tk.NSEW)
+            self.scroll_h = tk.Scrollbar(self, orient=tk.HORIZONTAL, command=self.text_box.xview)
+            self.scroll_h.grid(row=1, column=0, sticky=tk.NSEW)
+            self.text_box.config(yscrollcommand=self.scroll_v.set, xscrollcommand=self.scroll_h.set)
 
-            self.grid_rowconfigure(0, weight = 1)
-            self.grid_columnconfigure(0, weight = 1)
+            self.grid_rowconfigure(0, weight=1)
+            self.grid_columnconfigure(0, weight=1)
 
-            self.textBox.bind("<Return>", self.enter)
-            self.textBox.bind('}', self.closeBrace)
+            self.text_box.bind("<Return>", self.enter)
+            self.text_box.bind('}', self.close_brace)
 
-            self.textBox.bind("<<TextModified>>", self.save)
+            self.text_box.bind("<<TextModified>>", self.save)
 
-        def currentIndentation(self):
-            text = self.textBox.get("0.0", tk.INSERT)
+        def current_indentation(self):
+            text = self.text_box.get("0.0", tk.INSERT)
             indentation = 0
             for line in text.split('\n'):
                 indentation += line.split("//")[0].count('{') - line.split("//")[0].count('}')
-            return(indentation)
+            return indentation
 
-        def characterBeforeCursor(self):
-            return(self.textBox.get("insert - 1 char", tk.INSERT))
+        def character_before_cursor(self):
+            return self.text_box.get("insert - 1 char", tk.INSERT)
 
         def enter(self, *_):
-            self.textBox.insert(tk.INSERT, '\n' + '\t' * self.currentIndentation())
-            return("break")
+            self.text_box.insert(tk.INSERT, '\n' + '\t' * self.current_indentation())
+            return "break"
 
-        def closeBrace(self, *_):
-            if(self.characterBeforeCursor() == '\t'):
-                self.textBox.delete("insert - 1 char", tk.INSERT)
+        def close_brace(self, *_):
+            if self.character_before_cursor() == '\t':
+                self.text_box.delete("insert - 1 char", tk.INSERT)
 
-        def loadFile(self):
-            self.doNotOverwriteFile = True
-            filePath = self.codingPage.codeFilePath
-            file = open(filePath, 'r')
-            self.textBox.delete("0.0", tk.END)
-            self.textBox.insert(tk.END, file.read())
+        def load_file(self):
+            self.do_not_overwrite_file = True
+            file_path = self.coding_page.code_file_path
+            file = open(file_path, 'r')
+            self.text_box.delete("0.0", tk.END)
+            self.text_box.insert(tk.END, file.read())
             file.close()
-            self.doNotOverwriteFile = False
+            self.do_not_overwrite_file = False
 
         def save(self, *_):
-            if(not(self.doNotOverwriteFile)):
-                filePath = self.codingPage.codeFilePath
-                file = open(filePath, 'w')
+            if not self.do_not_overwrite_file:
+                file_path = self.coding_page.code_file_path
+                file = open(file_path, 'w')
                 file.flush()
                 file.write(self.text)
                 file.close()
 
         @property
         def text(self):
-            text = self.textBox.get("0.0", "end")
-            if(len(text) > 0 and text[-1] == '\n'):
+            text = self.text_box.get("0.0", "end")
+            if len(text) > 0 and text[-1] == '\n':
                 text = text[:-1]
-            return(text)
+            return text
 
     class TextWithModifiedCallback(tk.Text):
 
@@ -686,66 +746,69 @@ class Display(tk.Tk):
         def _proxy(self, command, *args):
             cmd = (self._orig, command) + args
 
-            try:
-                result = self.tk.call(cmd)
-            except Exception:
-                return
+            result = self.tk.call(cmd)
+            # try:
+            #     result = self.tk.call(cmd)
+            # except Exception:
+            #     return
 
             if command in ("insert", "delete", "replace"):
                 self.event_generate("<<TextModified>>")
 
-            return(result)
+            return result
 
     class MenuBar(tk.Frame):
 
-        def __init__(self, parent, display, backPage, colors, height = 32, runAction = None):
-            super().__init__(parent, bg = Display.tkColor(colors[1]))
+        def __init__(self, parent, display, back_page, colors, height=32, run_action=None):
+            super().__init__(parent, bg=Display.tk_color(colors[1]))
 
             self.parent = parent
             self.display = display
-            self.backPage = backPage
+            self.back_page = back_page
             self.height = height
 
-            self.grid_rowconfigure(0, weight = 0)
-            self.grid_columnconfigure(0, weight = 0)
-            self.grid_columnconfigure(1, weight = 1)
+            self.grid_rowconfigure(0, weight=0)
+            self.grid_columnconfigure(0, weight=0)
+            self.grid_columnconfigure(1, weight=1)
 
-            self.backButton = tk.Canvas(self, width = self.height, height = self.height, bg = Display.tkColor(colors[1]), highlightthickness = 0, relief = tk.RAISED, bd = 2)
+            self.back_button = tk.Canvas(self, width=self.height, height=self.height, bg=Display.tk_color(colors[1]),
+                                         highlightthickness=0, relief=tk.RAISED, bd=2)
 
-            arrowSize = self.height * 3 / 4
-            arrowTL = self.height * 1 / 8
-            self.backButton.create_polygon(arrowTL, arrowTL + arrowSize / 2,
-                                           arrowTL + arrowSize / 2, arrowTL,
-                                           arrowTL + arrowSize / 2, arrowTL + arrowSize / 4,
-                                           arrowTL + arrowSize, arrowTL + arrowSize / 4,
-                                           arrowTL + arrowSize, arrowTL + arrowSize * 3 / 4,
-                                           arrowTL + arrowSize / 2, arrowTL + arrowSize * 3 / 4,
-                                           arrowTL + arrowSize / 2, arrowTL + arrowSize,
-                                           arrowTL, arrowTL + arrowSize / 2,
-                                           fill = Display.tkColor(colors[2]))
+            arrow_size = self.height * 3 / 4
+            arrow_tl = self.height * 1 / 8
+            self.back_button.create_polygon(arrow_tl, arrow_tl + arrow_size / 2,
+                                            arrow_tl + arrow_size / 2, arrow_tl,
+                                            arrow_tl + arrow_size / 2, arrow_tl + arrow_size / 4,
+                                            arrow_tl + arrow_size, arrow_tl + arrow_size / 4,
+                                            arrow_tl + arrow_size, arrow_tl + arrow_size * 3 / 4,
+                                            arrow_tl + arrow_size / 2, arrow_tl + arrow_size * 3 / 4,
+                                            arrow_tl + arrow_size / 2, arrow_tl + arrow_size,
+                                            arrow_tl, arrow_tl + arrow_size / 2,
+                                            fill=Display.tk_color(colors[2]))
 
-            self.backButton.xview_moveto(0)
-            self.backButton.yview_moveto(0)
+            self.back_button.xview_moveto(0)
+            self.back_button.yview_moveto(0)
 
-            self.backButton.grid(row = 0, column = 0, sticky = tk.N + tk.S + tk.W, padx = 2.5, pady = 2.5)
-            self.backButton.bind("<Button-1>", self.goBack)
+            self.back_button.grid(row=0, column=0, sticky=tk.N + tk.S + tk.W, padx=2.5, pady=2.5)
+            self.back_button.bind("<Button-1>", self.go_back)
 
-            if(runAction is not None):
-                self.runButton = tk.Canvas(self, width = self.height, height = self.height, bg = Display.tkColor(colors[1]), highlightthickness = 0, relief = tk.RAISED, bd = 2)
+            if run_action is not None:
+                self.run_button = tk.Canvas(self, width=self.height, height=self.height, bg=Display.tk_color(colors[1]),
+                                            highlightthickness=0, relief=tk.RAISED, bd=2)
 
-                arrowSize = self.height * 3 / 4
-                arrowTL = self.height * 1 / 8
-                self.runButton.create_polygon(arrowTL, arrowTL,
-                                              arrowTL + arrowSize, arrowTL + arrowSize / 2,
-                                              arrowTL, arrowTL + arrowSize,
-                                              arrowTL, arrowTL,
-                                              fill = Display.tkColor(colors[2]))
+                arrow_size = self.height * 3 / 4
+                arrow_tl = self.height * 1 / 8
+                self.run_button.create_polygon(arrow_tl, arrow_tl,
+                                               arrow_tl + arrow_size, arrow_tl + arrow_size / 2,
+                                               arrow_tl, arrow_tl + arrow_size,
+                                               arrow_tl, arrow_tl,
+                                               fill=Display.tk_color(colors[2]))
 
-                self.runButton.xview_moveto(0)
-                self.runButton.yview_moveto(0)
+                self.run_button.xview_moveto(0)
+                self.run_button.yview_moveto(0)
 
-                self.runButton.grid(row = 0, column = 2, sticky = tk.N + tk.S + tk.E, padx = 2.5, pady = 2.5)
-                self.runButton.bind("<Button-1>", runAction)
+                self.run_button.grid(row=0, column=2, sticky=tk.N + tk.S + tk.E, padx=2.5, pady=2.5)
+                self.run_button.bind("<Button-1>", run_action)
 
-        def goBack(self, *_):
-            self.display.currentPage = self.backPage
+        def go_back(self, *_):
+            self.display.current_page = self.back_page

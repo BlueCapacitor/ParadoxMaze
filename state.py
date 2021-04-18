@@ -1,8 +1,8 @@
-'''
+"""
 Created on Oct 10, 2020
 
 @author: gosha
-'''
+"""
 
 from enum import Enum
 
@@ -11,121 +11,123 @@ from tile import TargetTile
 
 class State(object):
 
-    def __init__(self, board, robotLog = None, controlValueLog = None, stickyValues = None):
+    def __init__(self, board, robot_log=None, control_value_log=None, sticky_values=None):
         self.board = board
-        if(robotLog is None):
-            self.robotLog = {}
+        if robot_log is None:
+            self.robot_log = {}
         else:
-            self.robotLog = robotLog
+            self.robot_log = robot_log
 
-        if(controlValueLog is None):
-            self.controlValueLog = {}
+        if control_value_log is None:
+            self.control_valueLog = {}
         else:
-            self.controlValueLog = dict(map(lambda entry: (entry[0], entry[1].copy(state = self)), controlValueLog.items()))
+            self.control_valueLog = dict(
+                map(lambda entry: (entry[0], entry[1].copy(state=self)), control_value_log.items()))
 
-        if(stickyValues is None):
-            self.stickyValues = {}
+        if sticky_values is None:
+            self.sticky_values = {}
         else:
-            self.stickyValues = stickyValues
+            self.sticky_values = sticky_values
 
     def copy(self):
-        return(State(self.board,
-                     dict(map(lambda entry: (entry[0], entry[1].copy()), self.robotLog.items())),
-                     self.controlValueLog,
-                     dict(self.stickyValues)))
+        return (State(self.board,
+                      dict(map(lambda entry: (entry[0], entry[1].copy()), self.robot_log.items())),
+                      self.control_valueLog,
+                      dict(self.sticky_values)))
 
-    def getRobotsAtTime(self, time):
-        return(self.robotLog[time] if time in self.robotLog.keys() else [])
+    def get_robots_at_time(self, time):
+        return self.robot_log[time] if time in self.robot_log.keys() else []
 
-    def getAllRobots(self):
-        return(sum(self.robotLog.values(), []))
+    def get_all_robots(self):
+        return sum(self.robot_log.values(), [])
 
-    def getRobotWithCharge(self, charge):
-        for time in self.robotLog.keys():
-            for robot in self.robotLog[time]:
-                if(robot.chargeRemaining == charge):
-                    return(robot, time)
+    def get_robot_with_charge(self, charge):
+        for time in self.robot_log.keys():
+            for robot in self.robot_log[time]:
+                if robot.charge_remaining == charge:
+                    return robot, time
 
-    def logRobot(self, robot, time):
-        if(time not in self.robotLog.keys()):
-            self.robotLog[time] = []
+    def log_robot(self, robot, time):
+        if time not in self.robot_log.keys():
+            self.robot_log[time] = []
 
-        self.robotLog[time].append(robot.makeTrace())
+        self.robot_log[time].append(robot.make_trace())
 
-    def getControlValue(self, controlID, time):
-        if((controlID, time) not in self.controlValueLog.keys()):
-            currentValue = False
+    def get_control_value(self, control_id, time):
+        if (control_id, time) not in self.control_valueLog.keys():
+            current_value = False
 
-            self.controlValueLog[(controlID, time)] = ControlValue(self, time, controlID, currentValue)
+            self.control_valueLog[(control_id, time)] = ControlValue(self, time, control_id, current_value)
 
-        return(self.controlValueLog[(controlID, time)])
+        return self.control_valueLog[(control_id, time)]
 
-    def getKeyForControlValue(self, controlValue):
-        for key in self.controlValueLog.keys():
-            if(self.controlValueLog[key] == controlValue):
-                return(key)
+    def get_key_for_control_value(self, control_value):
+        for key in self.control_valueLog.keys():
+            if self.control_valueLog[key] == control_value:
+                return key
 
-    def setStickyValue(self, controlID, time, value):
-        self.stickyValues[(controlID, time)] = value
+    def set_sticky_value(self, control_id, time, value):
+        self.sticky_values[(control_id, time)] = value
 
     @property
-    def isValid(self):
+    def is_valid(self):
         out = Result.NO_SUCCESS
 
-        for controlID, time in self.controlValueLog.keys():
-            controlValue = self.controlValueLog[(controlID, time)]
-            out |= controlValue.validity
+        for control_id, time in self.control_valueLog.keys():
+            control_value = self.control_valueLog[(control_id, time)]
+            out |= control_value.validity
 
-        targets = {tile: False for tile in self.board.getTargets()}
+        targets = {tile: False for tile in self.board.get_targets()}
 
-        for time in self.robotLog.keys():
-            for robotTrace in self.robotLog[time]:
-                tile = self.board.getTile(robotTrace.x, robotTrace.y)
-                if(tile.isFatal(self, time) and tile.isStatic):
-                    out = self.failAndFinalize(out)
+        for time in self.robot_log.keys():
+            for robot_trace in self.robot_log[time]:
+                tile = self.board.get_tile(robot_trace.x, robot_trace.y)
+                if tile.is_fatal(self, time) and tile.is_static:
+                    out = self.fail_and_finalize(out)
                     break
-                if(not(tile.isStatic)):
-                    if(not(self.board.hasTimeTravel)):
-                        if(not(tile.crashLook(self, time))):
-                            out = self.failAndFinalize(out)
+                if not tile.is_static:
+                    if not self.board.has_timeTravel:
+                        if not (tile.crash_look(self, time)):
+                            out = self.fail_and_finalize(out)
                     else:
-                        controlValue, safeValue = tile.crashLook(self, time)
-                        if(controlValue.static and controlValue.curentValue != safeValue):
-                            out = self.failAndFinalize(out)
+                        control_value, safe_value = tile.crash_look(self, time)
+                        if control_value.static and control_value.current_value != safe_value:
+                            out = self.fail_and_finalize(out)
 
-                if(not self.board.checkBounds(robotTrace)):
-                    out = self.failAndFinalize(out)
+                if not self.board.check_bounds(robot_trace):
+                    out = self.fail_and_finalize(out)
                     break
-                if(isinstance(tile, TargetTile)):
+                if isinstance(tile, TargetTile):
                     targets[tile] = True
                     continue
 
-        if(out == Result.NO_SUCCESS and all(targets.values())):
+        if out == Result.NO_SUCCESS and all(targets.values()):
             out = Result.POTENTIAL_SUCCESS
 
-        return(out)
+        return out
 
-    def failAndFinalize(self, result):
+    @staticmethod
+    def fail_and_finalize(result):
         result |= Result.FAIL
-        if(result == Result.RECOVERABLE_PARADOX):
+        if result == Result.RECOVERABLE_PARADOX:
             result = Result.UNRECOVERABLE_PARADOX
-        return(result)
+        return result
 
     @property
-    def maxTime(self):
-        return(max(self.robotLog.keys()))
+    def max_time(self):
+        return max(self.robot_log.keys())
 
     @property
-    def minTime(self):
-        return(min(self.robotLog.keys()))
+    def min_time(self):
+        return min(self.robot_log.keys())
 
     @property
-    def maxCharge(self):
-        return(None if self.getAllRobots() == [] else self.getAllRobots()[0].initialCharge)
+    def max_charge(self):
+        return None if self.get_all_robots() == [] else self.get_all_robots()[0].initial_charge
 
     @property
-    def minCharge(self):
-        return(min(map(lambda robot: robot.chargeRemaining, self.getAllRobots())))
+    def min_charge(self):
+        return min(map(lambda robot: robot.charge_remaining, self.get_all_robots()))
 
 
 class Result(Enum):
@@ -137,50 +139,55 @@ class Result(Enum):
     UNRECOVERABLE_PARADOX = 6
 
     def __or__(self, other):
-        return(self if self.value > other.value else other)
+        return self if self.value > other.value else other
 
 
-class ControlValue():
+class ControlValue:
 
-    def __init__(self, state, time, controlID, currentValue, possibleValues = {True, False}, static = False):
+    def __init__(self, state, time, control_id, current_value, possible_values=None, static=False):
+        if possible_values is None:
+            possible_values = {True, False}
+
         self.state = state
         self.time = time
-        self.controlID = controlID
-        self._curentValue = currentValue
-        self.possibleValues = possibleValues
+        self.control_id = control_id
+        self._current_value = current_value
+        self.possible_values = possible_values
         self.static = static
 
-    def setCurrentValue(self, value, static):
-        if(not(self.static)):
-            self._curentValue = value
+    def set_current_value(self, value, static):
+        if not self.static:
+            self._current_value = value
             self.static = static
 
     @property
-    def curentValue(self):
-        value = self._curentValue
+    def current_value(self):
+        value = self._current_value
 
-        maxTime = None
-        for ((controlID, time), stickyValue) in self.state.stickyValues.items():
-            if(controlID == self.controlID and (maxTime is None or time > maxTime) and time <= self.time):
-                value = stickyValue
-                maxTime = time
+        max_time = None
+        for ((control_id, time), sticky_value) in self.state.sticky_values.items():
+            if control_id == self.control_id and (max_time is None or time > max_time) and time <= self.time:
+                value = sticky_value
+                max_time = time
 
-        return(value)
+        return value
 
     @property
     def validity(self):
-        if(not(self.state.board.hasTimeTravel)):
-            return(Result.SUCCESS)
-        if(self.curentValue in self.possibleValues):
-            return(Result.SUCCESS)
+        if not self.state.board.has_timeTravel:
+            return Result.SUCCESS
+        if self.current_value in self.possible_values:
+            return Result.SUCCESS
         else:
-            if(self.static or len(self.possibleValues) == 0):
-                return(Result.UNRECOVERABLE_PARADOX)
+            if self.static or len(self.possible_values) == 0:
+                return Result.UNRECOVERABLE_PARADOX
             else:
-                return(Result.RECOVERABLE_PARADOX)
+                return Result.RECOVERABLE_PARADOX
 
-    def assumeValue(self, value):
-        self.possibleValues &= {value}
+    def assume_value(self, value):
+        self.possible_values &= {value}
 
-    def copy(self, state = None, time = None):
-        return(ControlValue(self.state if state is None else state, self.time if time is None else time, self.controlID, self.curentValue, set(self.possibleValues), self.static))
+    def copy(self, state=None, time=None):
+        return (
+            ControlValue(self.state if state is None else state, self.time if time is None else time, self.control_id,
+                         self.current_value, set(self.possible_values), self.static))

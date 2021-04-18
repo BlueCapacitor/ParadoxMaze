@@ -1,157 +1,164 @@
-'''
+"""
 Created on Oct 10, 2020
 
 @author: gosha
-'''
+"""
 
 from instruction_set import Instruction
-from state import State, Result, ControlValue
+from state import State, Result
 from tile import TransportTile, ControlTile
 
-numberOfRobots = 1
+number_of_robots = 1
 
 
 class Controller(object):
 
-    def __init__(self, board, robot, instructions, state = None, time = 0, lookValue = None):
+    def __init__(self, board, robot, instructions, state=None, time=0, look_value=None):
         self.time = time
 
         self.board = board
         self.robot = robot
 
-        if(state is None):
+        if state is None:
             self.state = State(board)
-            self.state.logRobot(self.robot, self.time)
+            self.state.log_robot(self.robot, self.time)
         else:
             self.state = state
 
         self.instructions = instructions
-        if(lookValue is not None):
-            self.robot.lookValue = lookValue
+        if look_value is not None:
+            self.robot.look_value = look_value
 
     def run(self):
-        global numberOfRobots
+        global number_of_robots
 
-        while(self.robot.chargeRemaining > 0):
-            result, lookResult, crashLook = self.step()
+        result = None
 
-            if(lookResult is not None and isinstance(crashLook, bool)):
-                if(isinstance(lookResult, bool)):
-                    self.robot.lookValue = lookResult
+        while self.robot.charge_remaining > 0:
+            result, look_result, crash_look = self.step()
+
+            if look_result is not None and isinstance(crash_look, bool):
+                if isinstance(look_result, bool):
+                    self.robot.look_value = look_result
                 else:
-                    controlValue, safeValue = lookResult
-                    if(controlValue.validity == Result.UNRECOVERABLE_PARADOX):
+                    control_value, safe_value = look_result
+                    if control_value.validity == Result.UNRECOVERABLE_PARADOX:
                         result = Result.UNRECOVERABLE_PARADOX
                         break
                     else:
-                        if(controlValue.static):
-                            self.robot.lookValue = (controlValue.currentValue and safeValue) or not(controlValue.currentValue or safeValue)
-                        elif(len(controlValue.possibleValues) == 1):
-                            value = controlValue.possibleValues[0]
-                            self.robot.lookValue = (value and safeValue) or not(value or safeValue)
+                        if control_value.static:
+                            self.robot.look_value = (control_value.current_value and safe_value) or not (
+                                        control_value.current_value or safe_value)
+                        elif len(control_value.possible_values) == 1:
+                            value = control_value.possible_values[0]
+                            self.robot.look_value = (value and safe_value) or not (value or safe_value)
                         else:
-                            numberOfRobots += 1
+                            number_of_robots += 1
 
-                            key = self.state.getKeyForControlValue(controlValue)
+                            key = self.state.get_key_for_control_value(control_value)
 
-                            subControllerTrue = self.copy(lookValue = safeValue)
-                            subControllerTrue.state.controlValueLog[key].assumeValue(True)
+                            sub_controller_true = self.copy(look_value=safe_value)
+                            sub_controller_true.state.control_value_log[key].assume_value(True)
 
-                            subControllerFalse = self.copy(lookValue = not(safeValue))
-                            subControllerFalse.state.controlValueLog[key].assumeValue(False)
+                            sub_controller_false = self.copy(look_value=not safe_value)
+                            sub_controller_false.state.control_value_log[key].assume_value(False)
 
-                            resultWithTrue = subControllerTrue.run()
-                            resultWithFalse = subControllerFalse.run()
+                            result_with_true = sub_controller_true.run()
+                            result_with_false = sub_controller_false.run()
 
-                            return(resultWithTrue + resultWithFalse)
+                            return result_with_true + result_with_false
 
-            if(lookResult is None and not(isinstance(crashLook, bool))):
-                controlValue, safeValue = crashLook
-                if(controlValue.validity == Result.UNRECOVERABLE_PARADOX):
+            if look_result is None and not (isinstance(crash_look, bool)):
+                control_value, safe_value = crash_look
+                if control_value.validity == Result.UNRECOVERABLE_PARADOX:
                     result = Result.UNRECOVERABLE_PARADOX
                     break
                 else:
-                    if(controlValue.static):
-                        safe = (controlValue.curentValue and safeValue) or not(controlValue.curentValue or safeValue)
+                    if control_value.static:
+                        safe = (control_value.current_value and safe_value) or not (
+                                    control_value.current_value or safe_value)
                         result |= Result.FAIL if not safe else Result.SUCCESS
-                    elif(len(controlValue.possibleValues) == 1):
-                        value = tuple(controlValue.possibleValues)[0]
-                        safe = (value and safeValue) or not(value or safeValue)
+                    elif len(control_value.possible_values) == 1:
+                        value = tuple(control_value.possible_values)[0]
+                        safe = (value and safe_value) or not (value or safe_value)
                         result |= Result.FAIL if not safe else Result.SUCCESS
                     else:
-                        numberOfRobots += 1
+                        number_of_robots += 1
 
-                        key = self.state.getKeyForControlValue(controlValue)
+                        key = self.state.get_key_for_control_value(control_value)
 
-                        subControllerTrue = self.copy()
-                        subControllerTrue.state.controlValueLog[key].assumeValue(True)
+                        sub_controller_true = self.copy()
+                        sub_controller_true.state.control_value_log[key].assume_value(True)
 
-                        subControllerFalse = self.copy()
-                        subControllerFalse.state.controlValueLog[key].assumeValue(False)
+                        sub_controller_false = self.copy()
+                        sub_controller_false.state.control_value_log[key].assume_value(False)
 
-                        resultWithTrue = subControllerTrue.run()
-                        resultWithFalse = subControllerFalse.run()
+                        result_with_true = sub_controller_true.run()
+                        result_with_false = sub_controller_false.run()
 
-                        return(resultWithTrue + resultWithFalse)
+                        return result_with_true + result_with_false
 
-                # TODO: Check for both lookResult is not None and not(isinstance(crashLook, bool))   (split controller into 4)
+                # TODO: Check for both look_result is not None and not(isinstance(crash_look, bool))
+                #  (split controller into 4)
 
-            if(result == Result.SUCCESS):
+            if result == Result.SUCCESS:
                 break
-            if(result == Result.RECOVERABLE_PARADOX):
+            if result == Result.RECOVERABLE_PARADOX:
                 continue
-            if(result == Result.UNRECOVERABLE_PARADOX):
+            if result == Result.UNRECOVERABLE_PARADOX:
                 break
-            if(result == Result.NO_SUCCESS):
+            if result == Result.NO_SUCCESS:
                 continue
-            if(result == Result.FAIL):
+            if result == Result.FAIL:
                 break
 
-        if(result == Result.RECOVERABLE_PARADOX):
+        if result == Result.RECOVERABLE_PARADOX:
             result = Result.UNRECOVERABLE_PARADOX
-        if(result == Result.NO_SUCCESS):
+        if result == Result.NO_SUCCESS:
             result = Result.FAIL
-        if(result == Result.POTENTIAL_SUCCESS):
+        if result == Result.POTENTIAL_SUCCESS:
             result = Result.SUCCESS
 
-        numberOfRobots -= 1
-        return([(result, self.state)])
+        number_of_robots -= 1
+        return [(result, self.state)]
 
     def step(self):
-        instruction = self.instructions.nextInstruction(self.robot)
-        if(instruction == Instruction.SLEEP):
+        instruction = self.instructions.next_instruction(self.robot)
+        if instruction == Instruction.SLEEP:
             pass
-        if(instruction == Instruction.LEFT):
-            self.robot.turnLeft()
-        if(instruction == Instruction.RIGHT):
-            self.robot.turnRight()
-        if(instruction == Instruction.FORWARD):
-            self.robot.moveForward()
-        if(instruction == Instruction.SLEEP):
+        if instruction == Instruction.LEFT:
+            self.robot.turn_left()
+        if instruction == Instruction.RIGHT:
+            self.robot.turn_right()
+        if instruction == Instruction.FORWARD:
+            self.robot.move_forward()
+        if instruction == Instruction.SLEEP:
             self.robot.sleep()
-        if(instruction == Instruction.LOOK):
-            lookResult = self.robot.look(self.state, self.time)
-        if(instruction == Instruction.DEBUG):
+        look_result = None
+        if instruction == Instruction.LOOK:
+            look_result = self.robot.look(self.state, self.time)
+        if instruction == Instruction.DEBUG:
             print("@@@@ Debug @@@@")
-            return((Result.NO_SUCCESS, None))
+            return Result.NO_SUCCESS, None
 
         self.time += 1
-        self.state.logRobot(self.robot, self.time)
+        self.state.log_robot(self.robot, self.time)
 
-        crashLook = self.robot.crashLook(self.state, self.time)
+        crash_look = self.robot.crash_look(self.state, self.time)
 
-        tile = self.board.getTile(self.robot.x, self.robot.y)
+        tile = self.board.get_tile(self.robot.x, self.robot.y)
 
-        if(isinstance(tile, ControlTile)):
+        if isinstance(tile, ControlTile):
             tile.trigger(self.state, self.time)
 
-        if(isinstance(tile, TransportTile)):
-            self.robot.x, self.robot.y, self.time = tile.getDestination(self.state, self.time, self.robot)
-            self.robot.discontinuePath()
+        if isinstance(tile, TransportTile):
+            self.robot.x, self.robot.y, self.time = tile.get_destination(self.state, self.time, self.robot)
+            self.robot.discontinue_path()
 
-            self.state.logRobot(self.robot, self.time)
+            self.state.log_robot(self.robot, self.time)
 
-        return(self.state.isValid, lookResult if instruction == Instruction.LOOK else None, crashLook)
+        return self.state.is_valid, look_result if instruction == Instruction.LOOK else None, crash_look
 
-    def copy(self, lookValue = None):
-        return(Controller(self.board, self.robot.copy(), self.instructions.copy(), state = self.state.copy(), time = self.time, lookValue = lookValue))
+    def copy(self, look_value=None):
+        return Controller(self.board, self.robot.copy(), self.instructions.copy(), state=self.state.copy(),
+                          time=self.time, look_value=look_value)
