@@ -4,7 +4,7 @@ Created on Oct 10, 2020
 @author: gosha
 """
 
-from display.display import Display
+from ui.display import Display
 
 
 def set_up_and_run():
