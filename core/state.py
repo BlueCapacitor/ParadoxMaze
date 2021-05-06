@@ -48,10 +48,13 @@ class State(object):
                     return robot, time
 
     def log_robot(self, robot, time):
+        self.log_robot_trace(robot.make_trace(), time)
+
+    def log_robot_trace(self, robot_trace, time):
         if time not in self.robot_log.keys():
             self.robot_log[time] = []
 
-        self.robot_log[time].append(robot.make_trace())
+        self.robot_log[time].append(robot_trace)
 
     def get_control_value(self, control_id, time):
         if (control_id, time) not in self.control_value_log.keys():
