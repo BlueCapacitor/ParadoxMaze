@@ -57,6 +57,14 @@ class State(object):
 
         return out
 
+    def get_robot_with_continuity_id(self, time, continuity_id):
+        if time not in self.robot_log.keys():
+            return
+
+        for robot in self.robot_log[time]:
+            if robot.continuity_id == continuity_id:
+                return robot
+
     def log_robot(self, robot, time):
         self.log_robot_trace(robot.make_trace(), time)
 

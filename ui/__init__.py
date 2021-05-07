@@ -4,7 +4,9 @@ Created on Apr 18, 2021
 @author: gosha
 """
 
-from math import ceil
+from math import ceil, pi
+
+ticks_per_step = 20
 
 
 def tk_color(color):
@@ -54,3 +56,38 @@ def draw_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
               x1, y1]
 
     return canvas.create_polygon(points, **kwargs, smooth=True)
+
+
+def robot_move_curve(time_fraction):
+    return time_fraction
+
+
+def apply_robot_move_curve(time_fraction, x0, x1, y0, y1):
+    motion_point1 = robot_move_curve(time_fraction)
+    motion_point0 = 1 - motion_point1
+    return x0 * motion_point0 + x1 * motion_point1, y0 * motion_point0 + y1 * motion_point1
+
+
+def robot_turn_curve(time_fraction):
+    return time_fraction
+
+
+def apply_robot_turn_curve(time_fraction, angle0, angle1):
+    if angle1 - angle0 > pi / 2:
+        angle1 -= pi * 2
+
+    motion_point1 = robot_move_curve(time_fraction)
+    motion_point0 = 1 - motion_point1
+    return angle0 * motion_point0 + angle1 * motion_point1
+
+
+def robot_appearance_curve(time_fraction):
+    return time_fraction * time_fraction
+
+
+def apply_appearance_curve(time_fraction):
+    return robot_appearance_curve(time_fraction)
+
+
+def apply_disappearance_curve(time_fraction):
+    return robot_appearance_curve(1 - time_fraction)

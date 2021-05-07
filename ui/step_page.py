@@ -1,7 +1,7 @@
 import tkinter as tk
 from math import ceil
 
-from ui import charge_color, tk_color
+from ui import charge_color, tk_color, ticks_per_step
 from ui.game_canvas import GameCanvas
 from ui.menu_bar import MenuBar
 from ui.result_selector import ResultSelector
@@ -13,6 +13,8 @@ class StepPage(tk.Frame):
         super().__init__(display)
         self.display = display
         self.drawn = False
+
+        self.p_time = None
 
         self.menu_bar = None
         self.game_canvas = None
@@ -50,8 +52,10 @@ class StepPage(tk.Frame):
             self.tk_frame.grid(row=3, column=1, columnspan=2, sticky=tk.NSEW)
 
             tick_interval = max(1, ceil((self.state.max_time - self.state.min_time) / 25))
+            resolution = 1 / ticks_per_step
             self.time_slider = tk.Scale(self, from_=self.state.min_time, to=self.state.max_time,
-                                        orient=tk.HORIZONTAL, command=self.time_change, tickinterval=tick_interval)
+                                        orient=tk.HORIZONTAL, command=self.time_change,
+                                        tickinterval=tick_interval, resolution=resolution)
             self.time_slider.grid(row=4, column=2, sticky=tk.NSEW)
 
             self.playing_tkvar = tk.BooleanVar(self, False, "playing_tkvar")
@@ -132,20 +136,26 @@ class StepPage(tk.Frame):
 
     @time.setter
     def time(self, value):
+        self.p_time = self.time
         self.time_slider.set(value)
 
     def tick(self, *_):
         if self.playing_tkvar.get():
             if ((self.time < self.state.max_time) if self.mode == "Global Time" else (
                     self.time > self.state.min_charge)):
-                self.time += 1 if self.mode == "Global Time" else -1
+                if self.mode == "Global Time":
+                    self.time += 1 / ticks_per_step
+                    self.time = min(self.time, self.state.max_time)
+                else:
+                    self.time -= 1
+
             else:
                 self.play_checkbox.deselect()
 
         if self.state.max_time - self.state.min_time > 100:
-            self.after(ceil(75000 / (self.state.max_time - self.state.min_time)), self.tick)
+            self.after(ceil(75000 / (self.state.max_time - self.state.min_time) / ticks_per_step), self.tick)
         else:
-            self.after(750, self.tick)
+            self.after(ceil(750 / ticks_per_step), self.tick)
 
     def time_change(self, *_):
         if self.mode == "Global Time":

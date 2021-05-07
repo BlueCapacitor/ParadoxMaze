@@ -5,6 +5,7 @@ Created on Oct 10, 2020
 """
 
 from enum import Enum
+from math import pi
 
 
 class StaticRobot(object):
@@ -94,6 +95,7 @@ class Direction(Enum):
         self.dx = dx
         self.dy = dy
         self.str_name = str_name
+        self.angle = self.value * pi / 2
 
     def left(self):
         return Direction((self.value + 1) % 4)
