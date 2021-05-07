@@ -13,19 +13,20 @@ def clean_run(state):
     clean_state = State(board)
 
     for charge in range(state.max_charge, state.min_charge - 1, -1):
-        robot_trace, time = state.get_robot_with_charge(charge)
+        robot_trace_time_pairs = state.get_all_robots_with_charge(charge)
 
-        tile = board.get_tile(robot_trace.x, robot_trace.y)
+        for robot_trace, time in robot_trace_time_pairs:
+            clean_state.log_robot_trace(robot_trace.copy(), time)
 
-        clean_state.log_robot_trace(robot_trace.copy(), time)
+            tile = board.get_tile(robot_trace.x, robot_trace.y)
+            if isinstance(tile, ControlTile):
+                tile.trigger(clean_state, time)
 
-        if isinstance(tile, ControlTile):
-            tile.trigger(clean_state, time)
-
-        if tile.is_solid(state, time) or (clean_state.is_valid | Result.NO_SUCCESS) != Result.NO_SUCCESS:
+        if (clean_state.is_valid | Result.NO_SUCCESS) != Result.NO_SUCCESS:
             break
 
-        if (clean_state.is_valid | Result.POTENTIAL_SUCCESS) == Result.POTENTIAL_SUCCESS:
+        if state.is_valid == Result.POTENTIAL_SUCCESS and \
+                (clean_state.is_valid | Result.POTENTIAL_SUCCESS) == Result.POTENTIAL_SUCCESS:
             break
 
     return clean_state

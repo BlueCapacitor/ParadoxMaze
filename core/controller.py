@@ -154,7 +154,6 @@ class Controller(object):
         if isinstance(tile, TransportTile):
             self.robot.x, self.robot.y, self.time = tile.get_destination(self.state, self.time, self.robot)
             self.robot.discontinue_path()
-
             self.state.log_robot(self.robot, self.time)
 
         return self.state.is_valid, look_result if instruction == Instruction.LOOK else None, crash_look

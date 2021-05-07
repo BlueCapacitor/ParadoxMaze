@@ -47,6 +47,16 @@ class State(object):
                 if robot.charge_remaining == charge:
                     return robot, time
 
+    def get_all_robots_with_charge(self, charge):
+        out = []
+
+        for time in self.robot_log.keys():
+            for robot in self.robot_log[time]:
+                if robot.charge_remaining == charge:
+                    out.append((robot, time))
+
+        return out
+
     def log_robot(self, robot, time):
         self.log_robot_trace(robot.make_trace(), time)
 

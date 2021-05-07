@@ -226,7 +226,7 @@ class TimePortalTile(TransportTile):
         super().__init__(x, y)
         self.dest_t = dest_t
 
-    def get_destination(self, _state, _time, _robot):
+    def get_destination(self, _state, time, _robot):
         return self.x, self.y, self.dest_t
 
     def get_colors(self, _state, _time):
