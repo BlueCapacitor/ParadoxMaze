@@ -62,7 +62,7 @@ class CodingPage(tk.Frame):
         self.preview_canvas = PreviewCanvas(self, self.board, self.csv_map.build_robot())
         self.preview_canvas.grid(row=1, column=0, sticky=tk.NSEW)
 
-        self.preview_canvas.draw()
+        self.preview_canvas.draw(True)
         self.code_box.load_file()
 
     def run(self, *_):

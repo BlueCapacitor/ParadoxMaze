@@ -73,7 +73,7 @@ class StepPage(tk.Frame):
             self.grid_rowconfigure(4, weight=0)
             self.grid_rowconfigure(5, weight=0)
 
-            self.game_canvas.draw()
+            self.game_canvas.draw(True)
             self.tick()
 
             self.drawn = True
@@ -89,7 +89,7 @@ class StepPage(tk.Frame):
 
         self.update_mode()
 
-        self.game_canvas.draw()
+        self.game_canvas.draw(True)
 
     @property
     def board(self):
@@ -164,7 +164,7 @@ class StepPage(tk.Frame):
             time = self.state.get_robot_with_charge(self.time)[1]
             self.charge_mode_time_display.config(text="Time: %s" % time,
                                                  bg=tk_color(charge_color(self.time, self.state.max_charge)))
-        self.game_canvas.draw()
+        self.game_canvas.draw(False)
 
     def alternative_result_change(self, *_):
         self.game_canvas.draw()

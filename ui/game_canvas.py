@@ -82,12 +82,12 @@ class GameCanvas(tk.Frame):
         out_y = (y + 1) * self.tile_size
         return out_x, out_y
 
-    def draw(self):
-        self.canvas.delete(tk.ALL if self.tile_time_changed else "robot")
+    def draw(self, force_reset):
+        self.canvas.delete(tk.ALL if self.tile_time_changed or force_reset else "robot")
         self.canvas.config(
             scrollregion=(0, 0, (self.board.width + 1) * self.tile_size, (self.board.height + 1) * self.tile_size))
 
-        if self.tile_time_changed:
+        if self.tile_time_changed or force_reset:
             self.draw_board()
 
         self.draw_robots()
