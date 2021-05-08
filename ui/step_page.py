@@ -134,6 +134,8 @@ class StepPage(tk.Frame):
                                     tickinterval=tick_interval)
             self.time = self.state.max_charge
 
+        self.game_canvas.draw(True)
+
     @time.setter
     def time(self, value):
         self.p_time = self.time
@@ -147,7 +149,8 @@ class StepPage(tk.Frame):
                     self.time += 1 / ticks_per_step
                     self.time = min(self.time, self.state.max_time)
                 else:
-                    self.time -= 1
+                    self.time -= 1 / ticks_per_step
+                    self.time = max(self.time, self.state.min_charge)
 
             else:
                 self.play_checkbox.deselect()
@@ -161,7 +164,7 @@ class StepPage(tk.Frame):
         if self.mode == "Global Time":
             self.charge_mode_time_display.config(text="", bg="#FFF")
         else:
-            time = self.state.get_robot_with_charge(self.time)[1]
+            time = self.state.get_robot_with_charge(round(self.time))[1]
             self.charge_mode_time_display.config(text="Time: %s" % time,
                                                  bg=tk_color(charge_color(self.time, self.state.max_charge)))
         self.game_canvas.draw(False)

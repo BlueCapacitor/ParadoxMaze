@@ -34,6 +34,8 @@ class GameCanvas(tk.Frame):
 
         self.canvas.config(xscrollcommand=self.scroll_h.set, yscrollcommand=self.scroll_v.set)
 
+        self.p_round_slice_time = None
+
     @property
     def display(self):
         return self.parent.display
@@ -68,7 +70,7 @@ class GameCanvas(tk.Frame):
 
     @property
     def p_tile_time(self):
-        return round(self.tile_time)
+        return round(self.p_time)
 
     @property
     def tile_time_changed(self):
@@ -83,33 +85,79 @@ class GameCanvas(tk.Frame):
         return out_x, out_y
 
     def draw(self, force_reset):
-        self.canvas.delete(tk.ALL if self.tile_time_changed or force_reset else "robot")
-        self.canvas.config(
-            scrollregion=(0, 0, (self.board.width + 1) * self.tile_size, (self.board.height + 1) * self.tile_size))
-
-        if self.tile_time_changed or force_reset:
-            self.draw_board()
-
-        self.draw_robots()
-
-    def draw_board(self):
-        time = self.tile_time if self.mode == "Global Time" else self.state.get_robot_with_charge(self.time)[1]
-        for tile in self.board.list_tiles:
-            self.draw_tile(tile, time)
-
-    def draw_robots(self):
         if self.mode == "Global Time":
+            if self.tile_time_changed or force_reset:
+                self.canvas.delete(tk.ALL)
+                self.draw_board()
+            else:
+                self.canvas.delete("robot")
+
             for robot0 in self.state.get_robots_at_time(floor(self.time)):
-                robot1 = self.state.get_robot_with_continuity_id(ceil(self.time), robot0.continuity_id)
-                self.draw_intermediate_robot(floor(self.time), ceil(self.time), robot0, robot1)
+                robot1 = self.state.get_robot_with_time_and_continuity_id(ceil(self.time), robot0.continuity_id)
+                self.draw_intermediate_robot(self.time, floor(self.time), ceil(self.time), robot0, robot1)
 
         if self.mode == "Charge Remaining":
-            current_robot, time = self.state.get_robot_with_charge(self.tile_time)
-            for robot in self.state.get_robots_at_time(time):
-                if robot != current_robot:
-                    self.draw_robot(robot, color_function=inactive_charge_color,
-                                    border_color_function=inactive_border_charge_color)
-            self.draw_robot(current_robot)
+            charge0 = floor(self.time)
+            charge1 = ceil(self.time)
+            charge_fraction = (self.time - charge0) / (charge1 - charge0) if charge0 != charge1 else 0
+
+            robots_with_this_charge = self.state.get_all_robots_with_charge(charge0)
+
+            assert len(robots_with_this_charge) <= 2, \
+                "Something is wrong: there are more than two robot traces with the same charge"
+            assert len(robots_with_this_charge) >= 1, \
+                "Something is wrong: there are no robots with charge %s" % charge0
+
+            current_robot0, initial_time = min(robots_with_this_charge,
+                                               key=lambda robot_tuple: robot_tuple[0].continuity_id)
+
+            robots_with_next_charge = self.state.get_all_robots_with_charge(charge1)
+
+            assert len(robots_with_next_charge) <= 2, \
+                "Something is wrong: there are more than two robot traces with the same charge"
+            assert len(robots_with_next_charge) >= 1, \
+                "Something is wrong: there are no robots with charge %s" % charge1
+
+            current_robot1, final_time = max(robots_with_next_charge,
+                                             key=lambda robot_tuple: robot_tuple[0].continuity_id)
+
+            slice_time = initial_time * (1 - charge_fraction) + final_time * charge_fraction
+            time0 = floor(slice_time)
+            time1 = ceil(slice_time)
+
+            if force_reset or round(slice_time) != self.p_round_slice_time:
+                self.canvas.delete(tk.ALL)
+                self.draw_board()
+
+                self.p_round_slice_time = round(slice_time)
+            else:
+                self.canvas.delete("robot")
+
+            self.canvas.config(
+                scrollregion=(0, 0, (self.board.width + 1) * self.tile_size, (self.board.height + 1) * self.tile_size))
+
+            robots = self.state.get_robots_at_time(time0)
+
+            for robot0 in robots:
+                if robot0 != current_robot0:
+                    robot1 = self.state.get_robot_with_time_and_continuity_id(time1, robot0.continuity_id)
+                    greyed_out = robot0.charge_remaining != charge0 or final_time != initial_time + 1
+                    self.draw_intermediate_robot(slice_time, time0, time1, robot0, robot1,
+                                                 color_function=inactive_charge_color if greyed_out else None,
+                                                 border_color_function=inactive_border_charge_color
+                                                 if greyed_out else None)
+
+            self.draw_intermediate_robot(self.time, charge0, charge1, current_robot0, current_robot1)
+
+        if self.mode == "Preview":
+            self.draw_board()
+            for robot in self.state.get_robots_at_time(self.time):
+                self.draw_robot(robot)
+
+    def draw_board(self):
+        time = self.tile_time if self.mode == "Global Time" else self.state.get_robot_with_charge(self.tile_time)[1]
+        for tile in self.board.list_tiles:
+            self.draw_tile(tile, time)
 
     def draw_tile(self, tile, time):
         colors = tile.get_colors(self.state, time)
@@ -146,13 +194,13 @@ class GameCanvas(tk.Frame):
 
         self.draw_robot_shape(x, y, dx, dy, color, border, border_color, scale, robot.charge_remaining)
 
-    def draw_intermediate_robot(self, time0, time1, robot0, robot1, color_function=None, border=2,
+    def draw_intermediate_robot(self, time, time0, time1, robot0, robot1, color_function=None, border=2,
                                 border_color_function=None, scale=0.75):
         if robot1 is None:
-            if self.time == time0:
+            if time == time0:
                 self.draw_robot(robot0, color_function, border, border_color_function, scale)
         else:
-            time_fraction = (self.time - time0) / (time1 - time0) if time0 != time1 else 0
+            time_fraction = (time - time0) / (time1 - time0) if time0 != time1 else 0
 
             if color_function is None:
                 color_function = charge_color

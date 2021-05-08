@@ -57,7 +57,7 @@ class State(object):
 
         return out
 
-    def get_robot_with_continuity_id(self, time, continuity_id):
+    def get_robot_with_time_and_continuity_id(self, time, continuity_id):
         if time not in self.robot_log.keys():
             return
 

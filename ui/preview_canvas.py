@@ -31,6 +31,10 @@ class PreviewCanvas(GameCanvas):
     def time(self):
         return self._time
 
+    @property
+    def mode(self):
+        return "Preview"
+
     def draw_robots(self):
         self.draw_robot(self.robot_start)
 
