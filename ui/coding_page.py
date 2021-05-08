@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 
-from core.clean_run import clean_run
+# from core.clean_run import clean_run
 from core.controller import Controller
 from core.instruction_set import InstructionSet
-from core.state import Result
+# from core.state import Result
 from ui import tk_color
 from ui.coding_box import CodeBox
 from ui.menu_bar import MenuBar
@@ -73,15 +73,17 @@ class CodingPage(tk.Frame):
 
         self.display.current_page = self.display.Page.CALCULATING
 
-        dirty_results = controller.run()
-        results = []
+        # dirty_results = controller.run()
+        # results = []
+        #
+        # for result in dirty_results:
+        #     if result[0] != Result.UNRECOVERABLE_PARADOX:
+        #         results.append((result[0], clean_run(result[1])))
 
-        for result in dirty_results:
-            if result[0] != Result.UNRECOVERABLE_PARADOX:
-                results.append((result[0], clean_run(result[1])))
+        results = controller.run()
 
-        if len(results) == 0:
-            results = dirty_results
+        # if len(results) == 0:
+        #     results = dirty_results
 
         self.display.board = self.board
         self.display.results = results

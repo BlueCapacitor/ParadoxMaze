@@ -148,25 +148,30 @@ class GameCanvas(tk.Frame):
 
     def draw_intermediate_robot(self, time0, time1, robot0, robot1, color_function=None, border=2,
                                 border_color_function=None, scale=0.75):
-        if color_function is None:
-            color_function = charge_color
-        if border_color_function is None:
-            border_color_function = border_charge_color
+        if robot1 is None:
+            if self.time == time0:
+                self.draw_robot(robot0, color_function, border, border_color_function, scale)
+        else:
+            time_fraction = (self.time - time0) / (time1 - time0) if time0 != time1 else 0
 
-        time_fraction = (self.time - time0) / (time1 - time0) if time0 != time1 else 0
+            if color_function is None:
+                color_function = charge_color
+            if border_color_function is None:
+                border_color_function = border_charge_color
 
-        color = color_function(robot0.charge_remaining * (1 - time_fraction) + robot1.charge_remaining * time_fraction,
-                               robot0.initial_charge)
-        border_color = border_color_function(robot0.charge_remaining * (1 - time_fraction) +
-                                             robot1.charge_remaining * time_fraction, robot0.initial_charge)
+            color = color_function(robot0.charge_remaining * (1 - time_fraction) +
+                                   robot1.charge_remaining * time_fraction,
+                                   robot0.initial_charge)
+            border_color = border_color_function(robot0.charge_remaining * (1 - time_fraction) +
+                                                 robot1.charge_remaining * time_fraction, robot0.initial_charge)
 
-        x, y = self.screen_coords(*apply_robot_move_curve(time_fraction, robot0.x, robot1.x, robot0.y, robot1.y))
-        angle = apply_robot_turn_curve(time_fraction, robot0.direction.angle, robot1.direction.angle)
-        dx, dy = cos(angle), -sin(angle)
-        charge_remaining = round(robot0.charge_remaining * (1 - time_fraction) +
-                                 robot1.charge_remaining * time_fraction)
+            x, y = self.screen_coords(*apply_robot_move_curve(time_fraction, robot0.x, robot1.x, robot0.y, robot1.y))
+            angle = apply_robot_turn_curve(time_fraction, robot0.direction.angle, robot1.direction.angle)
+            dx, dy = cos(angle), -sin(angle)
+            charge_remaining = round(robot0.charge_remaining * (1 - time_fraction) +
+                                     robot1.charge_remaining * time_fraction)
 
-        self.draw_robot_shape(x, y, dx, dy, color, border, border_color, scale, charge_remaining)
+            self.draw_robot_shape(x, y, dx, dy, color, border, border_color, scale, charge_remaining)
 
     def draw_robot_shape(self, x, y, dx, dy, color, border, border_color, scale, charge_remaining):
         half_length = self.tile_size / 2 * scale
