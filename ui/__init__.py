@@ -75,6 +75,8 @@ def robot_turn_curve(time_fraction):
 def apply_robot_turn_curve(time_fraction, angle0, angle1):
     if angle1 - angle0 > pi / 2:
         angle1 -= pi * 2
+    if angle0 - angle1 > pi / 2:
+        angle0 -= pi * 2
 
     motion_point1 = robot_move_curve(time_fraction)
     motion_point0 = 1 - motion_point1
