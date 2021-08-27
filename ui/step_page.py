@@ -167,4 +167,4 @@ class StepPage(tk.Frame):
         self.game_canvas.draw(False)
 
     def alternative_result_change(self, *_):
-        self.game_canvas.draw()
+        self.game_canvas.draw(True)

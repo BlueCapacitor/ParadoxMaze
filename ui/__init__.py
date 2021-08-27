@@ -93,3 +93,32 @@ def apply_appearance_curve(time_fraction):
 
 def apply_disappearance_curve(time_fraction):
     return robot_appearance_curve(1 - time_fraction)
+
+
+def look_effect_radius_curve(time_fraction):
+    return time_fraction
+
+
+def look_effect_close_curve(time_fraction):
+    return 1 - time_fraction
+
+
+def look_effect_color_shift_curve(time_fraction):
+    return time_fraction
+
+
+def apply_look_effect_color_shift_curve(time_fraction, color0, color1):
+    r0, g0, b0 = color0
+    r1, g1, b1 = color1
+    motion_point1 = look_effect_color_shift_curve(time_fraction)
+    motion_point0 = 1 - motion_point1
+    return (r0 * motion_point0 + r1 * motion_point1,
+            g0 * motion_point0 + g1 * motion_point1,
+            b0 * motion_point0 + b1 * motion_point1)
+
+
+look_effect_color = (0.5, 0.5, 1)
+look_effect_open_color = (0.5, 1, 0.5)
+look_effect_closed_color = (1, 0.5, 0.5)
+look_effect_width = 1
+look_effect_angle = pi / 4

@@ -24,7 +24,6 @@ class Display(tk.Tk):
         class Page(Enum):
             LOADING = SimpleTextPage(self, "Loading...")
             CALCULATING = SimpleTextPage(self, "Calculating...")
-            NO_POSSIBILITIES = SimpleTextPage(self, "Fail: All possibilities lead to paradox")
             STEP = StepPage(self)
             LEVEL_SELECT = LevelSelectPage(self)
             CODING = CodingPage(self)

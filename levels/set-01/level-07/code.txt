@@ -1,0 +1,6 @@
+repeat(12){
+	fd;
+	rt;
+	fd;
+	lt;
+}
