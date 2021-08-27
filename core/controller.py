@@ -13,9 +13,7 @@ number_of_robots = 1
 
 class Controller(object):
 
-    def __init__(self, board, robot, instructions, state=None, time=0, look_value=None):
-        self.time = time
-
+    def __init__(self, board, robot, instructions, state=None):
         self.board = board
         self.robot = robot
 
@@ -26,8 +24,6 @@ class Controller(object):
             self.state = state
 
         self.instructions = instructions
-        if look_value is not None:
-            self.robot.look_value = look_value
 
     def run(self):
         global number_of_robots
@@ -125,39 +121,35 @@ class Controller(object):
     def step(self):
         instruction = self.instructions.next_instruction(self.robot)
         if instruction == Instruction.SLEEP:
-            pass
+            self.robot.sleep()
         if instruction == Instruction.LEFT:
             self.robot.turn_left()
         if instruction == Instruction.RIGHT:
             self.robot.turn_right()
         if instruction == Instruction.FORWARD:
             self.robot.move_forward()
-        if instruction == Instruction.SLEEP:
-            self.robot.sleep()
         look_result = None
         if instruction == Instruction.LOOK:
-            look_result = self.robot.look(self.state, self.time)
+            look_result = self.robot.look(self.state)
         if instruction == Instruction.DEBUG:
             print("@@@@ Debug @@@@")
             return Result.NO_SUCCESS, None
 
-        self.time += 1
-        self.state.log_robot(self.robot, self.time)
+        self.state.log_robot(self.robot)
 
-        crash_look = self.robot.crash_look(self.state, self.time)
+        crash_look = self.robot.crash_look(self.state)
 
         tile = self.board.get_tile(self.robot.x, self.robot.y)
 
         if isinstance(tile, ControlTile):
-            tile.trigger(self.state, self.time)
+            tile.trigger(self.state, self.robot)
 
         if isinstance(tile, TransportTile):
-            self.robot.x, self.robot.y, self.time = tile.get_destination(self.state, self.time, self.robot)
+            self.robot.x, self.robot.y, self.robot.time = tile.get_destination(self.state, self.robot)
             self.robot.discontinue_path()
-            self.state.log_robot(self.robot, self.time)
+            self.state.log_robot(self.robot)
 
         return self.state.is_valid, look_result if instruction == Instruction.LOOK else None, crash_look
 
     def copy(self, look_value=None):
-        return Controller(self.board, self.robot.copy(), self.instructions.copy(), state=self.state.copy(),
-                          time=self.time, look_value=look_value)
+        return Controller(self.board, self.robot.copy(), self.instructions.copy(), state=self.state.copy())

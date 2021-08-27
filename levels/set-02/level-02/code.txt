@@ -1,0 +1,9 @@
+forever{
+	look;
+	ifOpen{
+		fd;
+	}
+	ifClosed{
+		rt;
+	}
+}
