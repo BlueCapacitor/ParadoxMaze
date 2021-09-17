@@ -14,8 +14,6 @@ class StepPage(tk.Frame):
         self.display = display
         self.drawn = False
 
-        self.p_time = None
-
         self.menu_bar = None
         self.game_canvas = None
         self.result_selector = None
@@ -138,7 +136,6 @@ class StepPage(tk.Frame):
 
     @time.setter
     def time(self, value):
-        self.p_time = self.time
         self.time_slider.set(value)
 
     def tick(self, *_):
