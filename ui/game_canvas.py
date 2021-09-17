@@ -36,7 +36,6 @@ class GameCanvas(tk.Frame):
 
         self.canvas.config(xscrollcommand=self.scroll_h.set, yscrollcommand=self.scroll_v.set)
 
-        self.p_time = None
         self.p_round_slice_time = None
 
     @property
@@ -62,6 +61,10 @@ class GameCanvas(tk.Frame):
     @property
     def time(self):
         return self.parent.time
+
+    @property
+    def p_time(self):
+        return self.parent.p_time
 
     @property
     def tile_time(self):
@@ -90,8 +93,6 @@ class GameCanvas(tk.Frame):
                 self.draw_board()
             else:
                 self.canvas.delete("robot")
-
-            self.p_time = self.time
 
             for robot0 in self.state.get_robots_at_time(floor(self.time)):
                 robot1 = self.state.get_robot_with_time_and_continuity_id(ceil(self.time), robot0.continuity_id)
