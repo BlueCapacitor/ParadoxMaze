@@ -1,10 +1,8 @@
 import tkinter as tk
-from math import floor, ceil, cos, sin, pi
+from math import floor, ceil, cos, sin
 
 from ui import tk_color, inactive_charge_color, inactive_border_charge_color, charge_color, border_charge_color, \
-    apply_robot_move_curve, apply_robot_turn_curve, look_effect_radius_curve, look_effect_angle, look_effect_width, \
-    look_effect_color, look_effect_open_color, look_effect_closed_color, look_effect_close_curve, \
-    apply_look_effect_color_shift_curve
+    apply_robot_move_curve, apply_robot_turn_curve
 from ui.font import Font
 
 
@@ -219,31 +217,6 @@ class GameCanvas(tk.Frame):
             dx, dy = cos(angle), -sin(angle)
             charge_remaining = round(robot0.charge_remaining * (1 - time_fraction) +
                                      robot1.charge_remaining * time_fraction)
-
-            if robot1.looking:
-                if time_fraction <= 0.5:
-                    radius = look_effect_radius_curve(time_fraction * 2) / 2
-                    bounds = (*self.screen_coords(robot0.x - radius, robot0.y - radius),
-                              *self.screen_coords(robot0.x + radius, robot0.y + radius))
-                    degree_extent_angle = look_effect_angle * 180 / pi
-                    start_angle = angle - look_effect_angle / 2
-                    degree_start_angle = start_angle * 180 / pi
-                    self.canvas.create_arc(bounds, start=degree_start_angle, extent=degree_extent_angle,
-                                           style=tk.PIESLICE, width=look_effect_width,
-                                           fill=tk_color(look_effect_color), tags=("robot",))
-                else:
-                    color_detected = look_effect_open_color if robot1.look_value else look_effect_closed_color
-                    arc_color = apply_look_effect_color_shift_curve(time_fraction * 2 - 1,
-                                                                    look_effect_color, color_detected)
-                    radius = 1 / 2
-                    bounds = (*self.screen_coords(robot0.x - radius, robot0.y - radius),
-                              *self.screen_coords(robot0.x + radius, robot0.y + radius))
-                    degree_extent_angle = look_effect_angle * 180 / pi * look_effect_close_curve(time_fraction * 2 - 1)
-                    start_angle = angle - look_effect_angle / 2 * look_effect_close_curve(time_fraction * 2 - 1)
-                    degree_start_angle = start_angle * 180 / pi
-                    self.canvas.create_arc(bounds, start=degree_start_angle, extent=degree_extent_angle,
-                                           style=tk.PIESLICE, width=look_effect_width,
-                                           fill=tk_color(arc_color), tags=("robot",))
 
             self.draw_robot_shape(x, y, dx, dy, color, border, border_color, scale, charge_remaining)
 
