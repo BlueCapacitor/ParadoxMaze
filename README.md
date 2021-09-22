@@ -80,7 +80,7 @@ Don't run into it\
 Safely press each of these tiles to win the level\
 <img width="46" alt="Screen Shot 2021-09-21 at 8 05 42 PM" src="https://user-images.githubusercontent.com/32907199/134264378-b10cbc50-52a4-4cab-9dbc-d05940e298ac.png">
 ### Portal tile
-Enter this tile to be telleported to the matching destenation tile (same color/letter)\
+Enter this tile to be telleported to the matching destination tile (same color/letter)\
 <img width="46" alt="Screen Shot 2021-09-21 at 8 06 36 PM" src="https://user-images.githubusercontent.com/32907199/134264496-039f75ed-a6bc-4b06-9336-d76f9760cbb5.png">
 ### Destination tile
 Does nothing, but is the destenation for portal tiles\
