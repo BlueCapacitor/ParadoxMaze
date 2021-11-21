@@ -65,6 +65,14 @@ class CodingPage(tk.Frame):
         self.preview_canvas.draw(True)
         self.code_box.load_file()
 
+        width, height = self.display.winfo_width(), self.display.winfo_height()
+        window_x, window_y = self.display.winfo_x(), self.display.winfo_y()
+        self.display.geometry(f"{width - 1}x{height - 1}+{window_x}+{window_y}")
+        self.update()
+        self.display.update()
+        self.display.update_idletasks()
+        self.display.geometry(f"{width}x{height}+{window_x}+{window_y}")
+
     def run(self, *_):
         instructions = InstructionSet(self.code_box.text)
 
