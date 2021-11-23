@@ -3,7 +3,7 @@ import os
 import tkinter as tk
 
 from ui import tk_color
-from ui.csv_map import CSVMap
+from ui.utilities.csv_map import CSVMap
 from ui.font import Font
 
 
@@ -105,22 +105,29 @@ class LevelSelectPage(tk.Frame):
                 continue
 
             number = int(level_folder.split('-')[-1])
-            csv_map_file = open("%s/%s/%s-%s-map.csv" % (self.set_path, level_folder, self.set, number), 'r')
             code_file_path = "%s/%s/code.txt" % (self.set_path, level_folder)
-            csv_map_text = csv_map_file.read()
-            csv_map_file.close()
+            with open("%s/%s/%s-%s-map.csv" % (self.set_path, level_folder, self.set, number), 'r') as csv_map_file:
+                csv_map_text = csv_map_file.read()
 
-            self.add_button(number, csv_map_text, code_file_path)
+            instruction_text_path = "%s/%s/instruction_text.md" % (self.set_path, level_folder)
+            if not os.path.exists(instruction_text_path):
+                with open(instruction_text_path, 'x'):
+                    pass
 
-    def add_button(self, number, csv_map_text, code_file_path):
+            with open(instruction_text_path, 'r') as instruction_text_file:
+                instruction_text = instruction_text_file.read()
+
+            self.add_button(number, csv_map_text, code_file_path, instruction_text)
+
+    def add_button(self, number, csv_map_text, code_file_path, instruction_text):
         button = tk.Label(self, text="%s-%s" % (self.set, number), font=Font.LARGE.value,
                           bg=tk_color(self.colors[1]), fg=tk_color(self.colors[2]))
-        button.bind("<Button-1>", lambda *_: self.load_level(csv_map_text, code_file_path))
+        button.bind("<Button-1>", lambda *_: self.load_level(csv_map_text, code_file_path, instruction_text))
         button.grid(row=(number - 1) // self.buttons_per_row + 1, column=(number - 1) % self.buttons_per_row,
                     sticky=tk.NSEW, padx=8, pady=8)
         self.grid_rowconfigure((number - 1) // self.buttons_per_row + 1, weight=1)
         self.level_buttons.append(button)
 
-    def load_level(self, csv_map_text, code_file_path):
+    def load_level(self, csv_map_text, code_file_path, instruction_text):
         self.display.current_page = self.display.Page.CODING
-        self.display.Page.CODING.value.load_level(CSVMap(csv_map_text), code_file_path, self.colors)
+        self.display.Page.CODING.value.load_level(CSVMap(csv_map_text), code_file_path, instruction_text, self.colors)

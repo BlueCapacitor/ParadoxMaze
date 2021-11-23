@@ -11,7 +11,7 @@ from core.tile import EmptyTile, WallTile, DestinationTile, PortalTile, TargetTi
     CloseLogicalDoorTile, OnToggleTile, OffToggleTile
 
 
-class CSVMap(object):
+class CSVMap:
 
     empty_symbol = ''
     wall_symbol = '0'

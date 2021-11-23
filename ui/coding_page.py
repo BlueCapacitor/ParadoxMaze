@@ -36,10 +36,12 @@ class CodingPage(tk.Frame):
         self.colors = None
         self.bg = None
         self.board = None
+        self.instruction_text = ""
 
-    def load_level(self, csv_map, code_file_path, colors):
+    def load_level(self, csv_map, code_file_path, instruction_text, colors):
         self.csv_map = csv_map
         self.code_file_path = code_file_path
+        self.instruction_text = instruction_text
         self.draw(colors)
 
     def draw(self, colors):
