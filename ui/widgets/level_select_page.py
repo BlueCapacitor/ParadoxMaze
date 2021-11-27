@@ -122,12 +122,13 @@ class LevelSelectPage(tk.Frame):
     def add_button(self, number, csv_map_text, code_file_path, instruction_text):
         button = tk.Label(self, text="%s-%s" % (self.set, number), font=Font.LARGE.value,
                           bg=tk_color(self.colors[1]), fg=tk_color(self.colors[2]))
-        button.bind("<Button-1>", lambda *_: self.load_level(csv_map_text, code_file_path, instruction_text))
+        button.bind("<Button-1>", lambda *_: self.load_level(csv_map_text, code_file_path, instruction_text, number))
         button.grid(row=(number - 1) // self.buttons_per_row + 1, column=(number - 1) % self.buttons_per_row,
                     sticky=tk.NSEW, padx=8, pady=8)
         self.grid_rowconfigure((number - 1) // self.buttons_per_row + 1, weight=1)
         self.level_buttons.append(button)
 
-    def load_level(self, csv_map_text, code_file_path, instruction_text):
+    def load_level(self, csv_map_text, code_file_path, instruction_text, level_number):
         self.display.current_page = self.display.Page.CODING
-        self.display.Page.CODING.value.load_level(CSVMap(csv_map_text), code_file_path, instruction_text, self.colors)
+        self.display.Page.CODING.value.load_level(CSVMap(csv_map_text), code_file_path, instruction_text, self.colors,
+                                                  self.set, level_number)

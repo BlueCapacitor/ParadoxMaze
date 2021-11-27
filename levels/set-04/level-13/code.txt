@@ -42,4 +42,3 @@ ifClosed{
 		fd;
 	}
 }
-	

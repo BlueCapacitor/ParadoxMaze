@@ -24,11 +24,12 @@ class StepPage(tk.Frame):
         self.play_checkbox = None
         self.charge_mode_time_display = None
 
-    def draw(self, colors):
+    def draw(self, colors, set_number, level_number):
         if self.drawn:
-            self.redraw(colors)
+            self.redraw(colors, set_number, level_number)
         else:
-            self.menu_bar = MenuBar(self, self.display, self.display.Page.CODING, colors)
+            self.menu_bar = MenuBar(self, self.display, self.display.Page.CODING, colors,
+                                    text=f"Level {set_number}-{level_number}")
             self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
 
             self.game_canvas = GameCanvas(self)
@@ -76,9 +77,10 @@ class StepPage(tk.Frame):
 
             self.drawn = True
 
-    def redraw(self, colors):
+    def redraw(self, colors, set_number, level_number):
         self.menu_bar.destroy()
-        self.menu_bar = MenuBar(self, self.display, self.display.Page.CODING, colors)
+        self.menu_bar = MenuBar(self, self.display, self.display.Page.CODING, colors,
+                                text=f"Level {set_number}-{level_number}")
         self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
 
         self.result_selector.destroy()

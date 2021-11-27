@@ -19,6 +19,9 @@ class MDText(tk.Canvas):
     def refresh(self, config_event):
         self.delete(tk.ALL)
 
+        self.xview_moveto(0)
+        self.yview_moveto(0)
+
         y = self.outer_padding
         total_width = config_event.width
 

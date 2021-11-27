@@ -40,11 +40,15 @@ class CodingPage(tk.Frame):
         self.board = None
         self.instruction_display = None
         self.instruction_text = ""
+        self.set_number = 0
+        self.level_number = 0
 
-    def load_level(self, csv_map, code_file_path, instruction_text, colors):
+    def load_level(self, csv_map, code_file_path, instruction_text, colors, set_number, level_number):
         self.csv_map = csv_map
         self.code_file_path = code_file_path
         self.instruction_text = instruction_text
+        self.set_number = set_number
+        self.level_number = level_number
         self.draw(colors)
 
     def draw(self, colors):
@@ -56,7 +60,7 @@ class CodingPage(tk.Frame):
             self.menu_bar.destroy()
 
         self.menu_bar = MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, self.colors,
-                                run_action=self.run)
+                                run_action=self.run, text=f"Level {self.set_number}-{self.level_number}")
         self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
 
         if self.instruction_display is not None:
@@ -92,19 +96,9 @@ class CodingPage(tk.Frame):
 
         self.display.current_page = self.display.Page.CALCULATING
 
-        # dirty_results = controller.run()
-        # results = []
-        #
-        # for result in dirty_results:
-        #     if result[0] != Result.UNRECOVERABLE_PARADOX:
-        #         results.append((result[0], clean_run(result[1])))
-
         results = controller.run()
-
-        # if len(results) == 0:
-        #     results = dirty_results
 
         self.display.board = self.board
         self.display.results = results
         self.display.current_page = self.display.Page.STEP
-        self.display.current_page.page.draw(self.colors)
+        self.display.current_page.page.draw(self.colors, self.set_number, self.level_number)
