@@ -38,6 +38,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/levels/set-01/level-04/1-4-map.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/levels/set-01/level-14/1-14-map.csv">
           <value>
             <Attribute>

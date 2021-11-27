@@ -2,48 +2,29 @@ fd;
 look;
 ifClosed{
 	rt;
-	repeat(3){
-		fd;
-	}
+	repeat(3){fd;}
 }
 ifOpen{
-	fd;
-	fd;
+	fd; fd;
 	rt;
-	fd;
-	fd;
-	slp;
+	fd; fd;
+	slp; slp;
 	look;
 	ifClosed{
 		lt;
-		repeat(3){
-			fd;
-		}
+		repeat(3){fd;}
 	}
 	ifOpen{
-		repeat(5){
-			fd;
-		}
+		repeat(5){fd;}
+		rt; rt; 
+		repeat(3){fd;}
 		rt;
+		repeat(3){fd;}
+		rt; rt;
+		repeat(3){fd;}
 		rt;
-		repeat(3){
-			fd;
-		}
-		rt;
-		repeat(3){
-			fd;
-		}
-		rt;
-		rt;
-		repeat(3){
-			fd;
-		}
-		rt;
-		repeat(4){
-			fd;
-		}
+		repeat(4){fd;}
 		rt;
 		fd;
 	}
 }
-	

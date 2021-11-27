@@ -1,0 +1,1 @@
+Separate multiple commands with a new line or spaces

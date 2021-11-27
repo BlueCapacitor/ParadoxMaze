@@ -4,7 +4,7 @@ import tkinter as tk
 
 from ui import tk_color
 from ui.utilities.csv_map import CSVMap
-from ui.font import Font
+from ui.utilities.font import Font
 
 
 class LevelSelectPage(tk.Frame):

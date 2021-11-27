@@ -8,10 +8,11 @@ import tkinter as tk
 from enum import Enum
 
 from core.state import Result
-from ui.coding_page import CodingPage
-from ui.level_select_page import LevelSelectPage
-from ui.simple_text_page import SimpleTextPage
-from ui.step_page import StepPage
+from ui.widgets.coding_page import CodingPage
+from ui.widgets.intro_page import IntroPage
+from ui.widgets.level_select_page import LevelSelectPage
+from ui.widgets.simple_text_page import SimpleTextPage
+from ui.widgets.step_page import StepPage
 
 
 class Display(tk.Tk):
@@ -22,6 +23,7 @@ class Display(tk.Tk):
         self.results = []
 
         class Page(Enum):
+            INTRO = IntroPage(self)
             LOADING = SimpleTextPage(self, "Loading...")
             CALCULATING = SimpleTextPage(self, "Calculating...")
             NO_POSSIBILITIES = SimpleTextPage(self, "Fail: All possibilities lead to paradox")

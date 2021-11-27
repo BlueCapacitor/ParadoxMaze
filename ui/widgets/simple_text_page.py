@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from ui.font import Font
+from ui.utilities.font import Font
 
 
 class SimpleTextPage(tk.Frame):

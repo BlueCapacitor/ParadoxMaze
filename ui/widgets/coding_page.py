@@ -1,14 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
 
-# from core.clean_run import clean_run
 from core.controller import Controller
 from core.instruction_set import InstructionSet
-# from core.state import Result
 from ui import tk_color
-from ui.coding_box import CodeBox
-from ui.menu_bar import MenuBar
-from ui.preview_canvas import PreviewCanvas
+from ui.widgets.coding_box import CodeBox
+from ui.widgets.instruction_display import InstructionDisplay
+from ui.widgets.menu_bar import MenuBar
+from ui.widgets.preview_canvas import PreviewCanvas
 
 
 class CodingPage(tk.Frame):
@@ -18,13 +17,16 @@ class CodingPage(tk.Frame):
         self.display = display
 
         self.code_box = CodeBox(self)
-        self.code_box.grid(row=1, column=2, sticky=tk.NSEW)
+        self.code_box.grid(row=2, column=2, sticky=tk.NSEW)
 
         self.separator = ttk.Separator(self, orient=tk.VERTICAL)
-        self.separator.grid(row=1, column=1)
+        self.separator.grid(row=2, column=1)
 
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_rowconfigure(1, weight=0)
+        self.grid_rowconfigure(2, weight=1)
         self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=0)
         self.grid_columnconfigure(2, weight=1)
 
         self.p_time = None
@@ -36,6 +38,7 @@ class CodingPage(tk.Frame):
         self.colors = None
         self.bg = None
         self.board = None
+        self.instruction_display = None
         self.instruction_text = ""
 
     def load_level(self, csv_map, code_file_path, instruction_text, colors):
@@ -56,13 +59,19 @@ class CodingPage(tk.Frame):
                                 run_action=self.run)
         self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
 
+        if self.instruction_display is not None:
+            self.instruction_display.destroy()
+
+        self.instruction_display = InstructionDisplay(self, self.colors, self.instruction_text)
+        self.instruction_display.grid(row=1, column=0, columnspan=3, sticky=tk.NSEW)
+
         self.board = self.csv_map.build_board()
 
         if self.preview_canvas is not None:
             self.preview_canvas.destroy()
 
         self.preview_canvas = PreviewCanvas(self, self.board, self.csv_map.build_robot())
-        self.preview_canvas.grid(row=1, column=0, sticky=tk.NSEW)
+        self.preview_canvas.grid(row=2, column=0, sticky=tk.NSEW)
 
         self.preview_canvas.draw(True)
         self.code_box.load_file()

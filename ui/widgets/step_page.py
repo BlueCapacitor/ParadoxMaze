@@ -2,9 +2,9 @@ import tkinter as tk
 from math import ceil
 
 from ui import charge_color, tk_color, ticks_per_step
-from ui.game_canvas import GameCanvas
-from ui.menu_bar import MenuBar
-from ui.result_selector import ResultSelector
+from ui.widgets.game_canvas import GameCanvas
+from ui.widgets.menu_bar import MenuBar
+from ui.widgets.result_selector import ResultSelector
 
 
 class StepPage(tk.Frame):

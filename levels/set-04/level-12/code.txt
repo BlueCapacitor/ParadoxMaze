@@ -3,12 +3,13 @@ look;
 ifClosed{
 	rt;
 	repeat(3){fd;}
+	slp;
 }
 ifOpen{
-	fd;fd;
+	fd; fd;
 	rt;
 	repeat(3){fd;}
-	rt;rt;
+	rt; rt;
 	repeat(3){fd;}
 	rt;
 	fd;

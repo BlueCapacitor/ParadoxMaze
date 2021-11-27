@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from core.state import State
-from ui.game_canvas import GameCanvas
+from ui.widgets.game_canvas import GameCanvas
 
 
 class PreviewCanvas(GameCanvas):

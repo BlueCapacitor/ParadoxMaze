@@ -10,4 +10,6 @@ rt;
 rt;
 fd;
 lt;
-repeat(3){fd;}
+fd;
+fd;
+fd;

@@ -2,11 +2,11 @@ fd;
 look;
 ifOpen{
 	repeat(5){fd;}
-	repeat(2){
-		rt;
-		repeat(3){fd;}
-		rt;
-	}
+	rt;
+	repeat(3){fd;}
+	rt; rt;
+	repeat(3){fd;}
+	rt;
 	fd;
 }
 ifClosed{

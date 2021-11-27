@@ -3,7 +3,7 @@ from math import floor, ceil, cos, sin
 
 from ui import tk_color, inactive_charge_color, inactive_border_charge_color, charge_color, border_charge_color, \
     apply_robot_move_curve, apply_robot_turn_curve
-from ui.font import Font
+from ui.utilities.font import Font
 
 
 class GameCanvas(tk.Frame):

@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from ui.font import Font
+from ui.utilities.font import Font
 
 
 class CodeBox(tk.Frame):
@@ -12,7 +12,7 @@ class CodeBox(tk.Frame):
         self.do_not_overwrite_file = False
 
         self.text_box = CodeBox.TextWithModifiedCallback(self, wrap=tk.NONE, font=Font.NORMAL,
-                                                         tabs=(Font.NORMAL.measure(self, ' ' * 2),))
+                                                         tabs=(Font.measure(Font.NORMAL, self, ' ' * 2),))
         self.text_box.grid(row=0, column=0, sticky=tk.NSEW)
         self.scroll_v = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.text_box.yview)
         self.scroll_v.grid(row=0, column=1, sticky=tk.NSEW)
@@ -71,7 +71,6 @@ class CodeBox(tk.Frame):
         return text
 
     class TextWithModifiedCallback(tk.Text):
-
         def __init__(self, *args, **kwargs):
             tk.Text.__init__(self, *args, **kwargs)
 

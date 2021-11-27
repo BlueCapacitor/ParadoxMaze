@@ -3,10 +3,14 @@ look;
 ifOpen{
 	repeat(5){fd;}
 	rt;
-	repeat(3){fd;}
+	fd;
+	fd;
+	fd;
 	rt;
 	rt;
-	repeat(3){fd;}
+	fd;
+	fd;
+	fd;
 	rt;
 	fd;
 }
@@ -17,17 +21,25 @@ ifClosed{
 	look;
 	ifOpen{
 		fd;
+		lt;
+		fd;
+		fd;
+		fd;
+		rt;
+		rt;
+		fd;
+		fd;
 		fd;
 		lt;
-		repeat(3){fd;}
-		rt;
-		rt;
-		repeat(3){fd;}
-		lt;
-		repeat(3){fd;}
+		fd;
+		fd;
+		fd;
 	}
 	ifClosed{
 		lt;
-		repeat(3){fd;}
+		fd;
+		fd;
+		fd;
 	}
 }
+	
