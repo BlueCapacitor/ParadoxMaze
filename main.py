@@ -1,9 +1,3 @@
-"""
-Created on Oct 10, 2020
-
-@author: gosha
-"""
-
 from ui.widgets.display import Display
 
 

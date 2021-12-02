@@ -1,9 +1,3 @@
-"""
-Created on Oct 10, 2020
-
-@author: gosha
-"""
-
 from abc import ABC, abstractmethod
 from enum import Enum
 

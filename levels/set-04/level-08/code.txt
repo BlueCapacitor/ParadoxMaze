@@ -10,7 +10,7 @@ fd;
 fd;
 rt;
 rt;
-repeat(6){slp;}
+repeat(4){slp;}
 fd;
 lt;
 fd;

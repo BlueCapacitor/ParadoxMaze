@@ -1,9 +1,3 @@
-"""
-Created on Oct 10, 2020
-
-@author: gosha
-"""
-
 from enum import Enum
 from math import pi
 

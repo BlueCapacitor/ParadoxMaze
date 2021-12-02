@@ -1,9 +1,3 @@
-"""
-Created on Oct 10, 2020
-
-@author: gosha
-"""
-
 from core.instruction_set import Instruction
 from core.state import State, Result
 from core.tile import TransportTile, ControlTile
@@ -32,74 +26,92 @@ class Controller(object):
     def run(self):
         global number_of_robots
 
-        result = None
+        result = self.state.is_valid
+
+        if result in (Result.FAIL, Result.UNRECOVERABLE_PARADOX):
+            number_of_robots -= 1
+            return [(result, self.state)]
 
         while self.robot.charge_remaining > 0:
             result, look_result, crash_look = self.step()
 
-            if look_result is not None and isinstance(crash_look, bool):
-                if isinstance(look_result, bool):
-                    self.robot.look_value = look_result
-                else:
-                    control_value, safe_value = look_result
-                    if control_value.validity == Result.UNRECOVERABLE_PARADOX:
-                        result = Result.UNRECOVERABLE_PARADOX
-                        break
-                    else:
-                        if control_value.static:
-                            self.robot.look_value = (control_value.current_value and safe_value) or not (
-                                        control_value.current_value or safe_value)
-                        elif len(control_value.possible_values) == 1:
-                            value = control_value.possible_values[0]
-                            self.robot.look_value = (value and safe_value) or not (value or safe_value)
-                        else:
-                            number_of_robots += 1
-
-                            key = self.state.get_key_for_control_value(control_value)
-
-                            sub_controller_true = self.copy(look_value=safe_value)
-                            sub_controller_true.state.control_value_log[key].assume_value(True)
-
-                            sub_controller_false = self.copy(look_value=not safe_value)
-                            sub_controller_false.state.control_value_log[key].assume_value(False)
-
-                            result_with_true = sub_controller_true.run()
-                            result_with_false = sub_controller_false.run()
-
-                            return result_with_true + result_with_false
-
-            if look_result is None and not (isinstance(crash_look, bool)):
-                control_value, safe_value = crash_look
-                if control_value.validity == Result.UNRECOVERABLE_PARADOX:
+            # noinspection DuplicatedCode
+            match look_result:
+                case control_value, safe_value if control_value.validity == Result.UNRECOVERABLE_PARADOX:
                     result = Result.UNRECOVERABLE_PARADOX
                     break
-                else:
-                    if control_value.static:
-                        safe = (control_value.current_value and safe_value) or not (
-                                    control_value.current_value or safe_value)
-                        result |= Result.FAIL if not safe else Result.SUCCESS
-                    elif len(control_value.possible_values) == 1:
-                        value = tuple(control_value.possible_values)[0]
-                        safe = (value and safe_value) or not (value or safe_value)
-                        result |= Result.FAIL if not safe else Result.SUCCESS
-                    else:
-                        number_of_robots += 1
+                case control_value, safe_value if control_value.static:
+                    look_result = control_value.current_value == safe_value
+                case control_value, safe_value if len(control_value.possible_values) == 1:
+                    look_result = tuple(control_value.possible_values)[0] == safe_value
 
-                        key = self.state.get_key_for_control_value(control_value)
+            # noinspection DuplicatedCode
+            match crash_look:
+                case control_value, safe_value if control_value.validity == Result.UNRECOVERABLE_PARADOX:
+                    result = Result.UNRECOVERABLE_PARADOX
+                    break
+                case control_value, safe_value if control_value.static:
+                    crash_look = control_value.current_value == safe_value
+                case control_value, safe_value if len(control_value.possible_values) == 1:
+                    crash_look = tuple(control_value.possible_values)[0] == safe_value
 
-                        sub_controller_true = self.copy()
-                        sub_controller_true.state.control_value_log[key].assume_value(True)
+            match look_result, crash_look:
+                case None, bool():
+                    pass
 
-                        sub_controller_false = self.copy()
-                        sub_controller_false.state.control_value_log[key].assume_value(False)
+                case bool(), bool():
+                    self.robot.look_value = look_result
 
-                        result_with_true = sub_controller_true.run()
-                        result_with_false = sub_controller_false.run()
+                case (control_value, safe_value), bool():
+                    number_of_robots += 1
 
-                        return result_with_true + result_with_false
+                    key = self.state.get_key_for_control_value(control_value)
 
-                # TODO: Check for both look_result is not None and not(isinstance(crash_look, bool))
-                #  (split controller into 4)
+                    sub_controller_true = self.copy(look_value=safe_value)
+                    sub_controller_true.state.control_value_log[key].assume_value(True)
+
+                    sub_controller_false = self.copy(look_value=not safe_value)
+                    sub_controller_false.state.control_value_log[key].assume_value(False)
+
+                    result_with_true = sub_controller_true.run()
+                    result_with_false = sub_controller_false.run()
+
+                    return result_with_true + result_with_false
+
+                case None | bool(), (control_value, safe_value):
+                    if isinstance(look_result, bool):
+                        self.robot.look_value = look_result
+
+                    number_of_robots += 1
+
+                    key = self.state.get_key_for_control_value(control_value)
+
+                    sub_controller_true = self.copy()
+                    sub_controller_true.state.control_value_log[key].assume_value(True)
+
+                    sub_controller_false = self.copy()
+                    sub_controller_false.state.control_value_log[key].assume_value(False)
+
+                    result_with_true = sub_controller_true.run()
+                    result_with_false = sub_controller_false.run()
+
+                    return result_with_true + result_with_false
+
+                case (control_value_look, safe_value_look), (control_value_crash, safe_value_crash):
+                    number_of_robots += 3
+
+                    key_look = self.state.get_key_for_control_value(control_value_look)
+                    key_crash = self.state.get_key_for_control_value(control_value_crash)
+
+                    results = []
+                    for assumed_value_look in (False, True):
+                        for assumed_value_crash in (False, True):
+                            sub_controller = self.copy()
+                            sub_controller.state.control_value_log[key_look].assume_value(assumed_value_look)
+                            sub_controller.state.control_value_log[key_crash].assume_value(assumed_value_crash)
+                            results.append(sub_controller.run())
+
+                    return sum(results, start=[])
 
             if result == Result.SUCCESS:
                 break

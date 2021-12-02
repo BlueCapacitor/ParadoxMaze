@@ -114,6 +114,9 @@ class State(object):
                         control_value, safe_value = tile.crash_look(self, time)
                         if control_value.static and control_value.current_value != safe_value:
                             out = self.fail_and_finalize(out)
+                        if len(control_value.possible_values) == 1 and \
+                                tuple(control_value.possible_values)[0] != safe_value:
+                            out = self.fail_and_finalize(out)
 
                 if not self.board.check_bounds(robot_trace):
                     out = self.fail_and_finalize(out)
