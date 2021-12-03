@@ -80,7 +80,7 @@ class Controller(object):
 
                     return result_with_true + result_with_false
 
-                case None | bool(), (control_value, safe_value):
+                case None | bool(), (control_value, _):
                     if isinstance(look_result, bool):
                         self.robot.look_value = look_result
 
@@ -99,7 +99,7 @@ class Controller(object):
 
                     return result_with_true + result_with_false
 
-                case (control_value_look, safe_value_look), (control_value_crash, safe_value_crash):
+                case (control_value_look, safe_value_look), (control_value_crash, _):
                     number_of_robots += 3
 
                     key_look = self.state.get_key_for_control_value(control_value_look)
@@ -108,7 +108,7 @@ class Controller(object):
                     results = []
                     for assumed_value_look in (False, True):
                         for assumed_value_crash in (False, True):
-                            sub_controller = self.copy(look_value=assumed_value_look)
+                            sub_controller = self.copy(look_value=(assumed_value_look != safe_value_look))
                             sub_controller.state.control_value_log[key_look].assume_value(assumed_value_look)
                             sub_controller.state.control_value_log[key_crash].assume_value(assumed_value_crash)
                             results.append(sub_controller.run())
