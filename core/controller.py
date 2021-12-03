@@ -39,7 +39,7 @@ class Controller(object):
 
             # noinspection DuplicatedCode
             match look_result:
-                case control_value, safe_value if control_value.validity == Result.UNRECOVERABLE_PARADOX:
+                case control_value, _ if control_value.validity == Result.UNRECOVERABLE_PARADOX:
                     result = Result.UNRECOVERABLE_PARADOX
                     break
                 case control_value, safe_value if control_value.static:
@@ -49,7 +49,7 @@ class Controller(object):
 
             # noinspection DuplicatedCode
             match crash_look:
-                case control_value, safe_value if control_value.validity == Result.UNRECOVERABLE_PARADOX:
+                case control_value, _ if control_value.validity == Result.UNRECOVERABLE_PARADOX:
                     result = Result.UNRECOVERABLE_PARADOX
                     break
                 case control_value, safe_value if control_value.static:
@@ -108,7 +108,7 @@ class Controller(object):
                     results = []
                     for assumed_value_look in (False, True):
                         for assumed_value_crash in (False, True):
-                            sub_controller = self.copy()
+                            sub_controller = self.copy(look_value=assumed_value_look)
                             sub_controller.state.control_value_log[key_look].assume_value(assumed_value_look)
                             sub_controller.state.control_value_log[key_crash].assume_value(assumed_value_crash)
                             results.append(sub_controller.run())
