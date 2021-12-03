@@ -1,6 +1,8 @@
 from core.instruction_set import Instruction
 from core.state import State, Result
-from core.tile import TransportTile, ControlTile
+from core.tiles.abstract.control import ControlTile
+from core.tiles.abstract.transport import TransportTile
+
 
 number_of_robots = 1
 

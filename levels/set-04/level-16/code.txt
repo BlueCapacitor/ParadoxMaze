@@ -1,26 +1,35 @@
 fd;
+slp;
 look;
-ifOpen{
-	repeat(4){
-		fd;
-		slp;
-	}
-	fd;
-	repeat(2){
-		rt;
-		repeat(9){fd;}
-		rt;
-	}
-	fd;
-}
 ifClosed{
 	rt;
 	fd;
 	fd;
 	look;
-	ifOpen{stop;}
 	ifClosed{
 		lt;
 		repeat(3){fd;}
 	}
+	stop;
+}
+ifOpen{
+	repeat(5){
+		fd;
+	}
+	rt;
+	repeat(3){
+		fd;
+	}
+	slp;
+	slp;
+	repeat(3){
+		fd;
+	}
+	rt;
+	rt;
+	repeat(6){
+		fd;
+	}
+	rt;
+	fd;
 }

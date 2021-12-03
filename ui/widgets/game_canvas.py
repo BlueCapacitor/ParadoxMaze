@@ -1,22 +1,21 @@
 import tkinter as tk
-from math import floor, ceil, cos, sin
+from math import floor, ceil, cos, pi, sin
 
-from ui import tk_color, inactive_charge_color, inactive_border_charge_color, charge_color, border_charge_color, \
+from ui import tk_color, inactive_charge_color, inactive_border_charge_color, charge_color, \
+    border_charge_color, \
     apply_robot_move_curve, apply_robot_turn_curve
+from core.tiles import Drawings
 from ui.utilities.font import Font
 
 
 class GameCanvas(tk.Frame):
 
-    def __init__(self, parent, tile_size=45, tile_center_size=30, tile_flare_horizontal_vertical_size=20,
-                 tile_flare_diagonal_size=10):
+    def __init__(self, parent, tile_size=45, tile_center_size=30):
         super().__init__(parent)
 
         self.parent = parent
         self.tile_size = tile_size
         self.tile_center_size = tile_center_size
-        self.tile_flare_horizontal_verticalSize = tile_flare_horizontal_vertical_size
-        self.tile_flare_diagonal_size = tile_flare_diagonal_size
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -159,15 +158,32 @@ class GameCanvas(tk.Frame):
             self.draw_tile(tile, time)
 
     def draw_tile(self, tile, time):
-        colors = tile.get_colors(self.state, time)
-        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_size, colors[0], border=1)
-        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_center_size, colors[1])
-        if len(colors) >= 3:
-            self.draw_flare(*self.screen_coords(tile.x, tile.y), self.tile_flare_diagonal_size,
-                            self.tile_flare_horizontal_verticalSize, colors[2])
-        text = tile.get_text(self.state, time)
-        self.canvas.create_text(*self.screen_coords(tile.x, tile.y), text=text[0], fill=tk_color(text[1]),
-                                width=self.tile_center_size)
+        drawing = tile.get_drawing(self.state, time)
+        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_size, drawing[0], border=1)
+        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_center_size, drawing[1])
+        for procedure in drawing[2:]:
+            match procedure:
+                case Drawings.RECT, size, color:
+                    self.draw_square(*self.screen_coords(tile.x, tile.y), size * self.tile_center_size, color)
+
+                case Drawings.TEXT, text, color:
+                    self.canvas.create_text(*self.screen_coords(tile.x, tile.y), text=text, fill=tk_color(color),
+                                            width=self.tile_center_size)
+
+                case Drawings.FLARE, diagonal_size, rectilinear_size, color:
+                    self.draw_flare(*self.screen_coords(tile.x, tile.y), diagonal_size * self.tile_center_size,
+                                    rectilinear_size * self.tile_center_size, color)
+
+                case Drawings.CIRCLE, size, color:
+                    self.draw_circle(*self.screen_coords(tile.x, tile.y), size * self.tile_center_size, color)
+
+                case Drawings.REG_POLY, n, radius, color:
+                    self.draw_regular_poly(*self.screen_coords(tile.x, tile.y), n, radius * self.tile_center_size,
+                                           color)
+
+                case Drawings.REG_POLY, n, radius, angle_offset, color:
+                    self.draw_regular_poly(*self.screen_coords(tile.x, tile.y), n, radius * self.tile_center_size,
+                                           color, angle_offset=angle_offset)
 
     def draw_square(self, x, y, side, color, border=0):
         self.canvas.create_rectangle(x + side / 2, y - side / 2,
@@ -175,10 +191,21 @@ class GameCanvas(tk.Frame):
                                      fill=tk_color(color),
                                      width=border, outline="#000")
 
-    def draw_flare(self, x, y, d, hv, color):
-        self.canvas.create_polygon(x + hv / 2, y, x + d / 2, y + d / 2, x, y + hv / 2, x - d / 2, y + d / 2,
-                                   x - hv / 2, y, x - d / 2, y - d / 2, x, y - hv / 2, x + d / 2, y - d / 2,
+    def draw_circle(self, x, y, side, color, border=0):
+        self.canvas.create_oval(x + side / 2, y - side / 2,
+                                x - side / 2, y + side / 2,
+                                fill=tk_color(color),
+                                width=border, outline="#000")
+
+    def draw_flare(self, x, y, d, rl, color):
+        self.canvas.create_polygon(x + rl / 2, y, x + d / 2, y + d / 2, x, y + rl / 2, x - d / 2, y + d / 2,
+                                   x - rl / 2, y, x - d / 2, y - d / 2, x, y - rl / 2, x + d / 2, y - d / 2,
                                    fill=tk_color(color), width=0)
+
+    def draw_regular_poly(self, x, y, n, r, color, angle_offset=0):
+        points = zip((x + r * sin((i + angle_offset) * 2 * pi / n) for i in range(n)),
+                     (y + r * cos((i + angle_offset) * 2 * pi / n) for i in range(n)))
+        self.canvas.create_polygon(*points, fill=tk_color(color), width=0)
 
     def draw_robot(self, robot, color_function=None, border=2, border_color_function=None, scale=0.75):
         if color_function is None:

@@ -6,7 +6,7 @@ Created on Oct 10, 2020
 
 from enum import Enum
 
-from core.tile import TargetTile
+from core.tiles.target import TargetTile
 
 
 class State(object):

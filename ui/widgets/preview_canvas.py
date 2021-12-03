@@ -6,8 +6,7 @@ from ui.widgets.game_canvas import GameCanvas
 
 class PreviewCanvas(GameCanvas):
 
-    def __init__(self, parent, board, robot_start, tile_size=45, tile_center_size=30,
-                 tile_flare_horizontal_vertical_size=20, tile_flare_diagonal_size=10):
+    def __init__(self, parent, board, robot_start, tile_size=45, tile_center_size=30):
         self._board = board
         self.robot_start = robot_start
 
@@ -15,9 +14,7 @@ class PreviewCanvas(GameCanvas):
         self.state.robot_log = {0: [robot_start]}
         self._time = 0
 
-        super().__init__(parent, tile_size=tile_size, tile_center_size=tile_center_size,
-                         tile_flare_horizontal_vertical_size=tile_flare_horizontal_vertical_size,
-                         tile_flare_diagonal_size=tile_flare_diagonal_size)
+        super().__init__(parent, tile_size=tile_size, tile_center_size=tile_center_size,)
 
     @property
     def board(self):

@@ -5,10 +5,22 @@ Created on Oct 21, 2020
 """
 from core.board import Board
 from core.robot import Direction, Robot
-from core.tile import EmptyTile, WallTile, DestinationTile, PortalTile, TargetTile, \
-    TimeGateTile, CloseTimedDoorTile, OpenTimedDoorTile, TimePortalTile, \
-    ButtonTile, OpenLogicalDoorTile, LavaTile, HologramTile, \
-    CloseLogicalDoorTile, OnToggleTile, OffToggleTile
+from core.tiles.button import ButtonTile
+from core.tiles.close_logical_door import CloseLogicalDoorTile
+from core.tiles.close_time_door import CloseTimedDoorTile
+from core.tiles.destination import DestinationTile
+from core.tiles.hologram import HologramTile
+from core.tiles.lava import LavaTile
+from core.tiles.off_toggle import OffToggleTile
+from core.tiles.on_toggle import OnToggleTile
+from core.tiles.open_logical_door import OpenLogicalDoorTile
+from core.tiles.open_time_door import OpenTimedDoorTile
+from core.tiles.portal import PortalTile
+from core.tiles.target import TargetTile
+from core.tiles.time_gate import TimeGateTile
+from core.tiles.time_portal import TimePortalTile
+from core.tiles.wall import WallTile
+from core.tiles.empty import EmptyTile
 
 
 class CSVMap:

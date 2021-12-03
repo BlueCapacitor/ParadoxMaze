@@ -3,7 +3,6 @@ Created on Apr 18, 2021
 
 @author: gosha
 """
-
 from math import ceil, pi
 
 ticks_per_step = 20
@@ -93,3 +92,5 @@ def apply_appearance_curve(time_fraction):
 
 def apply_disappearance_curve(time_fraction):
     return robot_appearance_curve(1 - time_fraction)
+
+

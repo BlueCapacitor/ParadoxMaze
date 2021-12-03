@@ -1,10 +1,6 @@
-fd;
-forever{
-	look;
-	ifClosed{slp;}
-	ifOpen{break;}
-}
-
 repeat(3){
+	slp;
+}
+repeat(4){
 	fd;
 }
