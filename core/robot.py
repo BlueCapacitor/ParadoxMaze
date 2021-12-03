@@ -43,7 +43,6 @@ class Robot(StaticRobot):
         self.charge_remaining -= 1
 
     def look(self, state, time):
-        self.charge_remaining -= 1
         tile = state.board.get_tile(self.forward_x, self.forward_y)
         return tile.look(state, time) if not tile.is_static else not (tile.is_solid(state, time))
 

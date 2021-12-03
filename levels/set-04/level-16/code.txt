@@ -1,6 +1,4 @@
 fd;
-slp;
-slp;
 look;
 ifClosed{
 	rt;
@@ -21,7 +19,6 @@ ifOpen{
 	repeat(3){
 		fd;
 	}
-	slp;
 	slp;
 	repeat(3){
 		fd;

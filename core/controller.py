@@ -3,7 +3,6 @@ from core.state import State, Result
 from core.tiles.abstract.control import ControlTile
 from core.tiles.abstract.transport import TransportTile
 
-
 number_of_robots = 1
 
 
@@ -138,24 +137,23 @@ class Controller(object):
 
     def step(self):
         instruction = self.instructions.next_instruction(self.robot)
-        if instruction == Instruction.SLEEP:
-            pass
-        if instruction == Instruction.LEFT:
-            self.robot.turn_left()
-        if instruction == Instruction.RIGHT:
-            self.robot.turn_right()
-        if instruction == Instruction.FORWARD:
-            self.robot.move_forward()
-        if instruction == Instruction.SLEEP:
-            self.robot.sleep()
-        look_result = None
-        if instruction == Instruction.LOOK:
-            look_result = self.robot.look(self.state, self.time)
-        if instruction == Instruction.DEBUG:
-            print("@@@@ Debug @@@@")
-            return Result.NO_SUCCESS, None
+        match instruction:
+            case Instruction.SLEEP:
+                self.robot.sleep()
+            case Instruction.LEFT:
+                self.robot.turn_left()
+            case Instruction.RIGHT:
+                self.robot.turn_right()
+            case Instruction.FORWARD:
+                self.robot.move_forward()
+            case Instruction.LOOK:
+                self.robot.sleep()
+            case Instruction.DEBUG:
+                print("@@@@ Debug @@@@")
+                return Result.NO_SUCCESS, None
 
         self.time += 1
+
         self.state.log_robot(self.robot, self.time)
 
         crash_look = self.robot.crash_look(self.state, self.time)
@@ -170,7 +168,8 @@ class Controller(object):
             self.robot.discontinue_path()
             self.state.log_robot(self.robot, self.time)
 
-        return self.state.is_valid, look_result if instruction == Instruction.LOOK else None, crash_look
+        return (self.state.is_valid,
+                self.robot.look(self.state, self.time) if instruction == Instruction.LOOK else None, crash_look)
 
     def copy(self, look_value=None):
         return Controller(self.board, self.robot.copy(), self.instructions.copy(), state=self.state.copy(),

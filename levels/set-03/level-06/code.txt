@@ -6,6 +6,7 @@ forever{
 		break;
 	}
 }
+slp;
 repeat(3){
 	fd;
 }

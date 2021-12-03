@@ -85,7 +85,6 @@ class CodeBox(tk.Frame):
             if command in ("insert", "delete", "replace"):
                 pass
 
-            # result = self.tk.call(cmd)
             try:
                 result = self.tk.call(cmd)
             except _tkinter.TclError:
