@@ -1,3 +1,4 @@
+import _tkinter
 import tkinter as tk
 
 from ui.utilities.font import Font
@@ -81,11 +82,14 @@ class CodeBox(tk.Frame):
         def _proxy(self, command, *args):
             cmd = (self._orig, command) + args
 
-            result = self.tk.call(cmd)
-            # try:
-            #     result = self.tk.call(cmd)
-            # except Exception:
-            #     return
+            if command in ("insert", "delete", "replace"):
+                pass
+
+            # result = self.tk.call(cmd)
+            try:
+                result = self.tk.call(cmd)
+            except _tkinter.TclError:
+                return
 
             if command in ("insert", "delete", "replace"):
                 self.event_generate("<<TextModified>>")
