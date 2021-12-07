@@ -1,0 +1,25 @@
+fd;
+fd;
+repeat(4){
+	forever{
+		look;
+		ifOpen{
+			break;
+		}
+		rt;
+		fd;
+		lt;
+	}
+	fd;
+	fd;
+}
+rt;
+forever{
+	look;
+	ifOpen{
+		fd;
+	}
+	ifClosed{
+		break;
+	}
+}

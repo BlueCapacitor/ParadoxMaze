@@ -174,8 +174,8 @@ class GameCanvas(tk.Frame):
                     self.draw_flare(*self.screen_coords(tile.x, tile.y), diagonal_size * self.tile_center_size,
                                     rectilinear_size * self.tile_center_size, color)
 
-                case Drawings.CIRCLE, size, color:
-                    self.draw_circle(*self.screen_coords(tile.x, tile.y), size * self.tile_center_size, color)
+                case Drawings.CIRCLE, radius, color:
+                    self.draw_circle(*self.screen_coords(tile.x, tile.y), radius * self.tile_center_size, color)
 
                 case Drawings.REG_POLY, n, radius, color:
                     self.draw_regular_poly(*self.screen_coords(tile.x, tile.y), n, radius * self.tile_center_size,
@@ -191,9 +191,9 @@ class GameCanvas(tk.Frame):
                                      fill=tk_color(color),
                                      width=border, outline="#000")
 
-    def draw_circle(self, x, y, side, color, border=0):
-        self.canvas.create_oval(x + side / 2, y - side / 2,
-                                x - side / 2, y + side / 2,
+    def draw_circle(self, x, y, radius, color, border=0):
+        self.canvas.create_oval(x + radius, y - radius,
+                                x - radius, y + radius,
                                 fill=tk_color(color),
                                 width=border, outline="#000")
 

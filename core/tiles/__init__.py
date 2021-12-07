@@ -1,5 +1,7 @@
 from enum import Enum, auto
 
+greek_alphabet = tuple("αβγδεζηθικλμνξοπρστυφχψω")
+
 
 class Drawings(Enum):
     RECT = auto()

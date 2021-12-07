@@ -82,6 +82,14 @@ class State(object):
 
         return self.control_value_log[(control_id, time)]
 
+    def get_q_control_value(self, q_control_id):
+        if (q_control_id, "Q") not in self.control_value_log.keys():
+            current_value = False
+
+            self.control_value_log[(q_control_id, "Q")] = ControlValue(self, "Q", q_control_id, current_value)
+
+        return self.control_value_log[(q_control_id, "Q")]
+
     def get_key_for_control_value(self, control_value):
         for key in self.control_value_log.keys():
             if self.control_value_log[key] == control_value:
@@ -188,11 +196,12 @@ class ControlValue:
     def current_value(self):
         value = self._current_value
 
-        max_time = None
-        for ((control_id, time), sticky_value) in self.state.sticky_values.items():
-            if control_id == self.control_id and (max_time is None or time > max_time) and time <= self.time:
-                value = sticky_value
-                max_time = time
+        if self.time != "Q":
+            max_time = None
+            for ((control_id, time), sticky_value) in self.state.sticky_values.items():
+                if control_id == self.control_id and (max_time is None or time > max_time) and time <= self.time:
+                    value = sticky_value
+                    max_time = time
 
         return value
 
@@ -210,8 +219,9 @@ class ControlValue:
 
     def assume_value(self, value):
         self.possible_values &= {value}
+        if self.time == "Q":
+            self._current_value = value
 
     def copy(self, state=None, time=None):
-        return (
-            ControlValue(self.state if state is None else state, self.time if time is None else time, self.control_id,
-                         self.current_value, set(self.possible_values), self.static))
+        return ControlValue(self.state if state is None else state, self.time if time is None else time,
+                            self.control_id, self._current_value, set(self.possible_values), self.static)

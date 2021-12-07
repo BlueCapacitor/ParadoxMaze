@@ -1,8 +1,3 @@
-"""
-Created on Oct 21, 2020
-
-@author: gosha
-"""
 from core.board import Board
 from core.robot import Direction, Robot
 from core.tiles.button import ButtonTile
@@ -16,6 +11,7 @@ from core.tiles.on_toggle import OnToggleTile
 from core.tiles.open_logical_door import OpenLogicalDoorTile
 from core.tiles.open_time_door import OpenTimedDoorTile
 from core.tiles.portal import PortalTile
+from core.tiles.q_door import QDoor
 from core.tiles.target import TargetTile
 from core.tiles.time_gate import TimeGateTile
 from core.tiles.time_portal import TimePortalTile
@@ -35,6 +31,8 @@ class CSVMap:
     open_timed_door_symbol = '('
     open_logical_door_symbol = '['
     close_logical_door_symbol = ']'
+    positive_q_door_symbol = '{'
+    negative_q_door_symbol = '}'
     time_portal_symbol = '>'
     button_symbol = '^'
     on_toggle_symbol = '+'
@@ -88,6 +86,10 @@ class CSVMap:
                     self.tiles[y].append((OnToggleTile, {"control_id": int(args[0])}))
                 elif cell == CSVMap.off_toggle_symbol:
                     self.tiles[y].append((OffToggleTile, {"control_id": int(args[0])}))
+                elif cell == CSVMap.positive_q_door_symbol:
+                    self.tiles[y].append((QDoor, {"control_id": int(args[0]), "polarity": True}))
+                elif cell == CSVMap.negative_q_door_symbol:
+                    self.tiles[y].append((QDoor, {"control_id": int(args[0]), "polarity": False}))
                 else:
                     self.tiles[y].append(EmptyTile)
 
