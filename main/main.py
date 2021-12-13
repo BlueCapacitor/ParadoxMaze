@@ -7,7 +7,7 @@ def set_up_and_run():
 
 if __name__ == '__main__':
     display = Display()
-    display.title("Time Travel Game")
+    display.title("Paradox Maze")
 
     display.after(0, set_up_and_run)
     display.mainloop()
