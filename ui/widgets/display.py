@@ -1,9 +1,3 @@
-"""
-Created on Oct 14, 2020
-
-@author: gosha
-"""
-
 import tkinter as tk
 from enum import Enum
 
@@ -54,6 +48,8 @@ class Display(tk.Tk):
 
         if len(self._results) == 0:
             self._results = results
+
+        self._results = results
 
     @property
     def current_page(self):

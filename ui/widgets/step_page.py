@@ -85,6 +85,7 @@ class StepPage(tk.Frame):
 
         self.result_selector.destroy()
         self.result_selector = ResultSelector(self, colors)
+        self.result_selector.alternative_tkvar.set(0)
         self.result_selector.grid(row=2, column=0, rowspan=4, sticky=tk.NSEW)
 
         self.update_mode()
@@ -105,7 +106,9 @@ class StepPage(tk.Frame):
 
     @property
     def active_result(self):
-        return self.results[self.active_result_index] if len(self.results) > self.active_result_index else None
+        if len(self.results) <= self.active_result_index:
+            self.result_selector.alternative_tkvar.set(0)
+        return self.results[self.active_result_index]
 
     @property
     def time(self):
@@ -169,4 +172,5 @@ class StepPage(tk.Frame):
         self.game_canvas.draw(False)
 
     def alternative_result_change(self, *_):
+        self.update_mode()
         self.game_canvas.draw(True)

@@ -31,8 +31,7 @@ class CSVMap:
     open_timed_door_symbol = '('
     open_logical_door_symbol = '['
     close_logical_door_symbol = ']'
-    positive_q_door_symbol = '{'
-    negative_q_door_symbol = '}'
+    q_door_symbol = '|'
     time_portal_symbol = '>'
     button_symbol = '^'
     on_toggle_symbol = '+'
@@ -86,10 +85,9 @@ class CSVMap:
                     self.tiles[y].append((OnToggleTile, {"control_id": int(args[0])}))
                 elif cell == CSVMap.off_toggle_symbol:
                     self.tiles[y].append((OffToggleTile, {"control_id": int(args[0])}))
-                elif cell == CSVMap.positive_q_door_symbol:
-                    self.tiles[y].append((QDoor, {"control_id": int(args[0]), "polarity": True}))
-                elif cell == CSVMap.negative_q_door_symbol:
-                    self.tiles[y].append((QDoor, {"control_id": int(args[0]), "polarity": False}))
+                elif cell == CSVMap.q_door_symbol:
+                    self.tiles[y].append((QDoor, {"control_id": int(args[0]),
+                                                  "properties": [[c == "+" for c in args[a]] for a in range(1, 3)]}))
                 else:
                     self.tiles[y].append(EmptyTile)
 

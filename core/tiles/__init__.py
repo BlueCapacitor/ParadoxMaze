@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from functools import cache
 
 greek_alphabet = tuple("αβγδεζηθικλμνξοπρστυφχψω")
 
@@ -9,14 +10,16 @@ class Drawings(Enum):
     FLARE = auto()
     TEXT = auto()
     REG_POLY = auto()
+    CORNERS = auto()
 
 
+@cache
 def get_color_for_id(n):
     color_shift = 7
     color = [1, 1, 0]
     for _ in range((n * color_shift) % 12):
         color = shift_next_hue(color)
-    return color
+    return [max(val, 0.001) for val in color]
 
 
 def shift_next_hue(prev):

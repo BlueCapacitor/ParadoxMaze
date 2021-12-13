@@ -115,11 +115,12 @@ class State(object):
                     out = self.fail_and_finalize(out)
                     break
                 if not tile.is_static:
-                    if not self.board.has_time_travel:
-                        if not (tile.crash_look(self, time)):
+                    crash_look = tile.crash_look(self, time)
+                    if isinstance(crash_look, bool):
+                        if not crash_look:
                             out = self.fail_and_finalize(out)
                     else:
-                        control_value, safe_value = tile.crash_look(self, time)
+                        control_value, safe_value = crash_look
                         if control_value.static and control_value.current_value != safe_value:
                             out = self.fail_and_finalize(out)
                         if len(control_value.possible_values) == 1 and \

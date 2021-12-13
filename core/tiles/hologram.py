@@ -10,5 +10,5 @@ class HologramTile(EmptyTile):
         return True
 
     def get_drawing(self, _state, _time):
-        return (((0.5, 0.5, 1),
-                 (0.75, 0.75, 1)))
+        return (((0.25, 0.25, 1),
+                 (0.5, 0.5, 1)))

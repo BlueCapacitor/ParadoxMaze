@@ -10,11 +10,12 @@ from ui.utilities.font import Font
 
 class GameCanvas(tk.Frame):
 
-    def __init__(self, parent, tile_size=45, tile_center_size=30):
+    def __init__(self, parent, tile_size=48, tile_center_size=32):
         super().__init__(parent)
 
         self.parent = parent
         self.tile_size = tile_size
+        self.tile_ring_size = tile_size * 47 / 48
         self.tile_center_size = tile_center_size
 
         self.grid_rowconfigure(0, weight=1)
@@ -153,13 +154,17 @@ class GameCanvas(tk.Frame):
                 self.draw_robot(robot)
 
     def draw_board(self):
+        self.canvas.create_rectangle(*self.screen_coords(-0.5, -0.5),
+                                     *self.screen_coords(self.board.width - 0.5, self.board.height - 0.5),
+                                     fill=tk_color((0, 0, 0)), width=0)
+
         time = self.tile_time if self.mode == "Global Time" else self.state.get_robot_with_charge(self.tile_time)[1]
         for tile in self.board.list_tiles:
             self.draw_tile(tile, time)
 
     def draw_tile(self, tile, time):
         drawing = tile.get_drawing(self.state, time)
-        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_size, drawing[0], border=1)
+        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_ring_size, drawing[0])
         self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_center_size, drawing[1])
         for procedure in drawing[2:]:
             match procedure:
@@ -185,6 +190,10 @@ class GameCanvas(tk.Frame):
                     self.draw_regular_poly(*self.screen_coords(tile.x, tile.y), n, radius * self.tile_center_size,
                                            color, angle_offset=angle_offset)
 
+                case Drawings.CORNERS, distance, width, color:
+                    self.draw_corners(*self.screen_coords(tile.x, tile.y), distance * self.tile_ring_size,
+                                      width * self.tile_ring_size, color)
+
     def draw_square(self, x, y, side, color, border=0):
         self.canvas.create_rectangle(x + side / 2, y - side / 2,
                                      x - side / 2, y + side / 2,
@@ -206,6 +215,20 @@ class GameCanvas(tk.Frame):
         points = zip((x + r * sin((i + angle_offset) * 2 * pi / n) for i in range(n)),
                      (y + r * cos((i + angle_offset) * 2 * pi / n) for i in range(n)))
         self.canvas.create_polygon(*points, fill=tk_color(color), width=0)
+
+    def draw_corners(self, x, y, distance, width, color):
+        inner = distance - width / 2
+        outer = distance + width / 2
+        full = self.tile_ring_size / 2
+        # self.canvas.create_rectangle(x - full, y - full, x + full, y + full,
+        #                              fill=tk_color((0, 1, 0)), width=0)
+        for dx in (-1, 1):
+            for dy in (-1, 1):
+                self.canvas.create_polygon(x + inner * dx, y + full * dy,
+                                           x + outer * dx, y + full * dy,
+                                           x + full * dx, y + outer * dy,
+                                           x + full * dx, y + inner * dy,
+                                           fill=tk_color(color), width=0)
 
     def draw_robot(self, robot, color_function=None, border=2, border_color_function=None, scale=0.75):
         if color_function is None:

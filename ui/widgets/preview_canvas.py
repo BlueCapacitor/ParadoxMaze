@@ -1,12 +1,13 @@
 import tkinter as tk
 
 from core.state import State
+from ui import tk_color
 from ui.widgets.game_canvas import GameCanvas
 
 
 class PreviewCanvas(GameCanvas):
 
-    def __init__(self, parent, board, robot_start, tile_size=45, tile_center_size=30):
+    def __init__(self, parent, board, robot_start, tile_size=48, tile_center_size=32):
         self._board = board
         self.robot_start = robot_start
 
@@ -36,6 +37,10 @@ class PreviewCanvas(GameCanvas):
         self.draw_robot(self.robot_start)
 
     def draw_board(self):
+        self.canvas.create_rectangle(*self.screen_coords(-0.5, -0.5),
+                                     *self.screen_coords(self.board.width - 0.5, self.board.height - 0.5),
+                                     fill=tk_color((0, 0, 0)))
+
         for tile in self.board.list_tiles:
             self.draw_tile(tile, self.time)
 
