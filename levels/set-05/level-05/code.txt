@@ -1,0 +1,13 @@
+forever{
+	lt;
+	repeat(3){
+		look;
+		ifClosed{
+			rt;
+		}
+		ifOpen{
+			break;
+		}
+	}
+	fd;
+}

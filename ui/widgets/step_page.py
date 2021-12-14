@@ -4,6 +4,7 @@ from math import ceil
 from ui import charge_color, tk_color, ticks_per_step
 from ui.widgets.game_canvas import GameCanvas
 from ui.widgets.menu_bar import MenuBar
+from ui.widgets.overall_result_display import OverallResultDisplay
 from ui.widgets.result_selector import ResultSelector
 
 
@@ -16,6 +17,7 @@ class StepPage(tk.Frame):
 
         self.menu_bar = None
         self.game_canvas = None
+        self.overall_result_display = None
         self.result_selector = None
         self.mode_tkvar = None
         self.tk_frame = None
@@ -34,6 +36,9 @@ class StepPage(tk.Frame):
 
             self.game_canvas = GameCanvas(self)
             self.game_canvas.grid(row=2, column=1, columnspan=2, sticky=tk.NSEW)
+
+            self.overall_result_display = OverallResultDisplay(self)
+            self.overall_result_display.grid(row=1, column=0, columnspan=3, sticky=tk.NSEW)
 
             self.result_selector = ResultSelector(self, colors)
             self.result_selector.grid(row=2, column=0, rowspan=4, sticky=tk.NSEW)
@@ -67,6 +72,8 @@ class StepPage(tk.Frame):
             self.grid_columnconfigure(0, weight=0)
             self.grid_columnconfigure(1, weight=0)
             self.grid_columnconfigure(2, weight=1)
+            self.grid_rowconfigure(0, weight=0)
+            self.grid_rowconfigure(1, weight=0)
             self.grid_rowconfigure(2, weight=1)
             self.grid_rowconfigure(3, weight=0)
             self.grid_rowconfigure(4, weight=0)
@@ -82,6 +89,10 @@ class StepPage(tk.Frame):
         self.menu_bar = MenuBar(self, self.display, self.display.Page.CODING, colors,
                                 text=f"Level {set_number}-{level_number}")
         self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
+
+        self.overall_result_display.destroy()
+        self.overall_result_display = OverallResultDisplay(self)
+        self.overall_result_display.grid(row=1, column=0, columnspan=3, sticky=tk.NSEW)
 
         self.result_selector.destroy()
         self.result_selector = ResultSelector(self, colors)

@@ -1,0 +1,20 @@
+repeat(9){
+	fd;
+	rt;
+	fd;
+	lt;
+	fd;
+	rt;
+	fd;
+	lt;
+	fd;
+	fd;
+	lt;
+	fd;
+	rt;
+	fd;
+	lt;
+	fd;
+	rt;
+	fd;
+}

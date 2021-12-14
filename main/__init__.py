@@ -17,9 +17,9 @@ class SingletonMeta(type):
 class PrintOut(metaclass=SingletonMeta):
     # noinspection PyMethodMayBeStatic
     def write(self, new):
-        print("\b" * PrintProgress().length)
-        print(new)
-        print(PrintProgress().text)
+        print("\b" * PrintProgress().length, end="")
+        print(new, end="")
+        print(PrintProgress().text, end="")
 
 
 class PrintProgress(metaclass=SingletonMeta):
@@ -28,11 +28,12 @@ class PrintProgress(metaclass=SingletonMeta):
         self.text = ""
 
     def write(self, new):
+        new = "".join(c for c in new if c != '\n')
         self.length += len(new)
         self.text += new
-        print(new)
+        print(new, end="")
 
     def clear(self):
-        print("\b" * self.length)
+        print("\b" * self.length, end="")
         self.length = 0
         self.text = ""

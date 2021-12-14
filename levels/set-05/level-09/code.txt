@@ -1,0 +1,26 @@
+rt;
+look;
+lt;
+fd;
+ifClosed{
+	lt;
+	fd;
+	rt;
+	fd;
+	fd;
+	rt;
+	fd;
+	lt;
+	fd;
+}
+ifOpen{
+	rt;
+	fd;
+	lt;
+	fd;
+	fd;
+	lt;
+	fd;
+	rt;
+	fd;
+}

@@ -31,6 +31,7 @@ class Display(tk.Tk):
         self.Page = Page
 
         self.current_page = self.Page.LOADING
+        self.overall_result = None
 
     @property
     def results(self):
@@ -47,9 +48,8 @@ class Display(tk.Tk):
                 self.overall_result |= result[0]
 
         if len(self._results) == 0:
+            self.overall_result = Result.FAIL
             self._results = results
-
-        self._results = results
 
     @property
     def current_page(self):

@@ -1,13 +1,13 @@
 forever{
 	lt;
-	look;
-	ifOpen{fd;}
-	ifClosed{
-		rt;
+	repeat(3){
 		look;
-		ifOpen{fd;}
 		ifClosed{
-			lt; lt;
+			rt;
+		}
+		ifOpen{
+			break;
 		}
 	}
+	fd;
 }
