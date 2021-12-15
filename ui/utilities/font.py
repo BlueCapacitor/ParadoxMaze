@@ -9,6 +9,7 @@ class Font(Enum):
     LARGER = (family, 48)
     LARGE = (family, 32)
     NORMAL = (family, 16)
+    MED_SMALL = (family, 12)
     SMALL = (family, 8)
 
     @staticmethod
