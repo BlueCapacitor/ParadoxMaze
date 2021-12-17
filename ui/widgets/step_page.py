@@ -96,7 +96,6 @@ class StepPage(tk.Frame):
 
         self.result_selector.destroy()
         self.result_selector = ResultSelector(self, colors)
-        self.result_selector.alternative_tkvar.set(0)
         self.result_selector.grid(row=2, column=0, rowspan=4, sticky=tk.NSEW)
 
         self.update_mode()
@@ -113,13 +112,15 @@ class StepPage(tk.Frame):
 
     @property
     def active_result_index(self):
-        return self.result_selector.alternative_tkvar.get()
+        return self.result_selector.active_alternative
 
     @property
     def active_result(self):
         if len(self.results) <= self.active_result_index:
-            self.result_selector.alternative_tkvar.set(0)
-        return self.results[self.active_result_index]
+            self.result_selector.list_box.activate(0)
+            return self.results[0]
+        else:
+            return self.results[self.active_result_index]
 
     @property
     def time(self):

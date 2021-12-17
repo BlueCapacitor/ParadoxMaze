@@ -1,8 +1,10 @@
 import tkinter as tk
+from math import ceil, log10
 
 from core.state import Result
 from ui import tk_color
 from ui.utilities.font import Font
+from ui.widgets.automatic_hide_scrollbar import AutomaticHideScrollbar
 
 
 class ResultSelector(tk.Frame):
@@ -10,38 +12,40 @@ class ResultSelector(tk.Frame):
     def __init__(self, parent, colors):
         super().__init__(parent, bg=tk_color(colors[1]))
         self.parent = parent
-        self.alternative_tkvar = tk.IntVar()
-        self.alternative_tkvar.trace('w', self.result_change)
 
-        self.button_container = tk.Frame(self, bg=tk_color(colors[1]))
-        self.button_container.grid(row=0, column=0, sticky=tk.NSEW)
         self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_columnconfigure(1, weight=1)
 
-        self.buttons = []
+        self.list_box = tk.Listbox(self, bg=tk_color(colors[1]), font=Font.MED_SMALL.value, width=26, bd=0,
+                                   selectbackground=tk_color(colors[3]), activestyle=tk.NONE, selectborderwidth=0)
+        self.list_box.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
+
+        self.scroll_bar = AutomaticHideScrollbar(self, orient=tk.VERTICAL, command=self.list_box.yview)
+        self.scroll_bar.grid(row=0, column=0, sticky=tk.NSEW)
+
+        self.list_box.config(yscrollcommand=self.scroll_bar.set)
+
+        num_digits = ceil(log10(len(self.parent.results)))
 
         for alternative_number, result in enumerate(self.parent.results):
             result_status_text = \
                 {Result.SUCCESS: "Success", Result.UNRECOVERABLE_PARADOX: "Paradox", Result.FAIL: "Fail"}[result[0]]
-            self.buttons.append(tk.Radiobutton(self.button_container,
-                                               text="Alternative %s - %s" % (alternative_number, result_status_text),
-                                               variable=self.alternative_tkvar, value=alternative_number,
-                                               indicatoron=False))
 
-            self.buttons[-1].grid(row=alternative_number, column=0, sticky=tk.E + tk.N + tk.W)
+            text = "0" * (num_digits - len(str(alternative_number))) + str(alternative_number)
 
-        self.recolor()
+            self.list_box.insert(tk.END, f"Alternative {text} - {result_status_text}")
+
+        self.list_box.bind('<<ListboxSelect>>', self.result_change)
 
     def result_change(self, *_):
-        self.recolor()
         self.parent.alternative_result_change()
 
-    def recolor(self):
-        for alternative_number, result in enumerate(self.parent.results):
-            button_colors = {Result.SUCCESS: ((0, 1, 0), (0, 0.25, 0), (0, 0.75, 0)),
-                             Result.UNRECOVERABLE_PARADOX: ((0, 0, 1), (0, 0, 0.25), (0, 0, 0.75)),
-                             Result.FAIL: ((1, 0, 0), (0.25, 0, 0), (0.75, 0, 0))}[result[0]]
-            button = self.buttons[alternative_number]
-            active = alternative_number == self.alternative_tkvar.get()
-            button.config(bg=tk_color(button_colors[0 + 2 * active]), fg=tk_color(button_colors[1]),
-                          selectcolor=tk_color(button_colors[0 + 2 * active]))
+    @property
+    def active_alternative(self):
+        selection = self.list_box.curselection()
+        if len(selection) == 0:
+            self.list_box.activate(0)
+            return 0
+        else:
+            return self.list_box.curselection()[0]
