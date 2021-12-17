@@ -1,6 +1,7 @@
 # Paradox Maze
-## This project is currently being completely reworked. A semi-operational and very glitchy version is currently in main, but it is highly unstable and very unfinished.
-Among other things, the ingame rules and guide is currently nonexistant. For now, the rules are here.
+## This project is currently work-in-progress. It is currently unstable and very unfinished.
+I have not yet tested it on anything other than MacOS, and I am pretty sure that it would yet not work on other platforms.
+Among other things, the ingame rules and guide is currently in progress. For now, the rules are here.
 
 Hopefully, you have seen and played a "program a robot" game in the past. If you have not, http://robozzle.com/ is a fun one. Paradox Maze is one of these games, but with a twist. In this game, the puzzles involve time travel as well, allong with other related mechanics. Here is the general outline of the gameplay: in each "room", you program a robot to traverse a tile map and reach every target tile (not neccessarily at the same time). Be carful not to run into walls, create paradoxes, or run out of energy (running out of energy does not neccessarely cause you to lose, but the robot stops where it is). Each move consumes one unit of energy for your robot, so economize your moves.
 
