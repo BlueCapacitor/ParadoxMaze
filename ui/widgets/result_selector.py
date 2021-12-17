@@ -18,7 +18,7 @@ class ResultSelector(tk.Frame):
         self.grid_columnconfigure(1, weight=1)
 
         self.list_box = tk.Listbox(self, bg=tk_color(colors[1]), font=Font.MED_SMALL.value, width=26, bd=0,
-                                   selectbackground=tk_color(colors[3]), activestyle=tk.NONE, selectborderwidth=0)
+                                   selectbackground=tk_color(colors[3]), activestyle=tk.NONE, selectborderwidth=2)
         self.list_box.grid(row=0, column=1, sticky=tk.NSEW, padx=5, pady=5)
 
         self.scroll_bar = AutomaticHideScrollbar(self, orient=tk.VERTICAL, command=self.list_box.yview)
@@ -32,9 +32,15 @@ class ResultSelector(tk.Frame):
             result_status_text = \
                 {Result.SUCCESS: "Success", Result.UNRECOVERABLE_PARADOX: "Paradox", Result.FAIL: "Fail"}[result[0]]
 
+            colors = {Result.SUCCESS: ((0, 1, 0), (0, 0.5, 0), (0.5, 1, 0.5), (0, 0.25, 0)),
+                      Result.UNRECOVERABLE_PARADOX: ((0, 0, 1), (0, 0, 0.5), (0.5, 0.5, 1), (0, 0, 0.25)),
+                      Result.FAIL: ((1, 0, 0), (0.5, 0, 0), (1, 0.5, 0.5), (0.25, 0, 0))}[result[0]]
+
             text = "0" * (num_digits - len(str(alternative_number))) + str(alternative_number)
 
             self.list_box.insert(tk.END, f"Alternative {text} - {result_status_text}")
+            self.list_box.itemconfig(alternative_number, bg=tk_color(colors[2]), selectbackground=tk_color(colors[0]),
+                                     fg=tk_color(colors[1]), selectforeground=tk_color(colors[3]))
 
         self.list_box.bind('<<ListboxSelect>>', self.result_change)
 

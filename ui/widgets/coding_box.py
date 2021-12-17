@@ -2,6 +2,7 @@ import _tkinter
 import tkinter as tk
 
 from ui.utilities.font import Font
+from ui.widgets.automatic_hide_scrollbar import AutomaticHideScrollbar
 
 
 class CodeBox(tk.Frame):
@@ -13,11 +14,12 @@ class CodeBox(tk.Frame):
         self.do_not_overwrite_file = False
 
         self.text_box = CodeBox.TextWithModifiedCallback(self, wrap=tk.NONE, font=Font.NORMAL,
-                                                         tabs=(Font.measure(Font.NORMAL, self, ' ' * 2),))
+                                                         tabs=(Font.measure(Font.NORMAL, self, ' ' * 2),),
+                                                         highlightthickness=0)
         self.text_box.grid(row=0, column=0, sticky=tk.NSEW)
-        self.scroll_v = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.text_box.yview)
+        self.scroll_v = AutomaticHideScrollbar(self, orient=tk.VERTICAL, command=self.text_box.yview)
         self.scroll_v.grid(row=0, column=1, sticky=tk.NSEW)
-        self.scroll_h = tk.Scrollbar(self, orient=tk.HORIZONTAL, command=self.text_box.xview)
+        self.scroll_h = AutomaticHideScrollbar(self, orient=tk.HORIZONTAL, command=self.text_box.xview)
         self.scroll_h.grid(row=1, column=0, sticky=tk.NSEW)
         self.text_box.config(yscrollcommand=self.scroll_v.set, xscrollcommand=self.scroll_h.set)
 

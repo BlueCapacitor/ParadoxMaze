@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
 
 from core.controller import Controller
 from core.instruction_set import InstructionSet
@@ -17,17 +16,13 @@ class CodingPage(tk.Frame):
         self.display = display
 
         self.code_box = CodeBox(self)
-        self.code_box.grid(row=2, column=2, sticky=tk.NSEW)
-
-        self.separator = ttk.Separator(self, orient=tk.VERTICAL)
-        self.separator.grid(row=2, column=1)
+        self.code_box.grid(row=2, column=1, sticky=tk.NSEW)
 
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=0)
         self.grid_rowconfigure(2, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=0)
-        self.grid_columnconfigure(2, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
         self.p_time = None
 
@@ -77,7 +72,7 @@ class CodingPage(tk.Frame):
         self.preview_canvas = PreviewCanvas(self, self.board, self.csv_map.build_robot())
         self.preview_canvas.grid(row=2, column=0, sticky=tk.NSEW)
 
-        self.preview_canvas.draw(True)
+        self.preview_canvas.draw(True, colors=self.colors)
         self.code_box.load_file()
 
         width, height = self.display.winfo_width(), self.display.winfo_height()

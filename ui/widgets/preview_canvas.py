@@ -15,7 +15,7 @@ class PreviewCanvas(GameCanvas):
         self.state.robot_log = {0: [robot_start]}
         self._time = 0
 
-        super().__init__(parent, tile_size=tile_size, tile_center_size=tile_center_size,)
+        super().__init__(parent, tile_size=tile_size, tile_center_size=tile_center_size)
 
     @property
     def board(self):

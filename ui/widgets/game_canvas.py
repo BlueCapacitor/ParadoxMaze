@@ -6,6 +6,7 @@ from ui import tk_color, inactive_charge_color, inactive_border_charge_color, ch
     apply_robot_move_curve, apply_robot_turn_curve
 from core.tiles import Drawings
 from ui.utilities.font import Font
+from ui.widgets.automatic_hide_scrollbar import AutomaticHideScrollbar
 
 
 class GameCanvas(tk.Frame):
@@ -22,14 +23,15 @@ class GameCanvas(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
 
         self.canvas = tk.Canvas(self, width=(self.board.width + 1) * self.tile_size,
-                                height=(self.board.height + 1) * self.tile_size, scrollregion=(
-                0, 0, (self.board.width + 1) * self.tile_size, (self.board.height + 1) * self.tile_size))
+                                height=(self.board.height + 1) * self.tile_size,
+                                scrollregion=(0, 0, (self.board.width + 1) * self.tile_size,
+                                              (self.board.height + 1) * self.tile_size), highlightthickness=0)
         self.canvas.grid(row=0, column=0, sticky=tk.NSEW)
 
-        self.scroll_v = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.canvas.yview)
+        self.scroll_v = AutomaticHideScrollbar(self, orient=tk.VERTICAL, command=self.canvas.yview)
         self.scroll_v.grid(row=0, column=1, sticky=tk.NSEW)
 
-        self.scroll_h = tk.Scrollbar(self, orient=tk.HORIZONTAL, command=self.canvas.xview)
+        self.scroll_h = AutomaticHideScrollbar(self, orient=tk.HORIZONTAL, command=self.canvas.xview)
         self.scroll_h.grid(row=1, column=0, sticky=tk.NSEW)
 
         self.canvas.config(xscrollcommand=self.scroll_h.set, yscrollcommand=self.scroll_v.set)
@@ -74,14 +76,14 @@ class GameCanvas(tk.Frame):
         return self.p_time is None or self.tile_time != self.p_tile_time
 
     def set_colors(self, colors):
-        self.canvas.config(bg=tk_color(colors[0]), highlightcolor=tk_color(colors[1]))
+        self.canvas.config(bg=tk_color(colors[3]))
 
     def screen_coords(self, x, y):
         out_x = (x + 1) * self.tile_size
         out_y = (y + 1) * self.tile_size
         return out_x, out_y
 
-    def draw(self, force_reset):
+    def draw(self, force_reset, colors=None):
         if self.mode == "Global Time":
             if self.tile_time_changed or force_reset:
                 self.canvas.delete(tk.ALL)
@@ -152,6 +154,9 @@ class GameCanvas(tk.Frame):
             self.draw_board()
             for robot in self.state.get_robots_at_time(self.time):
                 self.draw_robot(robot)
+
+        if colors is not None:
+            self.set_colors(colors)
 
     def draw_board(self):
         self.canvas.create_rectangle(*self.screen_coords(-0.5, -0.5),
