@@ -1,7 +1,8 @@
-import os
+from os import path, listdir
 
 import tkinter as tk
 
+from main import root_path
 from ui import tk_color
 from ui.utilities.csv_map import CSVMap
 from ui.utilities.font import Font
@@ -34,19 +35,19 @@ class LevelSelectPage(tk.Frame):
         self.colors = None
         self.redraw()
 
-    levels_path = "levels"
+    levels_path = path.join(root_path, "levels")
 
     @property
     def set_path(self):
-        return "%s/set-%02d" % (self.levels_path, self.set)
+        return path.join(self.levels_path, f"set-{self.set:02}")
 
     @property
     def resource_path(self):
-        return "%s/resources" % self.set_path
+        return path.join(self.set_path, "resources")
 
     @property
     def valid_set(self):
-        return os.path.isdir(self.set_path)
+        return path.isdir(self.set_path)
 
     @property
     def is_first_set(self):
@@ -70,7 +71,7 @@ class LevelSelectPage(tk.Frame):
             self.redraw()
 
     def get_colors(self):
-        color_file = open("%s/set-colors.txt" % self.resource_path, 'r')
+        color_file = open(path.join(root_path, self.resource_path, "set-colors.txt"), 'r')
         colors = tuple(map(lambda s: tuple(map(float, s.split(", "))), color_file.read().split('\n')))
         color_file.close()
         return colors
@@ -98,21 +99,18 @@ class LevelSelectPage(tk.Frame):
         self.read_state_from_file_system()
 
     def read_state_from_file_system(self):
-        level_folders = os.listdir(self.set_path)
+        level_folders = listdir(self.set_path)
         level_folders.sort()
         for level_folder in level_folders:
             if level_folder.split('-')[0] != "level":
                 continue
 
             number = int(level_folder.split('-')[-1])
-            code_file_path = "%s/%s/code.txt" % (self.set_path, level_folder)
-            with open("%s/%s/%s-%s-map.csv" % (self.set_path, level_folder, self.set, number), 'r') as csv_map_file:
+            code_file_path = path.join(self.set_path, level_folder, "code.txt")
+            with open(path.join(self.set_path, level_folder, f"{self.set}-{number}-map.csv"), 'r') as csv_map_file:
                 csv_map_text = csv_map_file.read()
 
-            instruction_text_path = "%s/%s/instruction_text.md" % (self.set_path, level_folder)
-            if not os.path.exists(instruction_text_path):
-                with open(instruction_text_path, 'x'):
-                    pass
+            instruction_text_path = path.join(self.set_path, level_folder, "instruction_text.md")
 
             with open(instruction_text_path, 'r') as instruction_text_file:
                 instruction_text = instruction_text_file.read()
@@ -120,7 +118,7 @@ class LevelSelectPage(tk.Frame):
             self.add_button(number, csv_map_text, code_file_path, instruction_text)
 
     def add_button(self, number, csv_map_text, code_file_path, instruction_text):
-        button = tk.Label(self, text="%s-%s" % (self.set, number), font=Font.LARGE.value,
+        button = tk.Label(self, text=f"{self.set}-{number}", font=Font.LARGE.value,
                           bg=tk_color(self.colors[1]), fg=tk_color(self.colors[2]))
         button.bind("<Button-1>", lambda *_: self.load_level(csv_map_text, code_file_path, instruction_text, number))
         button.grid(row=(number - 1) // self.buttons_per_row + 1, column=(number - 1) % self.buttons_per_row,

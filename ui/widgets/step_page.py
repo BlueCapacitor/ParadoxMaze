@@ -28,6 +28,7 @@ class StepPage(tk.Frame):
         self.playing_tkvar = None
         self.play_checkbox = None
         self.charge_mode_time_display = None
+        self.speed_slider = None
         self.buttons = []
 
     def draw(self, colors, set_number, level_number):
@@ -40,13 +41,13 @@ class StepPage(tk.Frame):
 
             self.menu_bar = MenuBar(self, self.display, self.display.Page.CODING, colors,
                                     text=f"Level {set_number}-{level_number}")
-            self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
+            self.menu_bar.grid(row=0, column=0, columnspan=5, sticky=tk.NSEW)
 
             self.game_canvas = GameCanvas(self)
-            self.game_canvas.grid(row=2, column=1, columnspan=2, sticky=tk.NSEW)
+            self.game_canvas.grid(row=2, column=1, columnspan=4, sticky=tk.NSEW)
 
             self.overall_result_display = OverallResultDisplay(self)
-            self.overall_result_display.grid(row=1, column=0, columnspan=3, sticky=tk.NSEW)
+            self.overall_result_display.grid(row=1, column=0, columnspan=5, sticky=tk.NSEW)
 
             self.result_selector = ResultSelector(self, colors)
             self.result_selector.grid(row=2, column=0, rowspan=4, sticky=tk.NSEW)
@@ -59,20 +60,20 @@ class StepPage(tk.Frame):
             self.buttons = []
             for column, mode in enumerate(modes):
                 self.buttons.append(tk.Radiobutton(self.tk_frame, text=mode, variable=self.mode_tkvar, value=mode,
-                                    indicatoron=False, bg=tk_color(colors[0]), selectcolor=tk_color(colors[0]),
-                                    font=Font.MED_SMALL.value))
+                                                   indicatoron=False, bg=tk_color(colors[0]),
+                                                   selectcolor=tk_color(colors[0]),
+                                                   font=Font.MED_SMALL.value))
                 self.buttons[-1].grid(row=2, column=column, sticky=tk.NSEW)
                 self.tk_frame.grid_columnconfigure(column, weight=1)
             self.tk_frame.grid_rowconfigure(0, weight=1)
-            self.tk_frame.grid(row=3, column=1, columnspan=2, sticky=tk.NSEW)
+            self.tk_frame.grid(row=3, column=1, columnspan=4, sticky=tk.NSEW)
 
             tick_interval = max(1, ceil((self.state.max_time - self.state.min_time) / 25))
-            resolution = 1 / ticks_per_step
             self.time_slider = tk.Scale(self, from_=self.state.min_time, to=self.state.max_time,
                                         orient=tk.HORIZONTAL, command=self.time_change,
-                                        tickinterval=tick_interval, resolution=resolution, bg=tk_color(colors[3]),
-                                        activebackground=tk_color(colors[0]), troughcolor=tk_color(colors[2]),
-                                        font=Font.MED_SMALL.value)
+                                        tickinterval=tick_interval, resolution=self.actual_steps_per_tick,
+                                        bg=tk_color(colors[3]), activebackground=tk_color(colors[0]),
+                                        troughcolor=tk_color(colors[2]), font=Font.MED_SMALL.value)
             self.time_slider.grid(row=4, column=2, sticky=tk.NSEW)
 
             self.playing_tkvar = tk.BooleanVar(self, False, "playing_tkvar")
@@ -80,12 +81,21 @@ class StepPage(tk.Frame):
                                                 font=Font.MED_SMALL.value)
             self.play_checkbox.grid(row=4, column=1, sticky=tk.NSEW)
 
+            self.speed_slider = tk.Scale(self, from_=1, to=10, orient=tk.HORIZONTAL, tickinterval=9,
+                                         command=self.speed_change, bg=tk_color(colors[3]),
+                                         activebackground=tk_color(colors[0]), troughcolor=tk_color(colors[2]),
+                                         font=Font.MED_SMALL.value)
+            self.speed_slider.set(3)
+            self.speed_slider.grid(row=4, column=4)
+
             self.charge_mode_time_display = tk.Label(self, text="", bg=tk_color(colors[3]))
-            self.charge_mode_time_display.grid(row=5, column=1, columnspan=2, sticky=tk.NSEW)
+            self.charge_mode_time_display.grid(row=5, column=1, columnspan=4, sticky=tk.NSEW)
 
             self.grid_columnconfigure(0, weight=0)
             self.grid_columnconfigure(1, weight=0)
             self.grid_columnconfigure(2, weight=1)
+            self.grid_columnconfigure(3, weight=0)
+            self.grid_columnconfigure(4, weight=0)
             self.grid_rowconfigure(0, weight=0)
             self.grid_rowconfigure(1, weight=0)
             self.grid_rowconfigure(2, weight=1)
@@ -106,11 +116,11 @@ class StepPage(tk.Frame):
         self.menu_bar.destroy()
         self.menu_bar = MenuBar(self, self.display, self.display.Page.CODING, colors,
                                 text=f"Level {set_number}-{level_number}")
-        self.menu_bar.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW)
+        self.menu_bar.grid(row=0, column=0, columnspan=5, sticky=tk.NSEW)
 
         self.overall_result_display.destroy()
         self.overall_result_display = OverallResultDisplay(self)
-        self.overall_result_display.grid(row=1, column=0, columnspan=3, sticky=tk.NSEW)
+        self.overall_result_display.grid(row=1, column=0, columnspan=5, sticky=tk.NSEW)
 
         self.result_selector.destroy()
         self.result_selector = ResultSelector(self, colors)
@@ -118,6 +128,9 @@ class StepPage(tk.Frame):
 
         self.time_slider.config(bg=tk_color(colors[3]), activebackground=tk_color(colors[0]),
                                 troughcolor=tk_color(colors[2]))
+
+        self.speed_slider.config(bg=tk_color(colors[3]), activebackground=tk_color(colors[0]),
+                                 troughcolor=tk_color(colors[2]))
 
         self.play_checkbox.config(bg=tk_color(colors[3]))
 
@@ -182,24 +195,30 @@ class StepPage(tk.Frame):
     def time(self, value):
         self.time_slider.set(value)
 
+    @property
+    def delay_time(self):
+        return 32
+
+    @property
+    def actual_steps_per_tick(self):
+        return 1 / round(ticks_per_step * 2 ** ((3 - self.speed_slider.get()) / 2) if self.speed_slider is not None
+                         else ticks_per_step)
+
     def tick(self, *_):
         if self.playing_tkvar.get():
             if ((self.time < self.state.max_time) if self.mode == "Global Time" else (
                     self.time > self.state.min_charge)):
                 if self.mode == "Global Time":
-                    self.time += 1 / ticks_per_step
+                    self.time += self.actual_steps_per_tick
                     self.time = min(self.time, self.state.max_time)
                 else:
-                    self.time -= 1 / ticks_per_step
+                    self.time -= self.actual_steps_per_tick
                     self.time = max(self.time, self.state.min_charge)
 
             else:
                 self.play_checkbox.deselect()
 
-        if self.state.max_time - self.state.min_time > 100:
-            self.after(ceil(75000 / (self.state.max_time - self.state.min_time) / ticks_per_step), self.tick)
-        else:
-            self.after(ceil(750 / ticks_per_step), self.tick)
+        self.after(self.delay_time, self.tick)
 
     def time_change(self, *_):
         if self.mode == "Global Time":
@@ -209,6 +228,10 @@ class StepPage(tk.Frame):
             self.charge_mode_time_display.config(text="Time: %s" % time,
                                                  bg=tk_color(charge_color(self.time, self.state.max_charge)))
         self.game_canvas.draw(False)
+
+    def speed_change(self, *_):
+        self.time_slider.config(resolution=self.actual_steps_per_tick, from_=self.state.min_time,
+                                to=self.state.max_time)
 
     def alternative_result_change(self, *_):
         self.update_mode()

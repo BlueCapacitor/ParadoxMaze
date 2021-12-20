@@ -39,8 +39,8 @@ class ResultSelector(tk.Frame):
             text = "0" * (num_digits - len(str(alternative_number))) + str(alternative_number)
 
             self.list_box.insert(tk.END, f"Alternative {text} - {result_status_text}")
-            self.list_box.itemconfig(alternative_number, bg=tk_color(colors[2]), selectbackground=tk_color(colors[0]),
-                                     fg=tk_color(colors[1]), selectforeground=tk_color(colors[3]))
+            self.list_box.itemconfig(alternative_number, bg=tk_color(colors[0]), selectbackground=tk_color(colors[1]),
+                                     fg=tk_color(colors[3]), selectforeground=tk_color(colors[2]))
 
         self.list_box.bind('<<ListboxSelect>>', self.result_change)
 
