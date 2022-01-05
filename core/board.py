@@ -4,8 +4,8 @@ Created on Oct 10, 2020
 @author: gosha
 """
 
-from core.tiles.empty import EmptyTile
-from core.tiles.target import TargetTile
+from tiles.empty import EmptyTile
+from tiles.target import TargetTile
 
 
 class Board(object):

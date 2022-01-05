@@ -3,7 +3,8 @@ repeat(10){
 		fd;
 		look;
 		ifClosed{
-			fd; rt;
+			fd;
+			rt;
 			break;
 		}
 	}

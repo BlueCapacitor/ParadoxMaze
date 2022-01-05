@@ -6,7 +6,7 @@ Created on Oct 10, 2020
 
 from enum import Enum
 
-from core.tiles.target import TargetTile
+from tiles.target import TargetTile
 
 
 class State(object):
@@ -22,7 +22,7 @@ class State(object):
             self.control_value_log = {}
         else:
             self.control_value_log = dict(
-                map(lambda entry: (entry[0], entry[1].copy(state=self)), control_value_log.items()))
+                map(lambda entry: (entry[0], entry[1].copy()), control_value_log.items()))
 
         if sticky_values is None:
             self.sticky_values = {}

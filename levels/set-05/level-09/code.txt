@@ -1,11 +1,9 @@
-rt;
-look;
+fd;
 lt;
 fd;
+rt;
+look;
 ifClosed{
-	lt;
-	fd;
-	rt;
 	fd;
 	fd;
 	rt;
@@ -15,6 +13,7 @@ ifClosed{
 }
 ifOpen{
 	rt;
+	fd;
 	fd;
 	lt;
 	fd;

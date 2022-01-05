@@ -1,0 +1,20 @@
+fd;
+look;
+
+ifClosed{
+	repeat(3){
+		fd;
+	}
+}
+ifOpen{
+	rt;
+	fd;
+	fd;
+	look;
+	ifClosed{
+		lt;
+		fd;
+		fd;
+	}
+}
+

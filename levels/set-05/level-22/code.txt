@@ -1,0 +1,31 @@
+def(wind_up_left){
+	fd;
+	look;
+	ifClosed{
+		lt;
+	}
+	ifOpen{
+		fd;
+		fun(wind_up_right);
+		fd;
+		fd;
+	}
+}
+def(wind_up_right){
+	fd;
+	look;
+	ifClosed{
+		rt;
+	}
+	ifOpen{
+		fd;
+		fun(wind_up_left);
+		fd;
+		fd;
+	}
+}
+
+fun(wind_up_left);
+repeat(3){
+	fd;
+}

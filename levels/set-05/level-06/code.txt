@@ -1,25 +1,25 @@
 fd;
-lt;
 fd;
-rt;
-look;
-ifClosed{
-	fd;
-	fd;
-	rt;
-	fd;
-	lt;
-	fd;
+repeat(4){
+	forever{
+		look;
+		ifClosed{
+			rt;
+			fd;
+			lt;
+		}
+		ifOpen{
+			fd;
+			fd;
+			break;
+		}
+	}
 }
-ifOpen{
-	rt;
-	fd;
-	fd;
-	lt;
-	fd;
-	fd;
-	lt;
-	fd;
-	rt;
+rt;
+forever{
+	look;
+	ifClosed{
+		break;
+	}
 	fd;
 }

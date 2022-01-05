@@ -1,19 +1,13 @@
-fd;
-look;
-
-ifClosed{
+forever{
+	lt;
 	repeat(3){
-		fd;
+		look;
+		ifClosed{
+			rt;
+		}
+		ifOpen{
+			break;
+		}
 	}
-}
-ifOpen{
-	rt;
 	fd;
-	fd;
-	look;
-	ifClosed{
-		lt;
-		fd;
-		fd;
-	}
 }

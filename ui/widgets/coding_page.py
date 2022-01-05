@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from core.controller import Controller
-from core.instruction_set import InstructionSet
+from language.code import Code
 from ui import tk_color
 from ui.widgets.coding_box import CodeBox
 from ui.widgets.instruction_display import InstructionDisplay
@@ -84,10 +84,9 @@ class CodingPage(tk.Frame):
         self.display.geometry(f"{width}x{height}+{window_x}+{window_y}")
 
     def run(self, *_):
-        instructions = InstructionSet(self.code_box.text)
-
         robot = self.csv_map.build_robot()
-        controller = Controller(self.board, robot, instructions)
+        code = Code(robot, code=self.code_box.text)
+        controller = Controller(self.board, robot, code)
 
         self.display.current_page = self.display.Page.CALCULATING
 

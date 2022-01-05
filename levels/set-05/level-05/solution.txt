@@ -1,13 +1,28 @@
-forever{
-	lt;
-	repeat(3){
-		look;
-		ifClosed{
-			rt;
-		}
-		ifOpen{
-			break;
-		}
-	}
+repeat(6){
 	fd;
+	lt;
+	fd;
+	rt;
+	look;
+	ifOpen{
+		fd;
+		fd;
+		rt;
+		fd;
+		lt;
+		fd;
+	}
+	ifClosed{
+		rt;
+		fd;
+		fd;
+		lt;
+		fd;
+		fd;
+		lt;
+		fd;
+		rt;
+		fd;
+	}
 }
+

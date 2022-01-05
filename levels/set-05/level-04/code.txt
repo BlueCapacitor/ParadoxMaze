@@ -1,18 +1,26 @@
 fd;
+lt;
+fd;
+rt;
 look;
 ifOpen{
-	repeat(3){
-		fd;
-	}
+	fd;
+	fd;
+	rt;
+	fd;
+	lt;
+	fd;
 }
 ifClosed{
 	rt;
 	fd;
 	fd;
-	look;
-	ifClosed{
-		lt;
-		fd;
-		fd;
-	}
+	lt;
+	fd;
+	fd;
+	lt;
+	fd;
+	rt;
+	fd;
 }
+

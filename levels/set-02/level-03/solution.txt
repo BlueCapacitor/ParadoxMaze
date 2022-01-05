@@ -1,9 +1,16 @@
-forever{
-	look;
-	ifClosed{
-		rt;
+def(forward){
+	forever{
+		look;
+		ifOpen{
+			fd;
+		}
+		ifClosed{
+			break;
+		}
 	}
-	ifOpen{
-		fd;
-	}
+}
+
+repeat(14){
+	fun(forward);
+	rt;
 }

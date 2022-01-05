@@ -2,6 +2,6 @@ forever{
 	fd;
 	look;
 	ifClosed{
-		stop;
+		break;
 	}
 }

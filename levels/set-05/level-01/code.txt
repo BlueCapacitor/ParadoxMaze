@@ -1,25 +1,25 @@
-fd;
-lt;
-fd;
-rt;
-look;
-ifOpen{
-	fd;
-	fd;
-	rt;
-	fd;
-	lt;
-	fd;
+def(fd_all){
+	forever{
+		look;
+		ifClosed{
+			break;
+		}
+		fd;
+	}
 }
-ifClosed{
+forever{
+	fun(fd_all);
 	rt;
+	look;
+	ifClosed{
+		break;
+	}
 	fd;
 	fd;
+	rt;
+	fun(fd_all);
 	lt;
 	fd;
 	fd;
 	lt;
-	fd;
-	rt;
-	fd;
 }

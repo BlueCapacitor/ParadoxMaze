@@ -1,25 +1,22 @@
-fd;
-fd;
-repeat(4){
-	forever{
-		look;
-		ifClosed{
-			rt;
-			fd;
-			lt;
-		}
-		ifOpen{
-			fd;
-			fd;
-			break;
-		}
-	}
-}
-rt;
-forever{
+def(fd_and_backtrack){
 	look;
 	ifClosed{
-		break;
+		rt;
+		rt;
 	}
+	ifOpen{
+		fd;
+		fun(fd_and_backtrack);
+		fd;
+	}
+}
+
+repeat(14){
+	rt;
+	fun(fd_and_backtrack);
+	rt;
+	fd;
 	fd;
 }
+rt;
+fun(fd_and_backtrack);

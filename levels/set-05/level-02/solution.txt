@@ -1,27 +1,41 @@
-repeat(6){
-	fd;
-	lt;
+def(branch_0){
 	fd;
 	rt;
-	look;
-	ifOpen{
-		fd;
-		fd;
+	rt;
+	fd;
+}
+
+def(branch_1){
+	fd;
+	fd;
+	
+	repeat(3){
 		rt;
-		fd;
-		lt;
+		fun(branch_0);
+	}
+	rt;
+	
+	fd;
+	fd;
+}
+
+def(branch_2){
+	repeat(4){
 		fd;
 	}
-	ifClosed{
+	
+	repeat(3){
 		rt;
-		fd;
-		fd;
-		lt;
-		fd;
-		fd;
-		lt;
-		fd;
-		rt;
+		fun(branch_1);
+	}
+	rt;
+	
+	repeat(4){
 		fd;
 	}
+}
+
+repeat(4){
+	fun(branch_2);
+	rt;
 }

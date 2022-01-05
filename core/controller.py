@@ -1,14 +1,14 @@
-from core.instruction_set import Instruction
+from language.primitive_instructions import PrimitiveInstruction
 from core.state import State, Result
-from core.tiles.abstract.control import ControlTile
-from core.tiles.abstract.transport import TransportTile
+from tiles.abstract.control import ControlTile
+from tiles.abstract.transport import TransportTile
 
 number_of_robots = 1
 
 
 class Controller(object):
 
-    def __init__(self, board, robot, instructions, state=None, time=0, look_value=None):
+    def __init__(self, board, robot, code, state=None, time=0, look_value=None):
         self.time = time
 
         self.board = board
@@ -20,7 +20,7 @@ class Controller(object):
         else:
             self.state = state
 
-        self.instructions = instructions
+        self.code = code
         if look_value is not None:
             self.robot.look_value = look_value
 
@@ -136,21 +136,18 @@ class Controller(object):
         return [(result, self.state)]
 
     def step(self):
-        instruction = self.instructions.next_instruction(self.robot)
+        instruction = self.code.next_instruction()
         match instruction:
-            case Instruction.SLEEP:
+            case PrimitiveInstruction.SLEEP:
                 self.robot.sleep()
-            case Instruction.LEFT:
+            case PrimitiveInstruction.LEFT:
                 self.robot.turn_left()
-            case Instruction.RIGHT:
+            case PrimitiveInstruction.RIGHT:
                 self.robot.turn_right()
-            case Instruction.FORWARD:
+            case PrimitiveInstruction.FORWARD:
                 self.robot.move_forward()
-            case Instruction.LOOK:
+            case PrimitiveInstruction.LOOK:
                 self.robot.sleep()
-            case Instruction.DEBUG:
-                print("@@@@ Debug @@@@")
-                return Result.NO_SUCCESS, None
 
         self.time += 1
 
@@ -169,8 +166,9 @@ class Controller(object):
             self.state.log_robot(self.robot, self.time)
 
         return (self.state.is_valid,
-                self.robot.look(self.state, self.time) if instruction == Instruction.LOOK else None, crash_look)
+                self.robot.look(self.state, self.time) if instruction == PrimitiveInstruction.LOOK else None, crash_look)
 
     def copy(self, look_value=None):
-        return Controller(self.board, self.robot.copy(), self.instructions.copy(), state=self.state.copy(),
+        robot = self.robot.copy()
+        return Controller(self.board, robot, self.code.copy_code(robot), state=self.state.copy(),
                           time=self.time, look_value=look_value)

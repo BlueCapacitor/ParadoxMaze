@@ -4,7 +4,7 @@ from math import floor, ceil, cos, pi, sin
 from ui import tk_color, inactive_charge_color, inactive_border_charge_color, charge_color, \
     border_charge_color, \
     apply_robot_move_curve, apply_robot_turn_curve
-from core.tiles import Drawings
+from tiles import Drawings
 from ui.utilities.font import Font
 from ui.widgets.automatic_hide_scrollbar import AutomaticHideScrollbar
 
