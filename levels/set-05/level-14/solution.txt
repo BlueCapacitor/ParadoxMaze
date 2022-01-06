@@ -1,26 +1,25 @@
-rt;
-look;
-lt;
-fd;
-ifClosed{
-	lt;
-	fd;
-	rt;
-	fd;
-	fd;
-	rt;
-	fd;
-	lt;
-	fd;
+def(wind_up){
+	look;
+	ifClosed{
+		rt;
+		fd;
+		fd;
+		rt;
+		fd;
+		fd;
+	}
+	ifOpen{
+		fd;
+		fun(wind_up);
+		fd;
+	}
 }
-ifOpen{
+
+fd;
+rt;
+fd;
+repeat(7){
 	rt;
-	fd;
-	lt;
-	fd;
-	fd;
-	lt;
-	fd;
 	rt;
-	fd;
+	fun(wind_up);
 }

@@ -33,6 +33,8 @@ class LevelSelectPage(tk.Frame):
             self.grid_columnconfigure(column, weight=1)
 
         self.colors = None
+        self.num_rows = 1
+
         self.redraw()
 
     levels_path = path.join(root_path, "levels")
@@ -94,6 +96,11 @@ class LevelSelectPage(tk.Frame):
         for button in self.level_buttons:
             button.destroy()
 
+        for row in range(1, self.num_rows + 1):
+            self.rowconfigure(row, weight=0)
+
+        self.num_rows = 1
+
         self.level_buttons = []
 
         self.read_state_from_file_system()
@@ -121,9 +128,14 @@ class LevelSelectPage(tk.Frame):
         button = tk.Label(self, text=f"{self.set}-{number}", font=Font.LARGE.value,
                           bg=tk_color(self.colors[1]), fg=tk_color(self.colors[2]))
         button.bind("<Button-1>", lambda *_: self.load_level(csv_map_text, code_file_path, instruction_text, number))
-        button.grid(row=(number - 1) // self.buttons_per_row + 1, column=(number - 1) % self.buttons_per_row,
+        row = (number - 1) // self.buttons_per_row + 1
+        button.grid(row=row, column=(number - 1) % self.buttons_per_row,
                     sticky=tk.NSEW, padx=8, pady=8)
-        self.grid_rowconfigure((number - 1) // self.buttons_per_row + 1, weight=1)
+
+        self.grid_rowconfigure(row, weight=1)
+        if row > self.num_rows:
+            self.num_rows = row
+
         self.level_buttons.append(button)
 
     def load_level(self, csv_map_text, code_file_path, instruction_text, level_number):

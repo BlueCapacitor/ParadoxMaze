@@ -1,4 +1,4 @@
-from os import path
+from os import listdir, path
 
 root_path = path.dirname(path.abspath(path.join(__file__, path.pardir)))
 
@@ -37,3 +37,24 @@ class PrintProgress(metaclass=SingletonMeta):
         print("\b" * self.length, end="")
         self.length = 0
         self.text = ""
+
+
+def get_all_levels():
+    out = []
+
+    level_sets = listdir(path.join(root_path, "levels"))
+    level_sets.sort()
+    level_sets_dict = {int(level_set.lstrip("set-")): level_set for level_set in level_sets if level_set[:4] == "set-"}
+
+    for set_num, level_set in level_sets_dict.items():
+        set_path = path.join(root_path, "levels", level_set)
+        levels = list(map(str, listdir(set_path)))
+        levels.sort()
+        levels_dict = {int(level.lstrip("level-")): level for level in levels if level[:6] == "level-"}
+        for level_num, level in levels_dict.items():
+            level_path = path.join(set_path, level)
+            out.append({"Level Path": level_path,
+                        "Level Num": level_num,
+                        "Set Path": set_path,
+                        "Set Num": set_num})
+    return out

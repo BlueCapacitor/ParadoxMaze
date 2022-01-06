@@ -1,20 +1,32 @@
-fd;
-look;
-
-ifClosed{
-	repeat(3){
+def(seek_and_reverse){
+	look;
+	ifOpen{
+		rt;
+		rt;
 		fd;
 	}
+	ifClosed{
+		fd;
+		fd;
+		fun(seek_and_reverse);
+		repeat(4){
+			fd;
+		}
+	}
 }
-ifOpen{
-	rt;
+
+fd;
+rt;
+fun(seek_and_reverse);
+rt;
+repeat(11){
 	fd;
-	fd;
+}
+rt;
+forever{
 	look;
 	ifClosed{
-		lt;
-		fd;
-		fd;
+		break;
 	}
+	fd;
 }
-

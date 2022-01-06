@@ -1,0 +1,13 @@
+def(wind_up){
+	look;
+	ifOpen{
+		fd;
+		fun(wind_up);
+		lt;
+	}
+}
+
+fun(wind_up);
+repeat(3){
+	fd;
+}
