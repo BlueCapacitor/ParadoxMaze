@@ -1,0 +1,1 @@
+To win, you must reach every target tile

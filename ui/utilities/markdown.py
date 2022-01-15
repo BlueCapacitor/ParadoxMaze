@@ -55,6 +55,14 @@ class Markdown:
                     if len(self.parsed) > 0 and len(self.parsed[-1]) > 0:
                         self.parsed.append(list())
                     i += 4
+                case True, '\n', '`', '`', '`', _, _:
+                    assert MarkdownState.INLINE_CODE not in self.markdown_state, "Unclosed inline code"
+                    self.flush_buffer()
+                    self.markdown_state &= ~(MarkdownState.SIZE_BIT1 | MarkdownState.SIZE_BIT2)
+                    if len(self.parsed) > 0 and len(self.parsed[-1]) > 0:
+                        self.parsed.append(list())
+                    self.markdown_state ^= MarkdownState.MULTILINE_CODE
+                    i += 4
                 case True, '\n', _, _, _, _, _:
                     assert MarkdownState.INLINE_CODE not in self.markdown_state, "Unclosed inline code"
                     self.flush_buffer()

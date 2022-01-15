@@ -6,7 +6,7 @@ from ui.utilities.markdown import MarkdownState
 
 
 class MDText(tk.Canvas):
-    def __init__(self, parent, markdown, colors, line_spacing=1, header_spacing=0.5, outer_padding=16, *args, **kwargs):
+    def __init__(self, parent, markdown, colors, line_spacing=1, header_spacing=0.25, outer_padding=16, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.markdown = markdown
         self.colors = colors

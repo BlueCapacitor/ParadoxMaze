@@ -1,0 +1,2 @@
+This tile on the right is also a logical door. However, this one closes when activated and is open otherwise. Note the red ring instead of green.
+(It is not safe the same unit of time that the toggle is activated)

@@ -1,0 +1,1 @@
+These blue tiles are hologram tiles. They are the opposite of the lava: they appear to be walls to the `look;` command, but are actually safe.

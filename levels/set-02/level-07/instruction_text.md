@@ -1,0 +1,1 @@
+These red tiles are lava pits. Your robot can not sense them. They just look like empty tiles to the `look;` command but have the same effect as walls.

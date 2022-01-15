@@ -14,7 +14,7 @@ from language.resolvable_instructions.parametrized_compound_instructions import 
 from language.resolvable_instructions.parametrized_compound_instructions.custom_definition import CustomDefinition
 from language.resolvable_instructions.parametrized_compound_instructions.repeat import Repeat
 from language.resolvable_instructions.parametrized_instructions import ParametrizedInstruction
-from language.resolvable_instructions.parametrized_instructions.function import Function
+from language.resolvable_instructions.parametrized_instructions.subroutine_call import SubroutineCall
 from language.resolvable_instructions.stop import Stop
 
 
@@ -57,7 +57,7 @@ class Code(deque):
         self.instruction_names["debug"] = Debug
 
         self.instruction_names["def"] = CustomDefinition
-        self.instruction_names["fun"] = Function
+        self.instruction_names["fun"] = SubroutineCall
 
     def parse(self, code_str):
         location = 0

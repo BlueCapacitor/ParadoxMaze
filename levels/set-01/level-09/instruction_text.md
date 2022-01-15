@@ -1,0 +1,1 @@
+Your robot will instantly be transported from a portal tile (capital letter/black border) to the corresponding destination tile (lowercase letter/grey border)

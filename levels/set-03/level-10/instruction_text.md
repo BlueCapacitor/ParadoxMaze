@@ -1,0 +1,1 @@
+This is a Time Gate tile. Instead of transporting the robot forward or backward in time by a fixed amount, it will instead transport it to a specific indicated time.

@@ -1,9 +1,0 @@
-forever{
-	fd;
-	forever{
-		look;
-		ifOpen{
-			break;
-		}
-	}
-}

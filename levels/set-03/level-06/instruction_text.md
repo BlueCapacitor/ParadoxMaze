@@ -1,0 +1,1 @@
+The time portal will activate once per 1 unit of time *from the robot's perspective*. Keep standing on the tile to continue further back.

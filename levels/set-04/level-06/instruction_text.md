@@ -1,0 +1,1 @@
+This is a button. It is similar in to a toggle, but unlike a toggle, it only remains active while the robot is on it.

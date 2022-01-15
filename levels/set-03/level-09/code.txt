@@ -1,9 +1,0 @@
-repeat(4){fd;}
-repeat(3){slp;}
-repeat(3){
-	rt;
-	repeat(4){fd;}
-	rt; rt;
-	repeat(4){fd;}
-	repeat(7){slp;}
-}

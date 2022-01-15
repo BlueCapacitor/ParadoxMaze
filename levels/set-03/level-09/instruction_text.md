@@ -1,0 +1,1 @@
+In this level, the timed doors will make it necessary for you to press each of the target tiles at the same time.

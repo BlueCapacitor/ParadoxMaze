@@ -29,7 +29,7 @@ def update_levels():
                 with open(path.join(level_path, map_file_name), 'w') as dest_file:
                     dest_file.write(source_file.read())
 
-            for file_name in ("code.txt", "default_code.txt", "instruction_text.md", "solution.txt"):
+            for file_name in ("code.txt", "default_code.txt", "instruction_text.md", "hint.md", "solution.txt"):
                 file_path = path.join(level_path, file_name)
                 if not path.exists(file_path):
                     with open(file_path, 'x'):

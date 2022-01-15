@@ -1,6 +1,0 @@
-repeat(3){
-	slp;
-}
-repeat(4){
-	fd;
-}
