@@ -3,16 +3,19 @@ import tkinter as tk
 from ui import tk_color
 from ui.utilities.font import Font
 from ui.utilities.markdown import MarkdownState
+from ui.widgets.scroll_bound_canvas import ScrollBoundCanvas
 
 
-class MDText(tk.Canvas):
-    def __init__(self, parent, markdown, colors, line_spacing=1, header_spacing=0.25, outer_padding=16, *args, **kwargs):
+class MDText(ScrollBoundCanvas):
+    def __init__(self, parent, markdown, colors, line_spacing=1, header_spacing=0.25, outer_padding=16,
+                 *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.markdown = markdown
         self.colors = colors
         self.line_spacing = line_spacing
         self.header_spacing = header_spacing
         self.outer_padding = outer_padding
+        self.preferred_height = 0
 
         self.bind("<Configure>", lambda config_event: self.refresh(config_event))
 
@@ -34,7 +37,7 @@ class MDText(tk.Canvas):
                 size = markdown_state.size
                 weight = "bold" if MarkdownState.BOLD in markdown_state else "normal"
                 slant = "italic" if MarkdownState.ITALIC in markdown_state else "roman"
-                font = Font.create_font(size, weight, slant)
+                font, font_spacing = Font.create_font(size, weight, slant)
                 color = tk_color(self.colors[1])\
                     if (MarkdownState.INLINE_CODE not in markdown_state and
                         MarkdownState.MULTILINE_CODE not in markdown_state) else tk_color(self.colors[2])
@@ -65,5 +68,6 @@ class MDText(tk.Canvas):
 
             y += max_height * self.line_spacing
 
-        new_height = y + self.outer_padding
-        self.config(height=new_height)
+        self.preferred_height = y + self.outer_padding
+        self.config(height=self.preferred_height)
+        self.config(scrollregion=(0, 0, total_width, self.preferred_height))

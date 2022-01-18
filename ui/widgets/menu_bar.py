@@ -2,9 +2,28 @@ import tkinter as tk
 
 from ui import tk_color
 from ui.utilities.font import Font
+from ui.widgets.menu_bar_button import MenuBarButton
 
 
 class MenuBar(tk.Frame):
+    back_icon = [[(0, 1 / 2),
+                  (1 / 2, 0),
+                  (1 / 2, 1 / 4),
+                  (1, 1 / 4),
+                  (1, 3 / 4),
+                  (1 / 2, 3 / 4),
+                  (1 / 2, 1)]]
+
+    run_icon = [[(0, 0),
+                 (1, 1 / 2),
+                 (0, 1)]]
+
+    hint_icon = "?"
+
+    solution_icon = [[(1 / 7, y / 7),
+                      (6 / 7, y / 7),
+                      (6 / 7, (y + 1) / 7),
+                      (1 / 7, (y + 1) / 7)] for y in (1, 3, 5)]
 
     def __init__(self, parent, display, back_page, colors, height=32, run_action=None, text=""):
         super().__init__(parent, bg=tk_color(colors[1]))
@@ -13,53 +32,32 @@ class MenuBar(tk.Frame):
         self.display = display
         self.back_page = back_page
         self.height = height
+        self.colors = colors
 
-        self.grid_rowconfigure(0, weight=0)
-        self.grid_columnconfigure(0, weight=0)
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
-        self.back_button = tk.Canvas(self, width=self.height, height=self.height, bg=tk_color(colors[1]),
-                                     highlightthickness=0, relief=tk.RAISED, bd=2)
+        self.left_button_container = tk.Frame(self, bg=tk_color(self.colors[1]))
+        self.left_button_container.place(anchor=tk.W, relx=0, rely=0.5)
 
-        arrow_size = self.height * 3 / 4
-        arrow_tl = self.height * 1 / 8
-        self.back_button.create_polygon(arrow_tl, arrow_tl + arrow_size / 2,
-                                        arrow_tl + arrow_size / 2, arrow_tl,
-                                        arrow_tl + arrow_size / 2, arrow_tl + arrow_size / 4,
-                                        arrow_tl + arrow_size, arrow_tl + arrow_size / 4,
-                                        arrow_tl + arrow_size, arrow_tl + arrow_size * 3 / 4,
-                                        arrow_tl + arrow_size / 2, arrow_tl + arrow_size * 3 / 4,
-                                        arrow_tl + arrow_size / 2, arrow_tl + arrow_size,
-                                        arrow_tl, arrow_tl + arrow_size / 2,
-                                        fill=tk_color(colors[2]))
-
-        self.back_button.xview_moveto(0)
-        self.back_button.yview_moveto(0)
-
-        self.back_button.grid(row=0, column=0, sticky=tk.N + tk.S + tk.W, padx=2.5, pady=2.5)
-        self.back_button.bind("<Button-1>", self.go_back)
+        self.right_button_container = tk.Frame(self, bg=tk_color(self.colors[1]))
+        self.right_button_container.place(anchor=tk.E, relx=1, rely=0.5)
 
         self.label = tk.Label(self, text=text, font=Font.LARGE.value,
-                              bg=tk_color(colors[1]), fg=tk_color(colors[0]))
-        self.label.grid(row=0, column=1, sticky=tk.NSEW)
+                              bg=tk_color(self.colors[1]), fg=tk_color(self.colors[0]))
+        self.label.grid(row=0, column=0)
+
+        self.add_button(False, self.go_back, MenuBar.back_icon)
 
         if run_action is not None:
-            self.run_button = tk.Canvas(self, width=self.height, height=self.height, bg=tk_color(colors[1]),
-                                        highlightthickness=0, relief=tk.RAISED, bd=2)
+            self.add_button(True, run_action, MenuBar.run_icon)
+            self.add_button(True, None, MenuBar.hint_icon)
+            self.add_button(True, None, MenuBar.solution_icon)
 
-            arrow_size = self.height * 3 / 4
-            arrow_tl = self.height * 1 / 8
-            self.run_button.create_polygon(arrow_tl, arrow_tl,
-                                           arrow_tl + arrow_size, arrow_tl + arrow_size / 2,
-                                           arrow_tl, arrow_tl + arrow_size,
-                                           arrow_tl, arrow_tl,
-                                           fill=tk_color(colors[2]))
-
-            self.run_button.xview_moveto(0)
-            self.run_button.yview_moveto(0)
-
-            self.run_button.grid(row=0, column=2, sticky=tk.N + tk.S + tk.E, padx=2.5, pady=2.5)
-            self.run_button.bind("<Button-1>", run_action)
+    def add_button(self, side, action, icon):
+        button = MenuBarButton(self.right_button_container if side else self.left_button_container, self.height,
+                               self.colors, icon, action=action)
+        button.pack(side=tk.RIGHT if side else tk.LEFT, padx=(2.5 * (not side), 2.5 * side), pady=2.5)
 
     def go_back(self, *_):
         self.display.current_page = self.back_page

@@ -7,6 +7,7 @@ from ui import tk_color, inactive_charge_color, inactive_border_charge_color, ch
 from tiles import Drawings
 from ui.utilities.font import Font
 from ui.widgets.automatic_hide_scrollbar import AutomaticHideScrollbar
+from ui.widgets.scroll_bound_canvas import ScrollBoundCanvas
 
 
 class GameCanvas(tk.Frame):
@@ -22,10 +23,10 @@ class GameCanvas(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.canvas = tk.Canvas(self, width=(self.board.width + 1) * self.tile_size,
-                                height=(self.board.height + 1) * self.tile_size,
-                                scrollregion=(0, 0, (self.board.width + 1) * self.tile_size,
-                                              (self.board.height + 1) * self.tile_size), highlightthickness=0)
+        self.canvas = ScrollBoundCanvas(self, width=(self.board.width + 1) * self.tile_size,
+                                        height=(self.board.height + 1) * self.tile_size,
+                                        scrollregion=(0, 0, (self.board.width + 1) * self.tile_size,
+                                                      (self.board.height + 1) * self.tile_size), highlightthickness=0)
         self.canvas.grid(row=0, column=0, sticky=tk.NSEW)
 
         self.scroll_v = AutomaticHideScrollbar(self, orient=tk.VERTICAL, command=self.canvas.yview)

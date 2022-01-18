@@ -95,14 +95,14 @@ class Markdown:
                     self.flush_buffer()
                     self.markdown_state ^= MarkdownState.ITALIC
                     i += 1
-                case _, '`', '`', '`', _, _, _:
+                case _, '`', '`', '`', '\n', _, _:
                     assert MarkdownState.INLINE_CODE not in self.markdown_state, "Unclosed inline code"
                     self.flush_buffer()
                     self.markdown_state &= ~(MarkdownState.SIZE_BIT1 | MarkdownState.SIZE_BIT2)
                     if len(self.parsed) > 0 and len(self.parsed[-1]) > 0:
                         self.parsed.append(list())
                     self.markdown_state ^= MarkdownState.MULTILINE_CODE
-                    i += 3
+                    i += 4
                 case _, '`', _, _, _, _, _:
                     self.flush_buffer()
                     self.markdown_state ^= MarkdownState.INLINE_CODE

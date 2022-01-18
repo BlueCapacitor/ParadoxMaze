@@ -8,6 +8,7 @@ class Font(Enum):
     HUGE = (family, 64)
     LARGER = (family, 48)
     LARGE = (family, 32)
+    MED_LARGE = (family, 24)
     NORMAL = (family, 16)
     MED_SMALL = (family, 12)
     SMALL = (family, 8)
@@ -23,4 +24,5 @@ class Font(Enum):
     @staticmethod
     def create_font(size, weight="normal", slant="roman"):
         base_font = (Font.NORMAL, Font.LARGE, Font.LARGER, Font.HUGE)[size]
-        return base_font.value + (weight, slant)
+        spacing = 0.5 * base_font.value[1]
+        return base_font.value + (weight, slant), spacing
