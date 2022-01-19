@@ -135,9 +135,6 @@ class GameCanvas(tk.Frame):
             else:
                 self.canvas.delete("robot")
 
-            self.canvas.config(
-                scrollregion=(0, 0, (self.board.width + 1) * self.tile_size, (self.board.height + 1) * self.tile_size))
-
             robots = self.state.get_robots_at_time(time0)
 
             for robot0 in robots:
@@ -158,6 +155,9 @@ class GameCanvas(tk.Frame):
 
         if colors is not None:
             self.set_colors(colors)
+
+        self.canvas.config(
+            scrollregion=(0, 0, (self.board.width + 1) * self.tile_size, (self.board.height + 1) * self.tile_size))
 
     def draw_board(self):
         self.canvas.create_rectangle(*self.screen_coords(-0.5, -0.5),
