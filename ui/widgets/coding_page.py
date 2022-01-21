@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 
 from core.controller import Controller
@@ -36,6 +37,14 @@ class CodingPage(tk.Frame):
         self.set_number = 0
         self.level_number = 0
 
+        match sys.platform:
+            case "darwin":
+                self.cursor_names = ["resizeupdown", "resizeleftright"]
+            case "win32":
+                self.cursor_names = ["size_ns", "size_we"]
+            case _:
+                self.cursor_names = ["", ""]
+
         self.bind("<Configure>", self.resized)
 
     def load_level(self, csv_map, code_file_path, instruction_text, colors, set_number, level_number):
@@ -65,14 +74,15 @@ class CodingPage(tk.Frame):
 
         if has_instructions:
             self.vertical_paned_window = tk.PanedWindow(self, orient=tk.VERTICAL, borderwidth=0, sashwidth=8,
-                                                        bg=tk_color(self.colors[1]))
+                                                        bg=tk_color(self.colors[1]), sashcursor=self.cursor_names[0])
             self.vertical_paned_window.grid(row=1, column=0, sticky=tk.NSEW)
 
         if self.instruction_display is not None:
             self.instruction_display.destroy()
 
         if has_instructions:
-            self.instruction_display = InstructionDisplay(self.vertical_paned_window, self.colors, self.instruction_text)
+            self.instruction_display = InstructionDisplay(self.vertical_paned_window, self.colors,
+                                                          self.instruction_text)
             self.vertical_paned_window.add(self.instruction_display)
 
         if self.horizontal_paned_window is not None:
@@ -80,7 +90,7 @@ class CodingPage(tk.Frame):
 
         self.horizontal_paned_window = tk.PanedWindow(self.vertical_paned_window if has_instructions else self,
                                                       orient=tk.HORIZONTAL, borderwidth=0, sashwidth=8,
-                                                      bg=tk_color(self.colors[1]))
+                                                      bg=tk_color(self.colors[1]), sashcursor=self.cursor_names[1])
         if has_instructions:
             self.vertical_paned_window.add(self.horizontal_paned_window)
         else:
