@@ -7,8 +7,8 @@ from ui.widgets.automatic_hide_scrollbar import AutomaticHideScrollbar
 
 class CodeBox(tk.Frame):
 
-    def __init__(self, coding_page):
-        super().__init__(coding_page)
+    def __init__(self, parent, coding_page):
+        super().__init__(parent)
         self.coding_page = coding_page
 
         self.do_not_overwrite_file = False

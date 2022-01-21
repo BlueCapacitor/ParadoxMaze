@@ -7,7 +7,7 @@ class AutomaticHideScrollbar(tk.Scrollbar):
         self.mode = "grid"
 
     def set(self, low, high):
-        if float(low) <= 0.0 and float(high) >= 1.0:
+        if float(low) <= 0 and float(high) >= 1:
             self.hide()
         else:
             self.show()

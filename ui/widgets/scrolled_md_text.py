@@ -1,12 +1,13 @@
 import tkinter as tk
 
+from ui import tk_color
 from ui.widgets.automatic_hide_scrollbar import AutomaticHideScrollbar
 from ui.widgets.md_text import MDText
 
 
 class ScrolledMDText(tk.Frame):
-    def __init__(self, parent, reference_widget, *args, max_ratio=0.25, **kwargs):
-        super().__init__(parent, height=256)
+    def __init__(self, parent, reference_widget, markdown, colors, *args, max_ratio=0.25, **kwargs):
+        super().__init__(parent, height=256, bg=tk_color(colors[1]))
 
         self.parent = parent
         self.reference_widget = reference_widget
@@ -14,7 +15,7 @@ class ScrolledMDText(tk.Frame):
 
         self.pack_propagate(False)
 
-        self.md_text = MDText(self, *args, **kwargs)
+        self.md_text = MDText(self, markdown, colors, *args, **kwargs)
         self.md_text.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         self.scrollbar = AutomaticHideScrollbar(self, orient=tk.VERTICAL, command=self.md_text.yview)
@@ -23,6 +24,9 @@ class ScrolledMDText(tk.Frame):
 
         self.bind("<Configure>", self.resize)
 
+    @property
+    def max_height(self):
+        return self.md_text.preferred_height
+
     def resize(self, *_args, **_kwargs):
-        self.config(height=min(self.reference_widget.winfo_height() * self.max_ratio, self.md_text.preferred_height))
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
