@@ -9,7 +9,7 @@ from language.resolvable_instructions.compound_instructions.forever import Forev
 from language.resolvable_instructions.compound_instructions.if_closed import IfClosed
 from language.resolvable_instructions.compound_instructions.if_open import IfOpen
 from language.resolvable_instructions.continue_ import Continue
-from language.resolvable_instructions.debug import Debug
+from language.resolvable_instructions.parametrized_instructions.debug import Debug
 from language.resolvable_instructions.parametrized_compound_instructions import ParametrizedCompoundInstruction
 from language.resolvable_instructions.parametrized_compound_instructions.custom_definition import CustomDefinition
 from language.resolvable_instructions.parametrized_compound_instructions.repeat import Repeat

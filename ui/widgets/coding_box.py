@@ -74,6 +74,7 @@ class CodeBox(tk.Frame):
         return text
 
     class TextWithModifiedCallback(tk.Text):
+        # noinspection PyUnresolvedReferences
         def __init__(self, *args, **kwargs):
             tk.Text.__init__(self, *args, **kwargs)
 

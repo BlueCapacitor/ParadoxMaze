@@ -19,29 +19,33 @@ def write_to_solutions():
         with open(path.join(level_path, "code.txt"), 'r') as code_file,\
                 open(path.join(level_path, f"{set_num}-{level_num}-map.csv"), 'r') as map_file:
             code_str = code_file.read()
-            map_text = map_file.read()
+            if len(code_str) > 0:
+                map_text = map_file.read()
 
-            csv_map = CSVMap(map_text)
+                csv_map = CSVMap(map_text)
 
-            robot = csv_map.build_robot()
-            board = csv_map.build_board()
-            code = Code(robot, code=code_str)
-            controller = Controller(board, robot, code)
+                robot = csv_map.build_robot()
+                board = csv_map.build_board()
+                code = Code(robot, code=code_str)
+                controller = Controller(board, robot, code)
 
-            results = controller.run()
+                results = controller.run()
 
-            overall = Result.SUCCESS
-            for result, _ in results:
-                if result != Result.UNRECOVERABLE_PARADOX:
-                    overall |= result
+                overall = Result.SUCCESS
+                for result, _ in results:
+                    if result != Result.UNRECOVERABLE_PARADOX:
+                        overall |= result
 
-            num_tested += 1
-            if overall == Result.SUCCESS:
-                num_success += 1
-                with open(path.join(level_path, "solution.txt"), 'w') as solution_file:
-                    solution_file.write(code_str)
+                num_tested += 1
+                if overall == Result.SUCCESS:
+                    num_success += 1
+                    with open(path.join(level_path, "solution.txt"), 'w') as solution_file:
+                        solution_file.write(code_str)
+                else:
+                    print(f"{set_num:02}-{level_num:02}: Fail", file=PrintOut())
             else:
-                print(f"{set_num:02}-{level_num:02}: Fail", file=PrintOut())
+                num_tested += 1
+                print(f"{set_num:02}-{level_num:02}: Empty", file=PrintOut())
 
             PrintProgress().clear()
             print(f"\t{set_num:02}-{level_num:02} | {num_success} / {num_tested}", file=PrintProgress())
