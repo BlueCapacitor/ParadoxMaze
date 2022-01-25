@@ -10,7 +10,7 @@ from ui.widgets.automatic_hide_scrollbar import AutomaticHideScrollbar
 class ResultSelector(tk.Frame):
 
     def __init__(self, parent, colors):
-        super().__init__(parent, bg=tk_color(colors[1]))
+        super().__init__(parent, bg=tk_color(colors[1]), highlightthickness=0)
         self.parent = parent
 
         self.grid_rowconfigure(0, weight=1)

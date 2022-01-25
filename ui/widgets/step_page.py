@@ -62,7 +62,7 @@ class StepPage(tk.Frame):
                 self.buttons.append(tk.Radiobutton(self.tk_frame, text=mode, variable=self.mode_tkvar, value=mode,
                                                    indicatoron=False, bg=tk_color(colors[0]),
                                                    selectcolor=tk_color(colors[0]),
-                                                   font=Font.MED_SMALL.value))
+                                                   font=Font.MED_SMALL.value, activebackground=tk_color(colors[1])))
                 self.buttons[-1].grid(row=2, column=column, sticky=tk.NSEW)
                 self.tk_frame.grid_columnconfigure(column, weight=1)
             self.tk_frame.grid_rowconfigure(0, weight=1)
@@ -73,7 +73,8 @@ class StepPage(tk.Frame):
                                         orient=tk.HORIZONTAL, command=self.time_change,
                                         tickinterval=tick_interval, resolution=self.actual_steps_per_tick,
                                         bg=tk_color(colors[3]), activebackground=tk_color(colors[0]),
-                                        troughcolor=tk_color(colors[2]), font=Font.MED_SMALL.value)
+                                        troughcolor=tk_color(colors[2]), font=Font.MED_SMALL.value,
+                                        highlightthickness=0)
             self.time_slider.grid(row=4, column=2, sticky=tk.NSEW)
 
             self.playing_tkvar = tk.BooleanVar(self, False, "playing_tkvar")
@@ -84,7 +85,7 @@ class StepPage(tk.Frame):
             self.speed_slider = tk.Scale(self, from_=1, to=10, orient=tk.HORIZONTAL, tickinterval=9,
                                          command=self.speed_change, bg=tk_color(colors[3]),
                                          activebackground=tk_color(colors[0]), troughcolor=tk_color(colors[2]),
-                                         font=Font.MED_SMALL.value)
+                                         font=Font.MED_SMALL.value, highlightthickness=0)
             self.speed_slider.set(3)
             self.speed_slider.grid(row=4, column=4)
 

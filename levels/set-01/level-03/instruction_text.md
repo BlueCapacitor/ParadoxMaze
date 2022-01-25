@@ -1,1 +1,1 @@
-New command: `rt;` turns the robot 90° to the right 
+New command: `rt;` turns the robot 90 degrees to the right

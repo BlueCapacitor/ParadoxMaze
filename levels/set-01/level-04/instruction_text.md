@@ -1,1 +1,1 @@
-New command: `lt;` turns the robot 90° to the left 
+New command: `lt;` turns the robot 90 degrees to the left 
