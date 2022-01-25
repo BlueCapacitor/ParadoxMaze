@@ -3,6 +3,7 @@ from tiles.abstract.control import ControlTile
 
 
 class OffToggleTile(ControlTile):
+    needs_refresh = True
 
     def __init__(self, x, y, control_id):
         super().__init__(x, y)

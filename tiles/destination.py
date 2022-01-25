@@ -3,6 +3,7 @@ from tiles.empty import EmptyTile
 
 
 class DestinationTile(EmptyTile):
+    needs_refresh = True
 
     def __init__(self, x, y, letter='', color=None):
         super().__init__(x, y)

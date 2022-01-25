@@ -3,6 +3,7 @@ from tiles.empty import EmptyTile
 
 
 class CloseTimedDoorTile(EmptyTile):
+    needs_refresh = True
 
     def __init__(self, x, y, trigger_time):
         super().__init__(x, y)

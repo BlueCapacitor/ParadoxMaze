@@ -3,6 +3,7 @@ from tiles.empty import EmptyTile
 
 
 class TargetTile(EmptyTile):
+    needs_refresh = True
 
     def get_drawing(self, state, time):
         for check_time in range(state.min_time, time + 1):

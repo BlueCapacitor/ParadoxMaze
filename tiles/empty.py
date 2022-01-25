@@ -1,6 +1,7 @@
 class EmptyTile(object):
     is_static = True
     is_time_travel = False
+    needs_refresh = False
 
     def __init__(self, x, y):
         self.x = x

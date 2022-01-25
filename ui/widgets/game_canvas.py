@@ -86,9 +86,10 @@ class GameCanvas(tk.Frame):
 
     def draw(self, force_reset, colors=None):
         if self.mode == "Global Time":
-            if self.tile_time_changed or force_reset:
-                self.canvas.delete(tk.ALL)
+            if force_reset:
                 self.draw_board()
+            elif self.tile_time_changed:
+                self.draw_board(only_draw_needs_refresh=True)
             else:
                 self.canvas.delete("robot")
 
@@ -127,11 +128,10 @@ class GameCanvas(tk.Frame):
             time0 = floor(slice_time)
             time1 = ceil(slice_time)
 
-            if force_reset or round(slice_time) != self.p_round_slice_time:
-                self.canvas.delete(tk.ALL)
+            if force_reset:
                 self.draw_board()
-
-                self.p_round_slice_time = round(slice_time)
+            elif self.tile_time_changed:
+                self.draw_board(only_draw_needs_refresh=True)
             else:
                 self.canvas.delete("robot")
 
@@ -159,70 +159,79 @@ class GameCanvas(tk.Frame):
         self.canvas.config(
             scrollregion=(0, 0, (self.board.width + 1) * self.tile_size, (self.board.height + 1) * self.tile_size))
 
-    def draw_board(self):
-        self.canvas.create_rectangle(*self.screen_coords(-0.5, -0.5),
-                                     *self.screen_coords(self.board.width - 0.5, self.board.height - 0.5),
-                                     fill=tk_color((0, 0, 0)), width=0)
+    def draw_board(self, only_draw_needs_refresh=False):
+        if only_draw_needs_refresh:
+            self.canvas.delete("needs_refresh_tile", "robot")
+        else:
+            self.canvas.delete(tk.ALL)
+
+            self.canvas.create_rectangle(*self.screen_coords(-0.5, -0.5),
+                                         *self.screen_coords(self.board.width - 0.5, self.board.height - 0.5),
+                                         fill=tk_color((0, 0, 0)), width=0)
 
         time = self.tile_time if self.mode == "Global Time" else self.state.get_robot_with_charge(self.tile_time)[1]
         for tile in self.board.list_tiles:
-            self.draw_tile(tile, time)
+            if (not only_draw_needs_refresh) or tile.needs_refresh:
+                self.draw_tile(tile, time)
 
     def draw_tile(self, tile, time):
         drawing = tile.get_drawing(self.state, time)
-        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_ring_size, drawing[0])
-        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_center_size, drawing[1])
+        tags = ("needs_refresh_tile",) if tile.needs_refresh else ()
+        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_ring_size, drawing[0], tags=tags)
+        self.draw_square(*self.screen_coords(tile.x, tile.y), self.tile_center_size, drawing[1], tags=tags)
         for procedure in drawing[2:]:
             match procedure:
                 case Drawings.RECT, size, color:
-                    self.draw_square(*self.screen_coords(tile.x, tile.y), size * self.tile_center_size, color)
+                    self.draw_square(*self.screen_coords(tile.x, tile.y), size * self.tile_center_size, color,
+                                     tags=tags)
 
                 case Drawings.TEXT, text, color:
                     self.canvas.create_text(*self.screen_coords(tile.x, tile.y), text=text, fill=tk_color(color),
-                                            width=self.tile_center_size)
+                                            width=self.tile_center_size, tags=tags)
 
                 case Drawings.FLARE, diagonal_size, rectilinear_size, color:
                     self.draw_flare(*self.screen_coords(tile.x, tile.y), diagonal_size * self.tile_center_size,
-                                    rectilinear_size * self.tile_center_size, color)
+                                    rectilinear_size * self.tile_center_size, color, tags=tags)
 
                 case Drawings.CIRCLE, radius, color:
-                    self.draw_circle(*self.screen_coords(tile.x, tile.y), radius * self.tile_center_size, color)
+                    self.draw_circle(*self.screen_coords(tile.x, tile.y), radius * self.tile_center_size, color,
+                                     tags=tags)
 
                 case Drawings.REG_POLY, n, radius, color:
                     self.draw_regular_poly(*self.screen_coords(tile.x, tile.y), n, radius * self.tile_center_size,
-                                           color)
+                                           color, tags=tags)
 
                 case Drawings.REG_POLY, n, radius, angle_offset, color:
                     self.draw_regular_poly(*self.screen_coords(tile.x, tile.y), n, radius * self.tile_center_size,
-                                           color, angle_offset=angle_offset)
+                                           color, angle_offset=angle_offset, tags=tags)
 
                 case Drawings.CORNERS, distance, width, color:
                     self.draw_corners(*self.screen_coords(tile.x, tile.y), distance * self.tile_ring_size,
-                                      width * self.tile_ring_size, color)
+                                      width * self.tile_ring_size, color, tags=tags)
 
-    def draw_square(self, x, y, side, color, border=0):
+    def draw_square(self, x, y, side, color, border=0, tags=()):
         self.canvas.create_rectangle(x + side / 2, y - side / 2,
                                      x - side / 2, y + side / 2,
                                      fill=tk_color(color),
-                                     width=border, outline="#000")
+                                     width=border, outline="#000", tags=tags)
 
-    def draw_circle(self, x, y, radius, color, border=0):
+    def draw_circle(self, x, y, radius, color, border=0, tags=()):
         self.canvas.create_oval(x + radius, y - radius,
                                 x - radius, y + radius,
                                 fill=tk_color(color),
-                                width=border, outline="#000")
+                                width=border, outline="#000", tags=tags)
 
-    def draw_flare(self, x, y, d, rl, color):
+    def draw_flare(self, x, y, d, rl, color, tags=()):
         self.canvas.create_polygon(x + rl / 2, y, x + d / 2, y + d / 2, x, y + rl / 2, x - d / 2, y + d / 2,
                                    x - rl / 2, y, x - d / 2, y - d / 2, x, y - rl / 2, x + d / 2, y - d / 2,
-                                   fill=tk_color(color), width=0)
+                                   fill=tk_color(color), width=0, tags=tags)
 
-    def draw_regular_poly(self, x, y, n, r, color, angle_offset=0):
+    def draw_regular_poly(self, x, y, n, r, color, angle_offset=0, tags=()):
         points = zip((x + r * sin((i + angle_offset) * 2 * pi / n) for i in range(n)),
                      (y + r * cos((i + angle_offset) * 2 * pi / n) for i in range(n)))
-        self.canvas.create_polygon(*points, fill=tk_color(color), width=0)
+        self.canvas.create_polygon(*points, fill=tk_color(color), width=0, tags=tags)
 
-    def draw_corners(self, x, y, distance, width, color):
+    def draw_corners(self, x, y, distance, width, color, tags=()):
         inner = distance - width / 2
         outer = distance + width / 2
         full = self.tile_ring_size / 2
@@ -234,7 +243,7 @@ class GameCanvas(tk.Frame):
                                            x + outer * dx, y + full * dy,
                                            x + full * dx, y + outer * dy,
                                            x + full * dx, y + inner * dy,
-                                           fill=tk_color(color), width=0)
+                                           fill=tk_color(color), width=0, tags=tags)
 
     def draw_robot(self, robot, color_function=None, border=2, border_color_function=None, scale=0.75):
         if color_function is None:

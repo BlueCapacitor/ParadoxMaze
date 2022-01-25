@@ -3,6 +3,7 @@ from tiles.abstract.non_static_door import NonStaticDoorTile
 
 
 class CloseLogicalDoorTile(NonStaticDoorTile):
+    needs_refresh = True
 
     def __init__(self, x, y, control_id):
         super().__init__(x, y)

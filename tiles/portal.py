@@ -3,6 +3,7 @@ from tiles.abstract.transport import TransportTile
 
 
 class PortalTile(TransportTile):
+    needs_refresh = True
 
     def __init__(self, x, y, destination_tile):
         super().__init__(x, y)
