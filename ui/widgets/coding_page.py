@@ -1,10 +1,12 @@
 import sys
 import tkinter as tk
+from tkinter import messagebox
 
 from core.controller import Controller
 from language.code import Code
 from ui import tk_color
 from ui.widgets.coding_box import CodeBox
+from ui.widgets.hint_window import HintWindow
 from ui.widgets.instruction_display import InstructionDisplay
 from ui.widgets.menu_bar import MenuBar
 from ui.widgets.preview_canvas import PreviewCanvas
@@ -34,6 +36,8 @@ class CodingPage(tk.Frame):
         self.instruction_display = None
         self.code_box = None
         self.instruction_text = ""
+        self.hint_text = ""
+        self.solution = ""
         self.set_number = 0
         self.level_number = 0
 
@@ -47,10 +51,13 @@ class CodingPage(tk.Frame):
 
         self.bind("<Configure>", self.resized)
 
-    def load_level(self, csv_map, code_file_path, instruction_text, colors, set_number, level_number):
+    def load_level(self, csv_map, code_file_path, instruction_text, hint_text, solution, colors, set_number,
+                   level_number):
         self.csv_map = csv_map
         self.code_file_path = code_file_path
         self.instruction_text = instruction_text
+        self.hint_text = hint_text
+        self.solution = solution
         self.set_number = set_number
         self.level_number = level_number
         self.draw(colors)
@@ -65,8 +72,14 @@ class CodingPage(tk.Frame):
         if self.menu_bar is not None:
             self.menu_bar.destroy()
 
+        menu_bar_buttons = ([], [(self.run, MenuBar.run_icon)])
+        if self.hint_text:
+            # noinspection PyTypeChecker
+            menu_bar_buttons[1].append((self.show_hint, MenuBar.hint_icon))
+
         self.menu_bar = MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, self.colors,
-                                run_action=self.run, text=f"Level {self.set_number}-{self.level_number}")
+                                buttons=menu_bar_buttons,
+                                text=f"Level {self.set_number}-{self.level_number}")
         self.menu_bar.grid(row=0, column=0, sticky=tk.NSEW)
 
         if self.vertical_paned_window is not None:
@@ -141,3 +154,8 @@ class CodingPage(tk.Frame):
         self.display.results = results
         self.display.current_page = self.display.Page.STEP
         self.display.current_page.page.draw(self.colors, self.set_number, self.level_number)
+
+    def show_hint(self, *_args, **_kwargs):
+        confirmation = messagebox.askyesno("Show Hint?", "Are you sure that you want to see a hint?")
+        if confirmation:
+            HintWindow(self, self.hint_text, self.colors)

@@ -6,11 +6,10 @@ from ui.widgets.md_text import MDText
 
 
 class ScrolledMDText(tk.Frame):
-    def __init__(self, parent, reference_widget, markdown, colors, *args, max_ratio=0.25, **kwargs):
+    def __init__(self, parent, markdown, colors, *args, max_ratio=0.25, **kwargs):
         super().__init__(parent, height=256, bg=tk_color(colors[1]))
 
         self.parent = parent
-        self.reference_widget = reference_widget
         self.max_ratio = max_ratio
 
         self.pack_propagate(False)

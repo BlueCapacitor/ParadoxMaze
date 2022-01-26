@@ -9,7 +9,7 @@ from ui.widgets.scroll_bound_canvas import ScrollBoundCanvas
 class MDText(ScrollBoundCanvas):
     def __init__(self, parent, markdown, colors, line_spacing=1, header_spacing=0.25, outer_padding=16,
                  *args, **kwargs):
-        super().__init__(parent, *args, **kwargs)
+        super().__init__(parent, bg=tk_color(colors[0]), highlightthickness=0, bd=0, *args, **kwargs)
         self.markdown = markdown
         self.colors = colors
         self.line_spacing = line_spacing

@@ -25,7 +25,7 @@ class MenuBar(tk.Frame):
                       (6 / 7, (y + 1) / 7),
                       (1 / 7, (y + 1) / 7)] for y in (1, 3, 5)]
 
-    def __init__(self, parent, display, back_page, colors, height=32, run_action=None, text=""):
+    def __init__(self, parent, display, back_page, colors, height=32, buttons=None, text=""):
         super().__init__(parent, bg=tk_color(colors[1]))
 
         self.parent = parent
@@ -49,10 +49,10 @@ class MenuBar(tk.Frame):
 
         self.add_button(False, self.go_back, MenuBar.back_icon)
 
-        if run_action is not None:
-            self.add_button(True, run_action, MenuBar.run_icon)
-            self.add_button(True, None, MenuBar.hint_icon)
-            self.add_button(True, None, MenuBar.solution_icon)
+        if buttons is not None:
+            for side in (False, True):
+                for action, icon in buttons[side]:
+                    self.add_button(side, action, icon)
 
     def add_button(self, side, action, icon):
         button = MenuBarButton(self.right_button_container if side else self.left_button_container, self.height,
