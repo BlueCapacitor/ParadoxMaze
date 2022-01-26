@@ -52,11 +52,13 @@ class CodeBox(tk.Frame):
     def load_file(self):
         self.do_not_overwrite_file = True
         file_path = self.coding_page.code_file_path
-        file = open(file_path, 'r')
-        self.text_box.delete("0.0", tk.END)
-        self.text_box.insert(tk.END, file.read())
-        file.close()
+        with open(file_path, 'r') as file:
+            self.write_value(file.read())
         self.do_not_overwrite_file = False
+
+    def write_value(self, text):
+        self.text_box.delete("0.0", tk.END)
+        self.text_box.insert(tk.END, text)
 
     def save(self, *_):
         if not self.do_not_overwrite_file:

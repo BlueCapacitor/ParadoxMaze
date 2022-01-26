@@ -74,8 +74,8 @@ class CodingPage(tk.Frame):
 
         menu_bar_buttons = ([], [(self.run, MenuBar.run_icon)])
         if self.hint_text:
-            # noinspection PyTypeChecker
             menu_bar_buttons[1].append((self.show_hint, MenuBar.hint_icon))
+        menu_bar_buttons[1].append((self.show_solution, MenuBar.solution_icon))
 
         self.menu_bar = MenuBar(self, self.display, self.display.Page.LEVEL_SELECT, self.colors,
                                 buttons=menu_bar_buttons,
@@ -159,3 +159,9 @@ class CodingPage(tk.Frame):
         confirmation = messagebox.askyesno("Show Hint?", "Are you sure that you want to see a hint?")
         if confirmation:
             HintWindow(self, self.hint_text, self.colors)
+
+    def show_solution(self, *_args, **_kwargs):
+        confirmation = messagebox.askyesno("Show Solution?",
+                                           "Are you sure that you want to see the solution to this level?")
+        if confirmation:
+            self.code_box.write_value(self.solution)
