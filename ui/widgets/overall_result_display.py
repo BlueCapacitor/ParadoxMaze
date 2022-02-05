@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from core.state import Result
+from core.state_v2 import Result
 from ui import tk_color
 from ui.utilities.font import Font
 

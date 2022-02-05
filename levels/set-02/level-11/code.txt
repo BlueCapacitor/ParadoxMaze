@@ -1,0 +1,12 @@
+repeat(10){
+	forever{
+		fd;
+		look;
+		ifClosed{
+			fd;
+			rt;
+			break;
+		}
+	}
+}
+fd;

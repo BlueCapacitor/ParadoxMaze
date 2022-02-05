@@ -1,0 +1,50 @@
+def(fd_to_wall){
+	forever{
+		look;
+		ifClosed{
+			break;
+		}
+		fd;
+	}
+}
+
+def(fd_and_backtrack){
+	look;
+	ifClosed{
+		rt;
+		rt;
+	}
+	ifOpen{
+		fd;
+		fun(fd_and_backtrack);
+		fd;
+	}
+}
+
+repeat(3){
+	fd;
+	fd;
+	look;
+	ifClosed{
+		lt;
+		fun(fd_to_wall);
+		rt;
+	}
+	ifOpen{
+		rt;
+		fun(fd_to_wall);
+		lt;
+	}
+	fd;
+}
+fd;
+fun(fd_and_backtrack);
+rt;
+fd;
+rt;
+look;
+ifClosed{
+	rt;
+	fd;
+	fd;
+}

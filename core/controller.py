@@ -136,7 +136,7 @@ class Controller(object):
         return [(result, self.state)]
 
     def step(self):
-        instruction = self.code.next_instruction()
+        instruction = self.code.peak()
         match instruction:
             case PrimitiveInstruction.SLEEP:
                 self.robot.sleep()
@@ -161,7 +161,7 @@ class Controller(object):
             tile.trigger(self.state, self.time)
 
         if isinstance(tile, TransportTile):
-            self.robot.x, self.robot.y, self.time = tile.get_destination(self.state, self.time, self.robot)
+            self.robot.x, self.robot.y, self.time = tile.get_destination(self.state, self.robot)
             self.robot.discontinue_path()
             self.state.log_robot(self.robot, self.time)
 

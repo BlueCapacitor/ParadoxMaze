@@ -9,8 +9,8 @@ class PortalTile(TransportTile):
         super().__init__(x, y)
         self.destination_tile = destination_tile
 
-    def get_destination(self, _state, time, _robot):
-        return self.destination_tile.x, self.destination_tile.y, time
+    def get_destination(self, _state, robot):
+        return self.destination_tile.x, self.destination_tile.y, robot.time
 
     def get_drawing(self, state, time):
         for robot_trace in state.get_robots_at_time(time):

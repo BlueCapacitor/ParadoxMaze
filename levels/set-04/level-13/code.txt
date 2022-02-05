@@ -1,0 +1,44 @@
+fd;
+look;
+ifOpen{
+	repeat(5){fd;}
+	rt;
+	fd;
+	fd;
+	fd;
+	rt;
+	rt;
+	fd;
+	fd;
+	fd;
+	rt;
+	fd;
+}
+ifClosed{
+	rt;
+	fd;
+	fd;
+	look;
+	ifOpen{
+		fd;
+		lt;
+		fd;
+		fd;
+		fd;
+		rt;
+		rt;
+		fd;
+		fd;
+		fd;
+		lt;
+		fd;
+		fd;
+		fd;
+	}
+	ifClosed{
+		lt;
+		fd;
+		fd;
+		fd;
+	}
+}

@@ -2,7 +2,7 @@ import sys
 import tkinter as tk
 from tkinter import messagebox
 
-from core.controller import Controller
+from core.controller_v2 import Controller
 from language.code import Code
 from ui import tk_color
 from ui.widgets.coding_box import CodeBox
@@ -114,7 +114,7 @@ class CodingPage(tk.Frame):
         # if self.preview_canvas is not None:
         #     self.preview_canvas.destroy()
 
-        self.preview_canvas = PreviewCanvas(self.horizontal_paned_window, self.board, self.csv_map.build_robot())
+        self.preview_canvas = PreviewCanvas(self.horizontal_paned_window, self.board, self.csv_map.build_robot(None))
         self.horizontal_paned_window.add(self.preview_canvas)
 
         self.preview_canvas.draw(True, colors=self.colors)
@@ -142,9 +142,9 @@ class CodingPage(tk.Frame):
             self.vertical_paned_window.paneconfig(self.horizontal_paned_window, minsize=min_height)
 
     def run(self, *_):
-        robot = self.csv_map.build_robot()
-        code = Code(robot, code=self.code_box.text)
-        controller = Controller(self.board, robot, code)
+        robot = self.csv_map.build_robot(None)
+        robot.code = Code(robot, code=self.code_box.text)
+        controller = Controller(self.board, (robot,))
 
         self.display.current_page = self.display.Page.CALCULATING
 

@@ -1,0 +1,16 @@
+repeat(5){
+	repeat(13){
+		fd;
+	}
+	rt;
+	repeat(2){
+		fd;
+	}
+	rt;
+	repeat(13){
+		fd;
+	}
+	lt;
+	fd; fd;
+	lt;
+}

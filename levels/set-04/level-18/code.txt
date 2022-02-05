@@ -1,0 +1,29 @@
+fd;
+look;
+ifOpen{
+	fd;
+	fd;
+	repeat(2){
+		rt;
+		repeat(3){
+			fd;
+		}
+		rt;
+	}
+	fd;
+}
+ifClosed{
+	forever{
+		rt;
+		repeat(3){
+			look;
+			ifClosed{
+				lt;
+			}
+			ifOpen{
+				break;
+			}
+		}
+		fd;
+	}
+}

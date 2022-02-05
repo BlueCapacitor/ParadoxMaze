@@ -147,7 +147,7 @@ class Code(deque):
 
         return out
 
-    def next_instruction(self):
+    def get_next_instruction(self):
         while self:
             instruction = self.popleft()
             if isinstance(instruction, PrimitiveInstruction):
@@ -156,6 +156,11 @@ class Code(deque):
                 instruction.resolve(self)
 
         return PrimitiveInstruction.SLEEP
+
+    def peak(self):
+        instruction = self.get_next_instruction()
+        self.appendleft(instruction)
+        return instruction
 
     @staticmethod
     def isolate_delimited_range(code, open_delimiter, close_delimiter):

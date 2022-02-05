@@ -9,7 +9,7 @@ class TimePortalTile(TransportTile):
         super().__init__(x, y)
         self.dest_t = dest_t
 
-    def get_destination(self, _state, time, _robot):
+    def get_destination(self, _state, _robot):
         return self.x, self.y, self.dest_t
 
     def get_drawing(self, _state, _time):

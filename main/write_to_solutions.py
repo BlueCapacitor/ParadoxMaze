@@ -1,7 +1,7 @@
 from os import path
 
-from core.controller import Controller
-from core.state import Result
+from core.controller_v2 import Controller
+from core.state_v2 import Result
 from language.code import Code
 from main import PrintOut, PrintProgress, get_all_levels
 from ui.utilities.csv_map import CSVMap
@@ -24,10 +24,10 @@ def write_to_solutions():
 
                 csv_map = CSVMap(map_text)
 
-                robot = csv_map.build_robot()
+                robot = csv_map.build_robot(None)
                 board = csv_map.build_board()
-                code = Code(robot, code=code_str)
-                controller = Controller(board, robot, code)
+                robot.code = Code(robot, code=code_str)
+                controller = Controller(board, (robot,))
 
                 results = controller.run()
 

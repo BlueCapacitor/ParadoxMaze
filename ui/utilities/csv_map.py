@@ -1,5 +1,5 @@
 from core.board import Board
-from core.robot import Direction, Robot
+from core.robot_v2 import Direction, Robot
 from tiles.button import ButtonTile
 from tiles.close_logical_door import CloseLogicalDoorTile
 from tiles.close_time_door import CloseTimedDoorTile
@@ -104,8 +104,9 @@ class CSVMap:
     def build_board(self):
         return Board(self.tiles)
 
-    def build_robot(self):
+    def build_robot(self, code):
         for direction in CSVMap.robot_start_symbols.keys():
             pos = self.find_cell(CSVMap.robot_start_symbols[direction])
             if pos is not None:
-                return Robot(pos[0], pos[1], direction, int(pos[2]), int(pos[2]))
+                return Robot(pos[0], pos[1], direction, int(pos[2]), int(pos[2]),
+                             code.copy_code() if code is not None else None)

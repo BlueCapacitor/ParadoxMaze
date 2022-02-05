@@ -1,0 +1,16 @@
+def(forward){
+	forever{
+		look;
+		ifOpen{
+			fd;
+		}
+		ifClosed{
+			break;
+		}
+	}
+}
+
+repeat(14){
+	fun(forward);
+	rt;
+}

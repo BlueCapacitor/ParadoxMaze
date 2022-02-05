@@ -59,8 +59,8 @@ class State:
             if robot.continuity_id == continuity_id:
                 return robot
 
-    def log_robot(self, robot, time):
-        self.log_robot_trace(robot.make_trace(), time)
+    def log_robot(self, robot):
+        self.log_robot_trace(robot.make_trace(), robot.time)
 
     def log_robot_trace(self, robot_trace, time):
         if time not in self.robot_log.keys():
@@ -158,19 +158,34 @@ class State:
 
 
 class Result(Enum):
-    SUCCESS = 1
-    POTENTIAL_SUCCESS = 2
-    NO_SUCCESS = 3
-    FAIL = 4
-    RECOVERABLE_PARADOX = 5
-    UNRECOVERABLE_PARADOX = 6
+    SUCCESS = (1, 1)
+    POTENTIAL_SUCCESS = (2, 1)
+    NO_SUCCESS = (3, 4)
+    FAIL = (4, 4)
+    RECOVERABLE_PARADOX = (5, 6)
+    UNRECOVERABLE_PARADOX = (6, 6)
+
+    def __new__(cls, value, finalize_value):
+        new = object.__new__(cls)
+        new._value_ = value
+        new.finalize_value = finalize_value
+        return new
 
     def __or__(self, other):
         return self if self.value > other.value else other
 
+    @staticmethod
+    def get(value):
+        for result in Result:
+            if result.value == value:
+                return result
+
+    @property
+    def finalized(self):
+        return Result.get(self.finalize_value)
+
 
 class ControlValue:
-
     def __init__(self, state, time, control_id, current_value, possible_values=None, static=False):
         if possible_values is None:
             possible_values = {True, False}

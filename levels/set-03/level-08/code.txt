@@ -1,0 +1,8 @@
+fd;
+fd;
+repeat(5){
+	slp;
+}
+repeat(3){
+	fd;
+}

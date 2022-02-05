@@ -1,0 +1,30 @@
+forever{
+	forever{
+		look;
+		fd;
+		ifClosed{
+			look;
+			ifClosed{
+				stop;
+			}
+			repeat(2){
+				lt;
+				fd;
+				lt;
+			}
+			break;
+		}
+	}
+	forever{
+		look;
+		fd;
+		ifClosed{
+			repeat(2){
+				rt;
+				fd;
+				rt;
+			}
+			break;
+		}
+	}
+}

@@ -1,0 +1,30 @@
+def(traverse_tree){
+	forever{
+		look;
+		fd;
+		ifClosed{
+			break;
+		}
+	}
+	look;
+	ifClosed{
+		rt;
+		rt;
+	}
+	ifOpen{
+		rt;
+		repeat(3){
+			fun(traverse_tree);
+			rt;
+		}
+	}
+	forever{
+		look;
+		fd;
+		ifClosed{
+			break;
+		}
+	}
+}
+
+fun(traverse_tree);

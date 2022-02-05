@@ -1,7 +1,7 @@
 import tkinter as tk
 from math import ceil, log10
 
-from core.state import Result
+from core.state_v2 import Result
 from ui import tk_color
 from ui.utilities.font import Font
 from ui.widgets.automatic_hide_scrollbar import AutomaticHideScrollbar

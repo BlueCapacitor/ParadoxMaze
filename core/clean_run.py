@@ -1,10 +1,4 @@
-"""
-Created on Oct 10, 2020
-
-@author: gosha
-"""
-
-from core.state import State, Result
+from core.state_v2 import State, Result
 from core.tile import ControlTile
 
 

@@ -1,0 +1,22 @@
+def(fd_and_backtrack){
+	look;
+	ifClosed{
+		rt;
+		rt;
+	}
+	ifOpen{
+		fd;
+		fun(fd_and_backtrack);
+		fd;
+	}
+}
+
+repeat(14){
+	rt;
+	fun(fd_and_backtrack);
+	rt;
+	fd;
+	fd;
+}
+rt;
+fun(fd_and_backtrack);
