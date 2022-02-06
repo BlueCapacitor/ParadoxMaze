@@ -82,7 +82,7 @@ class StepPage(tk.Frame):
                                                 font=Font.MED_SMALL.value)
             self.play_checkbox.grid(row=4, column=1, sticky=tk.NSEW)
 
-            self.speed_slider = tk.Scale(self, from_=1, to=10, orient=tk.HORIZONTAL, tickinterval=9,
+            self.speed_slider = tk.Scale(self, from_=1, to=8, orient=tk.HORIZONTAL, tickinterval=7,
                                          command=self.speed_change, bg=tk_color(colors[3]),
                                          activebackground=tk_color(colors[0]), troughcolor=tk_color(colors[2]),
                                          font=Font.MED_SMALL.value, highlightthickness=0)
@@ -202,7 +202,7 @@ class StepPage(tk.Frame):
 
     @property
     def actual_steps_per_tick(self):
-        return 1 / round(ticks_per_step * 2 ** ((3 - self.speed_slider.get()) / 2) if self.speed_slider is not None
+        return 1 / round(ticks_per_step * 2 ** (3 - self.speed_slider.get()) if self.speed_slider is not None
                          else ticks_per_step)
 
     def tick(self, *_):
