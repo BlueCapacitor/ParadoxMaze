@@ -1,5 +1,5 @@
 from core.board import Board
-from core.robot_v2 import Direction, Robot
+from core.robot import Direction, Robot
 from tiles.button import ButtonTile
 from tiles.close_logical_door import CloseLogicalDoorTile
 from tiles.close_time_door import CloseTimedDoorTile

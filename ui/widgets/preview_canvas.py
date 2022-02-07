@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from core.state_v2 import State
+from core.state import State
 from ui import tk_color
 from ui.widgets.game_canvas import GameCanvas
 

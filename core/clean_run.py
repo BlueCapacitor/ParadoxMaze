@@ -1,4 +1,4 @@
-from core.state_v2 import State, Result
+from core.state import State, Result
 
 
 def clean_run(state):

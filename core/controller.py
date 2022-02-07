@@ -1,174 +1,146 @@
+from collections import deque
+
 from language.primitive_instructions import PrimitiveInstruction
-from core.state import State, Result
+from core.state import ControlValue, State, Result
 from tiles.abstract.control import ControlTile
 from tiles.abstract.transport import TransportTile
 
-number_of_robots = 1
 
+class Controller:
 
-class Controller(object):
-
-    def __init__(self, board, robot, code, state=None, time=0, look_value=None):
-        self.time = time
-
+    def __init__(self, board, robots, state=None):
         self.board = board
-        self.robot = robot
+        self.robots = robots
+        self.robot_queue = deque([robot for robot in self.robots if robot.peak != PrimitiveInstruction.LOOK] +
+                                 [robot for robot in self.robots if robot.peak == PrimitiveInstruction.LOOK])
 
         if state is None:
             self.state = State(board)
-            self.state.log_robot(self.robot, self.time)
+            for robot in self.robots:
+                self.state.log_robot(robot)
         else:
             self.state = state
 
-        self.code = code
-        if look_value is not None:
-            self.robot.look_value = look_value
-
     def run(self):
-        global number_of_robots
+        validity = self.state.is_valid
 
-        result = self.state.is_valid
+        while self.robot_queue:
+            if validity == Result.UNRECOVERABLE_PARADOX:
+                return (validity, self.state),
 
-        if result in (Result.FAIL, Result.UNRECOVERABLE_PARADOX):
-            number_of_robots -= 1
-            return [(result, self.state)]
+            robot = self.robot_queue[0]
+            if robot.peak == PrimitiveInstruction.LOOK:
+                look_value = robot.passive_look(self.state)
+                if isinstance(look_value, ControlValue) and not look_value.static and \
+                        len(look_value.possible_values) != 1:
+                    self.robot_queue.rotate(-1)
+                    robot = self.robot_queue[0]
 
-        while self.robot.charge_remaining > 0:
-            result, look_result, crash_look = self.step()
+            if robot.charge_remaining <= 0:
+                self.robot_queue.popleft()
+                continue
 
-            # noinspection DuplicatedCode
-            match look_result:
-                case control_value, _ if control_value.validity == Result.UNRECOVERABLE_PARADOX:
-                    result = Result.UNRECOVERABLE_PARADOX
-                    break
-                case control_value, safe_value if control_value.static:
-                    look_result = control_value.current_value == safe_value
-                case control_value, safe_value if len(control_value.possible_values) == 1:
-                    look_result = tuple(control_value.possible_values)[0] == safe_value
+            instruction = self.step_robot(robot)
 
-            # noinspection DuplicatedCode
-            match crash_look:
-                case control_value, _ if control_value.validity == Result.UNRECOVERABLE_PARADOX:
-                    result = Result.UNRECOVERABLE_PARADOX
-                    break
-                case control_value, safe_value if control_value.static:
-                    crash_look = control_value.current_value == safe_value
-                case control_value, safe_value if len(control_value.possible_values) == 1:
-                    crash_look = tuple(control_value.possible_values)[0] == safe_value
+            split_needed = False
+            crash_key = None
+            look_robot = None
 
-            match look_result, crash_look:
-                case None, bool():
+            match self.crash_look_robot(robot):
+                case True:
                     pass
+                case False:
+                    self.robot_queue.popleft()
+                    continue
+                case control_value, safe_value if control_value.static and control_value.current_value != safe_value:
+                    self.robot_queue.popleft()
+                    continue
+                case control_value, safe_value if len(control_value.possible_values) == 1 and tuple(
+                        control_value.possible_values)[0] != safe_value:
+                    self.robot_queue.popleft()
+                    continue
 
-                case bool(), bool():
-                    self.robot.look_value = look_result
+                case control_value, _ if not control_value.static and len(control_value.possible_values) > 1:
+                    crash_key = self.state.get_key_for_control_value(control_value)
+                    split_needed = True
 
-                case (control_value, safe_value), bool():
-                    number_of_robots += 1
+            if instruction == PrimitiveInstruction.LOOK:
+                robot_index = self.robots.index(robot)
 
-                    key = self.state.get_key_for_control_value(control_value)
+                match self.look_robot(robot):
+                    case bool() as look_value:
+                        look_robot = (robot_index, None, ((look_value, None),))
+                    case control_value, _ if control_value.validity == Result.UNRECOVERABLE_PARADOX:
+                        return (Result.UNRECOVERABLE_PARADOX, self.state),
+                    case control_value, safe_value if control_value.static:
+                        look_robot = (robot_index, None, ((control_value.current_value == safe_value, None),))
+                    case control_value, safe_value if len(control_value.possible_values) == 1:
+                        look_robot = (robot_index, None,
+                                      ((tuple(control_value.possible_values)[0] == safe_value, None),))
 
-                    sub_controller_true = self.copy(look_value=safe_value)
-                    sub_controller_true.state.control_value_log[key].assume_value(True)
+                    case control_value, safe_value if len(control_value.possible_values) > 1:
+                        key = self.state.get_key_for_control_value(control_value)
+                        look_robot = (robot_index, key, ((safe_value, True), (not safe_value, False)))
+                        split_needed = True
 
-                    sub_controller_false = self.copy(look_value=not safe_value)
-                    sub_controller_false.state.control_value_log[key].assume_value(False)
+            look_robot_index, look_key, look_possibilities = look_robot or (None, None, ((None, None),))
 
-                    result_with_true = sub_controller_true.run()
-                    result_with_false = sub_controller_false.run()
+            results = [] if split_needed else None
+            for assumed_crash_value in (True, False) if crash_key is not None else (None,):
+                for assumed_look_seen, assumed_look_value in look_possibilities:
+                    sub_controller = self.copy() if split_needed else self
 
-                    return result_with_true + result_with_false
+                    if crash_key is not None:
+                        sub_controller.state.control_value_log[crash_key].assume_value(assumed_crash_value)
 
-                case None | bool(), (control_value, _):
-                    if isinstance(look_result, bool):
-                        self.robot.look_value = look_result
+                    if look_robot is not None:
+                        sub_controller.robots[look_robot_index].look_value = assumed_look_seen
+                        if look_key is not None:
+                            sub_controller.state.control_value_log[look_key].assume_value(assumed_look_value)
 
-                    number_of_robots += 1
+                    if split_needed:
+                        results.append(sub_controller.run())
 
-                    key = self.state.get_key_for_control_value(control_value)
+            if split_needed:
+                return sum(results, start=())
 
-                    sub_controller_true = self.copy()
-                    sub_controller_true.state.control_value_log[key].assume_value(True)
+            validity = self.state.is_valid
 
-                    sub_controller_false = self.copy()
-                    sub_controller_false.state.control_value_log[key].assume_value(False)
+        return (validity.finalized, self.state),
 
-                    result_with_true = sub_controller_true.run()
-                    result_with_false = sub_controller_false.run()
-
-                    return result_with_true + result_with_false
-
-                case (control_value_look, safe_value_look), (control_value_crash, _):
-                    number_of_robots += 3
-
-                    key_look = self.state.get_key_for_control_value(control_value_look)
-                    key_crash = self.state.get_key_for_control_value(control_value_crash)
-
-                    results = []
-                    for assumed_value_look in (False, True):
-                        for assumed_value_crash in (False, True):
-                            sub_controller = self.copy(look_value=(assumed_value_look == safe_value_look))
-                            sub_controller.state.control_value_log[key_look].assume_value(assumed_value_look)
-                            sub_controller.state.control_value_log[key_crash].assume_value(assumed_value_crash)
-                            results.append(sub_controller.run())
-
-                    return sum(results, start=[])
-
-            if result == Result.SUCCESS:
-                break
-            if result == Result.RECOVERABLE_PARADOX:
-                continue
-            if result == Result.UNRECOVERABLE_PARADOX:
-                break
-            if result == Result.NO_SUCCESS:
-                continue
-            if result == Result.FAIL:
-                break
-
-        if result == Result.RECOVERABLE_PARADOX:
-            result = Result.UNRECOVERABLE_PARADOX
-        if result == Result.NO_SUCCESS:
-            result = Result.FAIL
-        if result == Result.POTENTIAL_SUCCESS:
-            result = Result.SUCCESS
-
-        number_of_robots -= 1
-        return [(result, self.state)]
-
-    def step(self):
-        instruction = self.code.peak()
+    def step_robot(self, robot):
+        instruction = robot.get_next_instruction()
         match instruction:
             case PrimitiveInstruction.SLEEP:
-                self.robot.sleep()
+                robot.sleep()
             case PrimitiveInstruction.LEFT:
-                self.robot.turn_left()
+                robot.turn_left()
             case PrimitiveInstruction.RIGHT:
-                self.robot.turn_right()
+                robot.turn_right()
             case PrimitiveInstruction.FORWARD:
-                self.robot.move_forward()
+                robot.move_forward()
             case PrimitiveInstruction.LOOK:
-                self.robot.sleep()
+                robot.sleep()
 
-        self.time += 1
+        self.state.log_robot(robot)
 
-        self.state.log_robot(self.robot, self.time)
-
-        crash_look = self.robot.crash_look(self.state, self.time)
-
-        tile = self.board.get_tile(self.robot.x, self.robot.y)
+        tile = self.board.get_tile(robot.x, robot.y)
 
         if isinstance(tile, ControlTile):
-            tile.trigger(self.state, self.time)
+            tile.trigger(self.state, robot.time)
 
         if isinstance(tile, TransportTile):
-            self.robot.x, self.robot.y, self.time = tile.get_destination(self.state, self.robot)
-            self.robot.discontinue_path()
-            self.state.log_robot(self.robot, self.time)
+            robot.x, robot.y, robot.time = tile.get_destination(self.state, robot)
+            robot.discontinue_path()
+            self.state.log_robot(robot)
 
-        return (self.state.is_valid,
-                self.robot.look(self.state, self.time) if instruction == PrimitiveInstruction.LOOK else None, crash_look)
+        return instruction
 
-    def copy(self, look_value=None):
-        robot = self.robot.copy()
-        return Controller(self.board, robot, self.code.copy_code(robot), state=self.state.copy(),
-                          time=self.time, look_value=look_value)
+    def look_robot(self, robot):
+        return robot.passive_look(self.state)
+
+    def crash_look_robot(self, robot):
+        return robot.crash_look(self.state)
+
+    def copy(self):
+        return Controller(self.board, [robot.copy() for robot in self.robots], state=self.state.copy())

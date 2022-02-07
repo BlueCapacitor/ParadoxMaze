@@ -1,7 +1,7 @@
 from os import path
 
-from core.controller_v2 import Controller
-from core.state_v2 import Result
+from core.controller import Controller
+from core.state import Result
 from language.code import Code
 from main import PrintOut, PrintProgress, get_all_levels
 from ui.utilities.csv_map import CSVMap

@@ -2,7 +2,7 @@ import tkinter as tk
 from enum import Enum
 
 from core.clean_run import clean_run
-from core.state_v2 import Result
+from core.state import Result
 from ui.widgets.coding_page import CodingPage
 from ui.widgets.intro_page import IntroPage
 from ui.widgets.level_select_page import LevelSelectPage

@@ -2,7 +2,7 @@ import sys
 import tkinter as tk
 from tkinter import messagebox
 
-from core.controller_v2 import Controller
+from core.controller import Controller
 from language.code import Code
 from ui import tk_color
 from ui.widgets.coding_box import CodeBox

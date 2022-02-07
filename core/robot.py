@@ -2,8 +2,7 @@ from enum import Enum
 from math import pi
 
 
-class StaticRobot(object):
-
+class StaticRobot:
     def __init__(self, x, y, direction, charge_remaining, initial_charge, continuity_id=0, look_value=False):
         self.x = x
         self.y = y
@@ -34,45 +33,75 @@ class StaticRobot(object):
 
 
 class Robot(StaticRobot):
-
-    def __init__(self, x, y, direction, charge_remaining, initial_charge, continuity_id=0, look_value=False):
+    def __init__(self, x, y, direction, charge_remaining, initial_charge, code, time=0, continuity_id=0,
+                 look_value=False):
         super().__init__(x, y, direction, charge_remaining, initial_charge, continuity_id=continuity_id,
                          look_value=look_value)
 
-    def sleep(self):
+        self.code = code
+        self.time = time
+        self._peak = None
+
+    @property
+    def peak(self):
+        if self._peak is None:
+            peak = self.code.peak()
+            self._peak = peak if peak is not None else False
+
+        if self._peak is False:
+            return
+
+        return self._peak
+
+    def get_next_instruction(self):
+        self._peak = None
+        return self.code.get_next_instruction()
+
+    def action(self):
         self.charge_remaining -= 1
+        self.time += 1
 
-    def look(self, state, time):
+    def sleep(self):
+        self.action()
+
+    def passive_look(self, state):
         tile = state.board.get_tile(self.forward_x, self.forward_y)
-        return tile.look(state, time) if not tile.is_static else not (tile.is_solid(state, time))
+        return tile.look(state, self.time) if not tile.is_static else not (tile.is_solid(state, self.time))
 
-    def crash_look(self, state, time):
+    # def look(self, state):
+    #     self.action()
+    #     return self.passive_look(state)
+
+    def crash_look(self, state):
         tile = state.board.get_tile(self.x, self.y)
-        return tile.crash_look(state, time) if not tile.is_static else not (tile.is_fatal(state, time))
+        return tile.crash_look(state, self.time) if not tile.is_static else not (tile.is_fatal(state, self.time))
 
     def turn_left(self):
         self.direction = self.direction.left()
-        self.charge_remaining -= 1
+        self.action()
 
     def turn_right(self):
         self.direction = self.direction.right()
-        self.charge_remaining -= 1
+        self.action()
 
     def move_forward(self):
         self.x, self.y = self.forward_x, self.forward_y
-        self.charge_remaining -= 1
+        self.action()
 
     def discontinue_path(self):
         self.continuity_id += 1
 
     def copy(self):
-        return Robot(self.x, self.y, self.direction, self.charge_remaining, self.initial_charge,
-                     continuity_id=self.continuity_id, look_value=self.look_value)
+        robot = Robot(self.x, self.y, self.direction, self.charge_remaining, self.initial_charge, None,
+                      time=self.time, continuity_id=self.continuity_id, look_value=self.look_value)
+        robot.code = self.code.copy_code(robot)
+        return robot
 
     def make_trace(self):
         return super().copy()
 
 
+# noinspection PyArgumentList
 class Direction(Enum):
     RIGHT = (0, 1, 0, "right")
     UP = (1, 0, -1, "up")
