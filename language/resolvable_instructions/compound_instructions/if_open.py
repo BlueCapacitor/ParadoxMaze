@@ -2,6 +2,8 @@ from language.resolvable_instructions.compound_instructions import CompoundInstr
 
 
 class IfOpen(CompoundInstruction):
+    determinate = False
+
     def resolve(self, code):
         if code.robot.look_value:
             code.extendleft(self.inner[::-1])

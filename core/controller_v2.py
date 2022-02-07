@@ -52,7 +52,7 @@ class Controller:
                 case False:
                     self.robot_queue.popleft()
                     continue
-                case control_value, safe_value if control_value.static and safe_value:
+                case control_value, safe_value if control_value.static and control_value.current_value != safe_value:
                     self.robot_queue.popleft()
                     continue
                 case control_value, safe_value if len(control_value.possible_values) == 1 and tuple(

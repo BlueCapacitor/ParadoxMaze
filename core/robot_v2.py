@@ -45,7 +45,11 @@ class Robot(StaticRobot):
     @property
     def peak(self):
         if self._peak is None:
-            self._peak = self.code.peak()
+            peak = self.code.peak()
+            self._peak = peak if peak is not None else False
+
+        if self._peak is False:
+            return
 
         return self._peak
 

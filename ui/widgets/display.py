@@ -1,6 +1,7 @@
 import tkinter as tk
 from enum import Enum
 
+from core.clean_run import clean_run
 from core.state_v2 import Result
 from ui.widgets.coding_page import CodingPage
 from ui.widgets.intro_page import IntroPage
@@ -44,12 +45,13 @@ class Display(tk.Tk):
         self.overall_result = Result.SUCCESS
         for result in results:
             if result[0] != Result.UNRECOVERABLE_PARADOX:
-                self._results.append(result)
+                self._results.append(result if result[0] == Result.SUCCESS else (result[0], clean_run(result[1])))
                 self.overall_result |= result[0]
 
         if len(self._results) == 0:
             self.overall_result = Result.FAIL
-            self._results = results
+            self._results = [result if result[0] == Result.SUCCESS else
+                             (result[0], clean_run(result[1])) for result in results]
 
     @property
     def current_page(self):

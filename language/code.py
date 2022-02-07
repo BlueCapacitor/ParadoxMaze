@@ -157,10 +157,20 @@ class Code(deque):
 
         return PrimitiveInstruction.SLEEP
 
-    def peak(self):
-        instruction = self.get_next_instruction()
-        self.appendleft(instruction)
-        return instruction
+    def peak(self, allow_indeterminate_tracing=False):
+        while self:
+            instruction = self.popleft()
+            if isinstance(instruction, PrimitiveInstruction):
+                self.appendleft(instruction)
+                return instruction
+            elif isinstance(instruction, ResolvableInstruction):
+                if instruction.determinate or allow_indeterminate_tracing:
+                    instruction.resolve(self)
+                else:
+                    self.appendleft(instruction)
+                    return None
+
+        return PrimitiveInstruction.SLEEP
 
     @staticmethod
     def isolate_delimited_range(code, open_delimiter, close_delimiter):

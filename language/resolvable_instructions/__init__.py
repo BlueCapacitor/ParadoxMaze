@@ -4,6 +4,7 @@ from language.instruction import Instruction
 
 
 class ResolvableInstruction(Instruction, ABC):
+    determinate = True
 
     @abstractmethod
     def resolve(self, code): ...

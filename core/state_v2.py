@@ -21,7 +21,7 @@ class State:
         if sticky_values is None:
             self.sticky_values = {}
         else:
-            self.sticky_values = sticky_values
+            self.sticky_values = dict(sticky_values)
 
     def copy(self):
         return (State(self.board,

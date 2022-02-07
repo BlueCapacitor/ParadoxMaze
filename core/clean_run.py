@@ -1,10 +1,9 @@
 from core.state_v2 import State, Result
-from core.tile import ControlTile
 
 
 def clean_run(state):
     board = state.board
-    clean_state = State(board)
+    clean_state = State(board, control_value_log=state.control_value_log, sticky_values=state.sticky_values)
 
     for charge in range(state.max_charge, state.min_charge - 1, -1):
         robot_trace_time_pairs = state.get_all_robots_with_charge(charge)
@@ -12,15 +11,7 @@ def clean_run(state):
         for robot_trace, time in robot_trace_time_pairs:
             clean_state.log_robot_trace(robot_trace.copy(), time)
 
-            tile = board.get_tile(robot_trace.x, robot_trace.y)
-            if isinstance(tile, ControlTile):
-                tile.trigger(clean_state, time)
-
-        if (clean_state.is_valid | Result.NO_SUCCESS) != Result.NO_SUCCESS:
-            break
-
-        if state.is_valid == Result.POTENTIAL_SUCCESS and \
-                (clean_state.is_valid | Result.POTENTIAL_SUCCESS) == Result.POTENTIAL_SUCCESS:
+        if clean_state.is_valid in (Result.FAIL, Result.UNRECOVERABLE_PARADOX):
             break
 
     return clean_state
