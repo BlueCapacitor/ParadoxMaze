@@ -1,0 +1,27 @@
+def(wind_up){
+	look;
+	ifOpen{
+		fd;
+		rt;
+		look;
+		lt;
+		fd;
+		ifOpen{
+			lt;
+			fun(wind_up);
+			lt;
+			fd;
+			fd;
+		}
+		ifClosed{
+			look;
+		}
+	}
+	ifClosed{
+		rt;
+		fun(wind_up);
+		rt;
+	}
+}
+
+fun(wind_up);
