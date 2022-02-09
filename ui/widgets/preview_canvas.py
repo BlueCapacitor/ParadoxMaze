@@ -7,12 +7,12 @@ from ui.widgets.game_canvas import GameCanvas
 
 class PreviewCanvas(GameCanvas):
 
-    def __init__(self, parent, board, robot_start, tile_size=48, tile_center_size=32):
+    def __init__(self, parent, board, robots, tile_size=48, tile_center_size=32):
         self._board = board
-        self.robot_start = robot_start
+        self.robot_start = robots
 
         self._state = State(board)
-        self.state.robot_log = {0: [robot_start]}
+        self.state.robot_log = {0: robots}
         self._time = 0
 
         super().__init__(parent, tile_size=tile_size, tile_center_size=tile_center_size)
@@ -36,7 +36,7 @@ class PreviewCanvas(GameCanvas):
     def draw_robots(self):
         self.draw_robot(self.robot_start)
 
-    def draw_board(self):
+    def draw_board(self, only_draw_needs_refresh=False):
         self.canvas.create_rectangle(*self.screen_coords(-0.5, -0.5),
                                      *self.screen_coords(self.board.width - 0.5, self.board.height - 0.5),
                                      fill=tk_color((0, 0, 0)))

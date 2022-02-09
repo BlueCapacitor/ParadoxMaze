@@ -9,8 +9,8 @@ class TimeGateTile(TransportTile):
         super().__init__(x, y)
         self.dt = dt
 
-    def get_destination(self, _state, robot):
-        return self.x, self.y, robot.time + self.dt
+    def get_destinations(self, _state, robot):
+        return (self.x, self.y, robot.time + self.dt),
 
     def get_drawing(self, _state, _time):
         return ((0.25, 0, 0.75) if self.dt < 0 else (0.75, 0.5, 0) if self.dt > 0 else (0.75, 0.75, 0.75),

@@ -1,17 +1,41 @@
 from core.state import State, Result
 
 
-def clean_run(state):
-    board = state.board
-    clean_state = State(board, control_value_log=state.control_value_log, sticky_values=state.sticky_values)
+def clean_run(result_tuple):
+    result, state = result_tuple
 
-    for charge in range(state.max_charge, state.min_charge - 1, -1):
-        robot_trace_time_pairs = state.get_all_robots_with_charge(charge)
+    match result:
+        case Result.SUCCESS:
+            return result, state
 
-        for robot_trace, time in robot_trace_time_pairs:
-            clean_state.log_robot_trace(robot_trace.copy(), time)
+        case Result.UNRECOVERABLE_PARADOX:
+            board = state.board
+            clean_state = State(board, control_value_log=state.control_value_log, sticky_values=state.sticky_values)
 
-        if clean_state.is_valid in (Result.FAIL, Result.UNRECOVERABLE_PARADOX):
-            break
+            for charge in range(state.max_charge, state.min_charge - 1, -1):
+                robot_trace_time_pairs = state.get_all_robots_with_charge(charge)
 
-    return clean_state
+                for robot_trace, time in robot_trace_time_pairs:
+                    clean_state.log_robot_trace(robot_trace.copy(), time)
+
+                if clean_state.is_valid == Result.UNRECOVERABLE_PARADOX:
+                    break
+
+            return result, clean_state
+
+        case Result.FAIL:
+            board = state.board
+            clean_state = State(board, control_value_log=state.control_value_log, sticky_values=state.sticky_values)
+            hidden_robot_numbers = set()
+
+            for charge in range(state.max_charge, state.min_charge - 1, -1):
+                robot_trace_time_pairs = state.get_all_robots_with_charge(charge)
+
+                for robot_trace, time in robot_trace_time_pairs:
+                    if robot_trace.continuity_id[0] not in hidden_robot_numbers:
+                        clean_state.log_robot_trace(robot_trace.copy(), time)
+
+                        if not robot_trace.static_crash_look(state, time):
+                            hidden_robot_numbers.add(robot_trace.continuity_id[0])
+
+            return result, clean_state

@@ -101,12 +101,25 @@ class CSVMap:
 
         return out
 
+    def find_cells(self, symbol):
+        out = []
+
+        for y in range(len(self.cells)):
+            for x in range(len(self.cells[y])):
+                if self.cells[y][x].split(':')[0] == symbol:
+                    out.append((x, y) + tuple(self.cells[y][x].split(':')[1:]))
+
+        return out
+
     def build_board(self):
         return Board(self.tiles)
 
-    def build_robot(self, code):
+    def build_robots(self, code):
+        robots = []
+        robot_number = 0
         for direction in CSVMap.robot_start_symbols.keys():
-            pos = self.find_cell(CSVMap.robot_start_symbols[direction])
-            if pos is not None:
-                return Robot(pos[0], pos[1], direction, int(pos[2]), int(pos[2]),
-                             code.copy_code() if code is not None else None)
+            for position in self.find_cells(CSVMap.robot_start_symbols[direction]):
+                robots.append(Robot(position[0], position[1], direction, int(position[2]), int(position[2]),
+                                    code.copy_code() if code is not None else None))
+                robot_number += 1
+        return robots

@@ -114,7 +114,7 @@ class CodingPage(tk.Frame):
         # if self.preview_canvas is not None:
         #     self.preview_canvas.destroy()
 
-        self.preview_canvas = PreviewCanvas(self.horizontal_paned_window, self.board, self.csv_map.build_robot(None))
+        self.preview_canvas = PreviewCanvas(self.horizontal_paned_window, self.board, self.csv_map.build_robots(None))
         self.horizontal_paned_window.add(self.preview_canvas)
 
         self.preview_canvas.draw(True, colors=self.colors)
@@ -142,9 +142,10 @@ class CodingPage(tk.Frame):
             self.vertical_paned_window.paneconfig(self.horizontal_paned_window, minsize=min_height)
 
     def run(self, *_):
-        robot = self.csv_map.build_robot(None)
-        robot.code = Code(robot, code=self.code_box.text)
-        controller = Controller(self.board, (robot,))
+        robots = self.csv_map.build_robots(None)
+        for robot in robots:
+            robot.code = Code(robot, code=self.code_box.text)
+        controller = Controller(self.board, robots)
 
         self.display.current_page = self.display.Page.CALCULATING
 

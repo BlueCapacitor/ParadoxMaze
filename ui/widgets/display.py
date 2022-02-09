@@ -12,8 +12,11 @@ from ui.widgets.step_page import StepPage
 
 class Display(tk.Tk):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, clean=True, debug=True, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.clean = clean or debug
+        self.debug = debug
 
         self.results = []
 
@@ -44,14 +47,13 @@ class Display(tk.Tk):
 
         self.overall_result = Result.SUCCESS
         for result in results:
-            if result[0] != Result.UNRECOVERABLE_PARADOX:
-                self._results.append(result if result[0] == Result.SUCCESS else (result[0], clean_run(result[1])))
+            if self.debug or result[0] != Result.UNRECOVERABLE_PARADOX:
                 self.overall_result |= result[0]
+                self._results.append(clean_run(result) if self.clean else result)
 
         if len(self._results) == 0:
             self.overall_result = Result.FAIL
-            self._results = [result if result[0] == Result.SUCCESS else
-                             (result[0], clean_run(result[1])) for result in results]
+            self._results = [clean_run(result) for result in results] if self.clean else results
 
     @property
     def current_page(self):

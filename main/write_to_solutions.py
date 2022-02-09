@@ -24,12 +24,18 @@ def write_to_solutions():
 
                 csv_map = CSVMap(map_text)
 
-                robot = csv_map.build_robot(None)
-                board = csv_map.build_board()
-                robot.code = Code(robot, code=code_str)
-                controller = Controller(board, (robot,))
+                robots = csv_map.build_robots(None)
+                for robot in robots:
+                    robot.code = Code(robot, code=code_str)
 
-                results = controller.run()
+                board = csv_map.build_board()
+                controller = Controller(board, robots)
+
+                try:
+                    results = controller.run()
+                except Exception:
+                    print(f"\n\nError on {set_num:02}-{level_num:02}")
+                    raise
 
                 overall = Result.SUCCESS
                 for result, _ in results:
