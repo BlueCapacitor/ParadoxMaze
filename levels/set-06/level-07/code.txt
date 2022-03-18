@@ -1,0 +1,48 @@
+def(safe_fd){
+	forever{
+		look;
+		ifClosed{
+			break;
+		}
+		fd;
+	}
+}
+
+rt;
+look;
+lt;
+
+ifClosed{
+	fd;
+	look;
+	ifClosed{
+		rt;
+		rt;
+		repeat(3){
+			fd;
+		}
+	}
+	stop;
+}
+
+fd;
+fd;
+look;
+ifClosed{
+	rt;
+	fun(safe_fd);
+	lt;
+}
+ifOpen{
+	lt;
+	fun(safe_fd);
+	rt;
+}
+repeat(5){
+	fd;
+}
+rt;
+rt;
+repeat(3){
+	fd;
+}

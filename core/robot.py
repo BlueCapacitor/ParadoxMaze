@@ -59,7 +59,14 @@ class StaticRobot:
 
     def static_crash_look(self, state, time):
         tile = state.board.get_tile(self.x, self.y)
-        return tile.crash_look(state, time).current_value if not tile.is_static else not tile.is_fatal(state, time)
+        if tile.is_static:
+            return not tile.is_fatal(state, time)
+        else:
+            match tile.crash_look(state, time):
+                case control_value, safe_value:
+                    return control_value.current_value == safe_value
+                case value:
+                    return value
 
     def __str__(self):
         return "<RobotTrace: (%s, %s) facing %s, charge: %s>" % (

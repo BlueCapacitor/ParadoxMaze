@@ -1,16 +1,14 @@
 repeat(6){
 	repeat(2){
-	fd;
-	fd;
-	rt;
+		fd;
+		fd;
+		rt;
 	}
-	fd;
-	fd;
-	lt;
-	fd;
-	fd;
-	lt;
+	repeat(2){
+		fd;
+		fd;
+		lt;
+	}
 }
-	fd;
-	fd;
-	
+fd;
+fd;

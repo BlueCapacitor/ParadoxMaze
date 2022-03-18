@@ -21,7 +21,7 @@ class OpenLogicalDoorTile(NonStaticDoorTile):
                 (Drawings.TEXT, self.control_id, (0, 0, 0)))
 
     def look(self, state, time):
-        if state.board.has_time_travel:
+        if state.board.needs_nondeterministic_controller:
             return state.get_control_value(self.control_id, time), True
         else:
             return state.get_control_value(self.control_id, time).current_value

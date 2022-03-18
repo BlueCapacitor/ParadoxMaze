@@ -150,7 +150,7 @@ class State:
 
     @property
     def max_charge(self):
-        return None if self.get_all_robots() == [] else self.get_all_robots()[0].initial_charge
+        return None if self.get_all_robots() == [] else max(robot.initial_charge for robot in self.get_all_robots())
 
     @property
     def min_charge(self):
@@ -217,7 +217,7 @@ class ControlValue:
 
     @property
     def validity(self):
-        if not self.state.board.has_time_travel:
+        if not self.state.board.needs_nondeterministic_controller:
             return Result.SUCCESS
         if self.current_value in self.possible_values:
             return Result.SUCCESS

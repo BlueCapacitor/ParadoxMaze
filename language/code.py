@@ -4,6 +4,7 @@ from language.instruction import Instruction
 from language.primitive_instructions import PrimitiveInstruction
 from language.resolvable_instructions import ResolvableInstruction
 from language.resolvable_instructions.break_ import Break
+from language.breakpoint_wrapper import BreakpointWrapper
 from language.resolvable_instructions.compound_instructions import CompoundInstruction
 from language.resolvable_instructions.compound_instructions.forever import Forever
 from language.resolvable_instructions.compound_instructions.if_closed import IfClosed
@@ -67,10 +68,14 @@ class Code(deque):
         while location < len(code_str):
             read_buffer = ""
 
-            while code_str[location] not in (";", "{", "}", "(", ")"):
+            breakpoint_on_execution = False
 
-                if code_str[location] not in (" ", "\n", "\t"):
+            while code_str[location] not in (";", "{", "}", "(", ")"):
+                if code_str[location] not in (" ", "\n", "\t", "@"):
                     read_buffer += code_str[location]
+
+                if code_str[location] == "@":
+                    breakpoint_on_execution = True
 
                 if len(read_buffer) >= 2 and read_buffer[-2:] == "//":
                     read_buffer = read_buffer[:-2]
@@ -91,8 +96,8 @@ class Code(deque):
                 elif read_buffer in self.instruction_names.keys():
                     block_type = self.instruction_names[read_buffer]
                     if isinstance(block_type, PrimitiveInstruction):
-                        out.append(block_type)
                         location += 1
+                        block = block_type
 
                     elif issubclass(block_type, ParametrizedCompoundInstruction):
                         assert code_str[location] == "(",\
@@ -109,8 +114,6 @@ class Code(deque):
 
                         block = block_type(parameter_string, inner=inner)
 
-                        out.append(block)
-
                     elif issubclass(block_type, ParametrizedInstruction):
                         assert code_str[location] == "(",\
                             f"{read_buffer} should be followed by (, not {code_str[location]}"
@@ -123,8 +126,6 @@ class Code(deque):
 
                         block = block_type(parameter_string)
 
-                        out.append(block)
-
                     elif issubclass(block_type, CompoundInstruction):
                         assert code_str[location] == "{",\
                             f"{read_buffer} should be followed by {{, not {code_str[location]}"
@@ -135,12 +136,17 @@ class Code(deque):
 
                         block = block_type(inner=inner)
 
-                        out.append(block)
-
                     elif issubclass(block_type, Instruction):
                         block = block_type()
-                        out.append(block)
                         location += 1
+
+                    else:
+                        raise TypeError("Not a subclass of Instruction")
+
+                    if not breakpoint_on_execution:
+                        out.append(block)
+                    else:
+                        out.append(BreakpointWrapper(block))
 
                 else:
                     assert False, f"Unrecognized command: \"{read_buffer}\""
@@ -150,6 +156,12 @@ class Code(deque):
     def get_next_instruction(self):
         while self:
             instruction = self.popleft()
+            if isinstance(instruction, BreakpointWrapper):
+                if isinstance(instruction.wrapped, PrimitiveInstruction):
+                    return instruction
+                else:
+                    instruction = instruction.wrapped
+                    breakpoint()
             if isinstance(instruction, PrimitiveInstruction):
                 return instruction
             elif isinstance(instruction, ResolvableInstruction):
@@ -168,6 +180,12 @@ class Code(deque):
                     instruction.resolve(self)
                 else:
                     self.appendleft(instruction)
+                    return None
+            elif isinstance(instruction, BreakpointWrapper):
+                self.appendleft(instruction)
+                if isinstance(instruction.wrapped, PrimitiveInstruction):
+                    return instruction.wrapped
+                else:
                     return None
 
         return PrimitiveInstruction.SLEEP

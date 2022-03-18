@@ -1,0 +1,126 @@
+def(split_first){
+	fun(split_wind_up);
+	fd;
+	fd;
+	rt;
+	rt;
+	repeat(1){
+		ifClosed{
+			fun(wind_up_right);
+			break;
+		}
+		fun(wind_up_left);
+	}
+}
+
+def(split_wind_up){
+	look;
+	repeat(1){
+		ifClosed{
+			fd;
+			fd;
+			look;
+			rt;
+			rt;
+			ifOpen{
+				slp;
+			}
+			ifClosed{
+				fd;
+			}
+			break;
+		}
+		fd;
+		fun(split_wind_up);
+		fd;
+	}
+}
+
+def(wind_up_right){
+	rt;
+	look;
+	repeat(1){
+		ifClosed{
+			lt;
+			fun(split_wind_up);
+			rt;
+			rt;
+			ifClosed{
+				fun(wind_up_right);
+				rt;
+				forever{
+					fd;
+					look;
+					ifClosed{
+						break;
+					}
+				}
+				lt;
+				fd;
+				fd;
+				break;
+			}
+			fun(wind_up_left);
+			rt;
+			forever{
+				fd;
+				look;
+				ifClosed{
+					break;
+				}
+			}
+			lt;
+			fd;
+			fd;
+			break;
+		}
+		ifOpen{
+			rt;
+			fd;
+			fd;
+			rt;
+			forever{
+				fd;
+				look;
+				ifClosed{
+					break;
+				}
+			}
+			lt;
+			fd;
+			fd;
+		}
+	}
+}
+
+def(wind_up_left){
+	rt;
+	look;
+	repeat(1){
+		ifClosed{
+			lt;
+			fun(split_wind_up);
+			rt;
+			rt;
+			ifClosed{
+				fun(wind_up_right);
+				fd;
+				fd;
+				break;
+			}
+			fun(wind_up_left);
+			fd;
+			fd;
+			break;
+		}
+		ifOpen{
+			rt;
+			repeat(4){
+				fd;
+			}
+		}
+	}
+}
+
+fun(split_first);
+fd;

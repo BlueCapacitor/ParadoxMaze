@@ -4,7 +4,7 @@ from tiles.abstract.non_static_door import NonStaticDoorTile
 
 
 class QDoor(NonStaticDoorTile):
-    is_time_travel = True
+    needs_nondeterministic_controller = True
 
     def __init__(self, x, y, control_id, properties):
         super().__init__(x, y)

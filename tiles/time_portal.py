@@ -3,7 +3,7 @@ from tiles.abstract.transport import TransportTile
 
 
 class TimePortalTile(TransportTile):
-    is_time_travel = True
+    needs_nondeterministic_controller = True
 
     def __init__(self, x, y, dest_t):
         super().__init__(x, y)

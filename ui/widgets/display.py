@@ -11,12 +11,10 @@ from ui.widgets.step_page import StepPage
 
 
 class Display(tk.Tk):
-
-    def __init__(self, *args, clean=True, debug=True, **kwargs):
+    def __init__(self, *args, clean=True, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.clean = clean or debug
-        self.debug = debug
+        self.clean = clean
 
         self.results = []
 
@@ -47,7 +45,7 @@ class Display(tk.Tk):
 
         self.overall_result = Result.SUCCESS
         for result in results:
-            if self.debug or result[0] != Result.UNRECOVERABLE_PARADOX:
+            if result[0] != Result.UNRECOVERABLE_PARADOX:
                 self.overall_result |= result[0]
                 self._results.append(clean_run(result) if self.clean else result)
 

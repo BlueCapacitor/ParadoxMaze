@@ -1,0 +1,46 @@
+def(split){
+	lt;
+	lt;
+	look;
+	ifOpen{
+		forever{
+			fd;
+			lt;
+			look;
+			ifOpen{
+				break;
+			}
+			rt;
+			fd;
+		}
+		repeat(3){
+			fd;
+		}
+		lt;
+		look;
+		ifOpen{
+			fd;
+		}
+		stop;
+	}
+	ifClosed{
+		slp;
+		slp;
+		fd;
+		rt;
+		fd;
+		rt;
+		fd;
+		fun(split);
+	}
+}
+
+forever{
+	fd;
+	look;
+	ifClosed{
+		break;
+	}
+}
+
+fun(split);

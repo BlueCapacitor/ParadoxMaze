@@ -5,6 +5,7 @@ from language.resolvable_instructions import ResolvableInstruction
 
 class CompoundInstruction(ResolvableInstruction, ABC):
     def __init__(self, inner=()):
+        ResolvableInstruction.__init__(self)
         self.inner = inner
 
     @abstractmethod

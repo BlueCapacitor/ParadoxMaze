@@ -1,14 +1,10 @@
-"""
-Created on Oct 10, 2020
-
-@author: gosha
-"""
+from functools import cached_property
 
 from tiles.empty import EmptyTile
 from tiles.target import TargetTile
 
 
-class Board(object):
+class Board:
 
     def __init__(self, tiles):
         self.tiles = []
@@ -29,18 +25,12 @@ class Board(object):
                 else:
                     self.tiles[y].append(tile(x, y))
 
-        for items in dependent_tiles.items():
-            x, y, tile, dep_x, dep_y = items[0][0], items[0][1], items[1][0], items[1][1][0], items[1][1][1]
-
-            assert (dep_x, dep_y) not in dependent_tiles.keys()
-            self.tiles[y][x] = tile(x, y, self.tiles[dep_y][dep_x])
-
         assert self.is_valid(), "Invalid board"
 
-        self.has_time_travel = False
+        self.needs_nondeterministic_controller = False
         for tile in self.list_tiles:
-            if tile.is_time_travel:
-                self.has_time_travel = True
+            if tile.needs_nondeterministic_controller:
+                self.needs_nondeterministic_controller = True
                 break
 
     @property
@@ -51,7 +41,7 @@ class Board(object):
     def height(self):
         return len(self.tiles)
 
-    @property
+    @cached_property
     def list_tiles(self):
         return sum(self.tiles, [])
 

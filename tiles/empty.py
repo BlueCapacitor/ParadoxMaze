@@ -1,6 +1,6 @@
-class EmptyTile(object):
+class EmptyTile:
     is_static = True
-    is_time_travel = False
+    needs_nondeterministic_controller = False
     needs_refresh = False
 
     def __init__(self, x, y):

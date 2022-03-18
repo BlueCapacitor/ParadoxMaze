@@ -1,6 +1,7 @@
 from collections import deque
 
 from core.robot import DiscontinuityType
+from language.breakpoint_wrapper import BreakpointWrapper
 from language.primitive_instructions import PrimitiveInstruction
 from core.state import ControlValue, State, Result
 from tiles.abstract.control import ControlTile
@@ -10,7 +11,7 @@ from tiles.abstract.transport import TransportTile
 class Controller:
     def __init__(self, board, robots, preserve_order=False, state=None):
         self.board = board
-        if preserve_order:
+        if preserve_order or not board.needs_nondeterministic_controller:
             self.robot_queue = deque(robots)
         else:
             self.robot_queue = deque([robot for robot in robots if robot.peak != PrimitiveInstruction.LOOK] +
@@ -24,6 +25,50 @@ class Controller:
             self.state = state
 
     def run(self):
+        if self.board.needs_nondeterministic_controller:
+            return self.nondeterministic_run()
+        else:
+            return self.deterministic_run()
+
+    def deterministic_run(self, stop_all_on_fail=False):
+        validity = self.state.is_valid
+        self.robot_queue.append(None)
+        robots_to_look = deque()
+        while self.robot_queue[0] != self.robot_queue[-1] and \
+                ((not stop_all_on_fail) or validity | Result.NO_SUCCESS == Result.NO_SUCCESS):
+            robot = self.robot_queue[0]
+
+            if robot is None:
+                for robot in robots_to_look:
+                    look_value = self.look_robot(robot)
+                    assert isinstance(look_value, bool)
+                    robot.look_value = look_value
+
+                robots_to_look.clear()
+
+            else:
+                if robot.charge_remaining <= 0:
+                    self.robot_queue.popleft()
+                else:
+                    instruction = self.step_robot(robot)
+                    if instruction == PrimitiveInstruction.LOOK:
+                        robots_to_look.append(robot)
+
+            validity = self.state.is_valid
+
+            if stop_all_on_fail or robot is None:
+                self.robot_queue.rotate(-1)
+            else:
+                crash_look = self.crash_look_robot(robot)
+                assert isinstance(crash_look, bool)
+                if crash_look:
+                    self.robot_queue.rotate(-1)
+                else:
+                    self.robot_queue.popleft()
+
+        return (validity.finalized, self.state),
+
+    def nondeterministic_run(self):
         validity = self.state.is_valid
 
         while self.robot_queue:
@@ -48,6 +93,7 @@ class Controller:
 
             split_needed = False
             crash_key = None
+            crash_safe_value = None
             look_robot = None
 
             match self.crash_look_robot(robot):
@@ -64,13 +110,12 @@ class Controller:
                     self.robot_queue.popleft()
                     continue
 
-                case control_value, _ if not control_value.static and len(control_value.possible_values) > 1:
+                case control_value, safe_value if not control_value.static and len(control_value.possible_values) > 1:
                     crash_key = self.state.get_key_for_control_value(control_value)
+                    crash_safe_value = safe_value
                     split_needed = True
 
             if instruction == PrimitiveInstruction.LOOK:
-                robot_index = 0
-
                 match self.look_robot(robot):
                     case bool() as look_value:
                         look_robot = (None, ((look_value, None),))
@@ -93,13 +138,15 @@ class Controller:
                 for assumed_look_seen, assumed_look_value in look_possibilities:
                     sub_controller = self.copy() if split_needed else self
 
-                    if crash_key is not None:
-                        sub_controller.state.control_value_log[crash_key].assume_value(assumed_crash_value)
-
                     if look_robot is not None:
                         sub_controller.robot_queue[0].look_value = assumed_look_seen
                         if look_key is not None:
                             sub_controller.state.control_value_log[look_key].assume_value(assumed_look_value)
+
+                    if crash_key is not None:
+                        sub_controller.state.control_value_log[crash_key].assume_value(assumed_crash_value)
+                        if assumed_crash_value != crash_safe_value:
+                            sub_controller.robot_queue.popleft()
 
                     if split_needed:
                         results.append(sub_controller.run())
@@ -114,6 +161,10 @@ class Controller:
 
     def step_robot(self, robot):
         instruction = robot.get_next_instruction()
+        if isinstance(instruction, BreakpointWrapper):
+            instruction = instruction.wrapped
+            breakpoint()
+
         if robot.skip_step:
             robot.skip_step = False
             return instruction

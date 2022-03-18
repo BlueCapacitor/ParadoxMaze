@@ -63,9 +63,7 @@ class CSVMap:
                 elif cell in CSVMap.destination_symbols:
                     self.tiles[y].append((DestinationTile, {"letter": cell}))
                 elif cell in CSVMap.portal_symbols:
-                    destination = self.find_cell(cell.lower())
-                    assert destination is not None, "No '%s' found in csv file" % (cell.lower())
-                    self.tiles[y].append((PortalTile, destination[0: 2]))
+                    self.tiles[y].append((PortalTile, {"letter": cell}))
                 elif cell == CSVMap.time_gate_symbol:
                     self.tiles[y].append((TimeGateTile, {"dt": int(args[0])}))
                 elif cell == CSVMap.close_timed_door_symbol:

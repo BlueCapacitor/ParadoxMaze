@@ -3,14 +3,14 @@ repeat(5){
 		fd;
 	}
 	rt;
-	repeat(2){
-		fd;
-	}
+	fd;
+	fd;
 	rt;
 	repeat(13){
 		fd;
 	}
 	lt;
-	fd; fd;
+	fd;
+	fd;
 	lt;
 }

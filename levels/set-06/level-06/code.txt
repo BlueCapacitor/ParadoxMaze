@@ -1,0 +1,30 @@
+def(fd2){
+	fd;
+	fd;
+}
+
+fun(fd2);
+lt;
+fun(fd2);
+lt;
+fun(fd2);
+rt;
+fun(fd2);
+rt;
+fun(fd2);
+fun(fd2);
+fun(fd2);
+rt;
+fun(fd2);
+fun(fd2);
+fun(fd2);
+rt;
+fun(fd2);
+lt;
+fun(fd2);
+lt;
+fun(fd2);
+fun(fd2);
+lt;
+fun(fd2);
+fun(fd2);
