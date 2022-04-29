@@ -1,6 +1,7 @@
 import tkinter as tk
 from math import ceil
 
+from tools.template import template
 from ui import charge_color, tk_color, ticks_per_step
 from ui.utilities.font import Font
 from ui.widgets.game_canvas import GameCanvas
@@ -225,7 +226,7 @@ class StepPage(tk.Frame):
         if self.mode == "Global Time":
             self.charge_mode_time_display.config(text="", bg=tk_color(self.colors[3]))
         else:
-            time = self.state.get_robot_with_charge(round(self.time))[1]
+            time = self.state.robot_log[template.charge, round(self.time)][0].time
             self.charge_mode_time_display.config(text="Time: %s" % time,
                                                  bg=tk_color(charge_color(self.time, self.state.max_charge)))
         self.game_canvas.draw(False)

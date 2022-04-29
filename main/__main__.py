@@ -1,6 +1,7 @@
 import argparse
 
 from main.clear_all_code import clear_all_code
+from main.dev_test import dev_test
 from main.run import run
 from main.update_levels import update_levels
 from main.write_solutions_to_code import write_solutions_to_code
@@ -21,6 +22,10 @@ action_group.add_argument("--write_solutions_to_code",
                           help="dev: overwrite the code from all levels with the code stored in solution.txt",
                           action="store_true")
 
+action_group.add_argument("--dev_test",
+                          help="dev: test script for development; not an action",
+                          action="store_true")
+
 args = parser.parse_args()
 
 if args.update_levels:
@@ -31,5 +36,7 @@ elif args.clear_all_code:
     clear_all_code()
 elif args.write_solutions_to_code:
     write_solutions_to_code()
+elif args.dev_test:
+    dev_test()
 else:
     run()

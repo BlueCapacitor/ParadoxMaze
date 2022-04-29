@@ -1,4 +1,0 @@
-repeat(4){fd;}
-slp;
-slp;
-repeat(4){fd;}

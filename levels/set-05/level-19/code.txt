@@ -1,50 +1,33 @@
-def(fd_to_wall){
-	forever{
-		look;
-		ifClosed{
-			break;
-		}
-		fd;
-	}
-}
-
-def(fd_and_backtrack){
+def(fd_and_back){
 	look;
 	ifClosed{
-		rt;
-		rt;
+		rt; rt;
 	}
 	ifOpen{
 		fd;
-		fun(fd_and_backtrack);
+		fun(fd_and_back);
 		fd;
 	}
 }
-
-repeat(3){
-	fd;
-	fd;
-	look;
-	ifClosed{
-		lt;
-		fun(fd_to_wall);
-		rt;
-	}
-	ifOpen{
-		rt;
-		fun(fd_to_wall);
-		lt;
-	}
-	fd;
-}
-fd;
-fun(fd_and_backtrack);
+fd; fd;
+lt;
+repeat(8){fd;}
+rt;
+repeat(3){fd;}
+lt;
+repeat(4){fd;}
+rt;
+repeat(3){fd;}
+lt;
+fd; fd;
+rt;
+fd; fd;
+fun(fd_and_back);
 rt;
 fd;
 rt;
 look;
 ifClosed{
 	rt;
-	fd;
-	fd;
+	fd; fd;
 }

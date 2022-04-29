@@ -1,7 +1,0 @@
-repeat(3){
-	repeat(2){
-		repeat(4){fd;}
-		rt;
-	}
-	rt;
-}

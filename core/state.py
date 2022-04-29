@@ -1,14 +1,32 @@
 from enum import Enum
 
 from tiles.target import TargetTile
+from tools.table import Table
+from tools.template import template
 
 
 class State:
+    robot_log_dimensions = [
+                template.time,
+                template.charge_remaining,
+                template.continuity_id,
+                (template.time, template.continuity_id),
+                (template.x, template.y),
+                (template.x, template.y, template.time)
+            ]
+    robot_log_reduce_dimensions = [
+                Table.reduce_max(template.charge_remaining),
+                Table.reduce_min(template.charge_remaining),
+                Table.reduce_max(template.time),
+                Table.reduce_min(template.time)
+            ]
 
     def __init__(self, board, robot_log=None, control_value_log=None, sticky_values=None):
         self.board = board
         if robot_log is None:
-            self.robot_log = {}
+            self.robot_log = Table(State.robot_log_dimensions, State.robot_log_reduce_dimensions)
+        elif isinstance(robot_log, (list, tuple)):
+            self.robot_log = Table(State.robot_log_dimensions, State.robot_log_reduce_dimensions, items=robot_log)
         else:
             self.robot_log = robot_log
 
@@ -25,48 +43,15 @@ class State:
 
     def copy(self):
         return (State(self.board,
-                      dict(map(lambda entry: (entry[0], entry[1].copy()), self.robot_log.items())),
+                      self.robot_log.copy(),
                       self.control_value_log,
                       dict(self.sticky_values)))
 
-    def get_robots_at_time(self, time):
-        return self.robot_log[time] if time in self.robot_log.keys() else []
-
-    def get_all_robots(self):
-        return sum(self.robot_log.values(), [])
-
-    def get_robot_with_charge(self, charge):
-        for time in self.robot_log.keys():
-            for robot in self.robot_log[time]:
-                if robot.charge_remaining == charge:
-                    return robot, time
-
-    def get_all_robots_with_charge(self, charge):
-        out = []
-
-        for time in self.robot_log.keys():
-            for robot in self.robot_log[time]:
-                if robot.charge_remaining == charge:
-                    out.append((robot, time))
-
-        return out
-
-    def get_robot_with_time_and_continuity_id(self, time, continuity_id):
-        if time not in self.robot_log.keys():
-            return
-
-        for robot in self.robot_log[time]:
-            if robot.continuity_id == continuity_id:
-                return robot
-
     def log_robot(self, robot):
-        self.log_robot_trace(robot.make_trace(), robot.time)
+        self.log_robot_trace(robot.make_trace())
 
-    def log_robot_trace(self, robot_trace, time):
-        if time not in self.robot_log.keys():
-            self.robot_log[time] = []
-
-        self.robot_log[time].append(robot_trace)
+    def log_robot_trace(self, robot_trace):
+        self.robot_log.append(robot_trace)
 
     def get_control_value(self, control_id, time):
         if (control_id, time) not in self.control_value_log.keys():
@@ -142,19 +127,19 @@ class State:
 
     @property
     def max_time(self):
-        return max(self.robot_log.keys())
+        return self.robot_log.reduce(Table.reduce_max(template.time))
 
     @property
     def min_time(self):
-        return min(self.robot_log.keys())
+        return self.robot_log.reduce(Table.reduce_min(template.time))
 
     @property
     def max_charge(self):
-        return None if self.get_all_robots() == [] else max(robot.initial_charge for robot in self.get_all_robots())
+        return self.robot_log.reduce(Table.reduce_max(template.current_charge))
 
     @property
     def min_charge(self):
-        return min(map(lambda robot: robot.charge_remaining, self.get_all_robots()))
+        return self.robot_log.reduce(Table.reduce_min(template.current_charge))
 
 
 class Result(Enum):

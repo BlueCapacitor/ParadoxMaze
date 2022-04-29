@@ -1,16 +1,14 @@
-def(wind_up){
+def(fun){
 	look;
 	ifClosed{
 		rt;
 		fd;
 		fd;
 		rt;
-		fd;
-		fd;
 	}
 	ifOpen{
 		fd;
-		fun(wind_up);
+		fun(fun);
 		fd;
 	}
 }
@@ -18,8 +16,9 @@ def(wind_up){
 fd;
 rt;
 fd;
+lt; lt;
 repeat(7){
-	rt;
-	rt;
-	fun(wind_up);
+	fun(fun);
+	fd; fd;
+	lt; lt;
 }

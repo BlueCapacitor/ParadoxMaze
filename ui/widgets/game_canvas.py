@@ -1,6 +1,7 @@
 import tkinter as tk
 from math import floor, ceil, cos, pi, sin
 
+from tools.template import template
 from ui import tk_color, inactive_charge_color, inactive_border_charge_color, charge_color, \
     border_charge_color, \
     apply_robot_move_curve, apply_robot_turn_curve
@@ -95,8 +96,9 @@ class GameCanvas(tk.Frame):
 
             self.p_time = self.time
 
-            for robot0 in self.state.get_robots_at_time(floor(self.time)):
-                robot1 = self.state.get_robot_with_time_and_continuity_id(ceil(self.time), robot0.continuity_id)
+            for robot0 in self.state.robot_log[template.time, floor(self.time)]:
+                robot1 = self.state.robot_log[(template.time, template.continuity_id),
+                                              (ceil(self.time), robot0.continuity_id)]
                 self.draw_intermediate_robot(self.time, floor(self.time), ceil(self.time), robot0, robot1)
 
         if self.mode == "Charge Remaining":
@@ -104,7 +106,7 @@ class GameCanvas(tk.Frame):
             charge1 = ceil(self.time)
             charge_fraction = (self.time - charge0) / (charge1 - charge0) if charge0 != charge1 else 0
 
-            robots_with_this_charge = self.state.get_all_robots_with_charge(charge0)
+            robots_with_this_charge = self.state.robot_index[template.current_charge, charge0]
 
             assert len(robots_with_this_charge) <= 2, \
                 "Something is wrong: there are more than two robot traces with the same charge"
@@ -114,7 +116,7 @@ class GameCanvas(tk.Frame):
             current_robot0, initial_time = min(robots_with_this_charge,
                                                key=lambda robot_tuple: robot_tuple[0].continuity_id)
 
-            robots_with_next_charge = self.state.get_all_robots_with_charge(charge1)
+            robots_with_next_charge = self.state.robot_index[template.current_charge, charge1]
 
             assert len(robots_with_next_charge) <= 2, \
                 "Something is wrong: there are more than two robot traces with the same charge"
@@ -135,11 +137,12 @@ class GameCanvas(tk.Frame):
             else:
                 self.canvas.delete("robot")
 
-            robots = self.state.get_robots_at_time(time0)
+            robots = self.state.robot_log[template.time, time0]
 
             for robot0 in robots:
                 if robot0 != current_robot0:
-                    robot1 = self.state.get_robot_with_time_and_continuity_id(time1, robot0.continuity_id)
+                    robot1 = self.state.robot_log[(template.time, template.continuity_id),
+                                                  (time1, robot0.continuity_id)]
                     greyed_out = robot0.charge_remaining != charge0 or final_time != initial_time + 1
                     self.draw_intermediate_robot(slice_time, time0, time1, robot0, robot1,
                                                  color_function=inactive_charge_color if greyed_out else None,
@@ -150,7 +153,7 @@ class GameCanvas(tk.Frame):
 
         if self.mode == "Preview":
             self.draw_board()
-            for robot in self.state.get_robots_at_time(self.time):
+            for robot in self.state.robot_log[template.time, self.time]:
                 self.draw_robot(robot)
 
         if colors is not None:
@@ -169,7 +172,8 @@ class GameCanvas(tk.Frame):
                                          *self.screen_coords(self.board.width - 0.5, self.board.height - 0.5),
                                          fill=tk_color((0, 0, 0)), width=0)
 
-        time = self.tile_time if self.mode == "Global Time" else self.state.get_robot_with_charge(self.tile_time)[1]
+        time = self.tile_time if self.mode == "Global Time" else self.state.robot_log[template.charge_remaining,
+                                                                                      self.tile_time][0].time
         for tile in self.board.list_tiles:
             if (not only_draw_needs_refresh) or tile.needs_refresh:
                 self.draw_tile(tile, time)
