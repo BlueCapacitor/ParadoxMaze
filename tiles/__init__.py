@@ -5,12 +5,12 @@ greek_alphabet = tuple("αβγδεζηθικλμνξοπρστυφχψω")
 
 
 class Drawings(Enum):
-    RECT = auto()
-    CIRCLE = auto()
-    FLARE = auto()
-    TEXT = auto()
-    REG_POLY = auto()
-    CORNERS = auto()
+    RECT = 1
+    CIRCLE = 2
+    FLARE = 3
+    TEXT = 4
+    REG_POLY = 5
+    CORNERS = 6
 
 
 @cache
@@ -19,7 +19,7 @@ def get_color_for_id(n):
     color = [1, 1, 0]
     for _ in range((n * color_shift) % 12):
         color = shift_next_hue(color)
-    return [max(val, 0.001) for val in color]
+    return [max(0.001, val) for val in color]
 
 
 def shift_next_hue(prev):

@@ -121,12 +121,12 @@ class Markdown:
 
 class MarkdownState(Flag):
     NORMAL = 0
-    BOLD = auto()
-    ITALIC = auto()
-    INLINE_CODE = auto()
-    MULTILINE_CODE = auto()
-    SIZE_BIT1 = auto()
-    SIZE_BIT2 = auto()
+    BOLD = 1
+    ITALIC = 2
+    INLINE_CODE = 4
+    MULTILINE_CODE = 8
+    SIZE_BIT1 = 16
+    SIZE_BIT2 = 32
 
     @property
     def size(self):

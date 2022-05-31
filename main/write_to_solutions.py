@@ -16,7 +16,7 @@ def write_to_solutions():
         set_num = level_dir["Set Num"]
         level_num = level_dir["Level Num"]
 
-        with open(path.join(level_path, "code.txt"), 'r') as code_file,\
+        with open(path.join(level_path, "code.txt"), 'r') as code_file, \
                 open(path.join(level_path, f"{set_num}-{level_num}-map.csv"), 'r') as map_file:
             code_str = code_file.read()
             if len(code_str) > 0:

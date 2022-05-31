@@ -2,20 +2,37 @@ fd;
 look;
 ifClosed{
 	rt;
-	fd; fd; fd;
+	repeat(3){
+		fd;
+	}
 }
 ifOpen{
-	fd; fd;
-	lt;
-	fd; fd;rt;
-	fd; fd;
+	fd;
+	fd;
+	look;
+	ifOpen{
+		rt;
+		fd;
+		fd;
+		lt;
+	}
+	ifClosed{
+		lt;
+		fd;
+		fd;
+		rt;
+	}
+	fd;
+	fd;
 	look;
 	ifOpen{
 		lt;
-		repeat(3){fd;}
-		slp;
-		repeat(3){fd;}
+		repeat(6){
+			fd;
+		}
 		rt;
-		repeat(3){fd;}
+		repeat(3){
+			fd;
+		}
 	}
 }

@@ -1,5 +1,4 @@
 from language.resolvable_instructions import ResolvableInstruction
-from language.resolvable_instructions.control_flow_anchors.break_anchor import BreakAnchor
 
 
 class Stop(ResolvableInstruction):

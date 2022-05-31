@@ -98,7 +98,7 @@ class GameCanvas(tk.Frame):
 
             for robot0 in self.state.robot_log[template.time, floor(self.time)]:
                 robot1 = self.state.robot_log[(template.time, template.continuity_id),
-                                              (ceil(self.time), robot0.continuity_id)]
+                                              (ceil(self.time), robot0.continuity_id)][0]
                 self.draw_intermediate_robot(self.time, floor(self.time), ceil(self.time), robot0, robot1)
 
         if self.mode == "Charge Remaining":

@@ -40,7 +40,7 @@ def clean_run(result_tuple):
 
                     clean_state.log_robot_trace(robot_trace.copy())
 
-                    if not robot_trace.static_crash_look(state, robot_trace.time):
+                    if not robot_trace.static_crash_look(state):
                         hidden_continuity_ids.add(robot_trace.continuity_id)
 
             return result | clean_state.is_valid, clean_state

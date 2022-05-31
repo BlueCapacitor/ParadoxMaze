@@ -38,7 +38,7 @@ class MDText(ScrollBoundCanvas):
                 weight = "bold" if MarkdownState.BOLD in markdown_state else "normal"
                 slant = "italic" if MarkdownState.ITALIC in markdown_state else "roman"
                 font, font_spacing = Font.create_font(size, weight, slant)
-                color = tk_color(self.colors[1])\
+                color = tk_color(self.colors[1]) \
                     if (MarkdownState.INLINE_CODE not in markdown_state and
                         MarkdownState.MULTILINE_CODE not in markdown_state) else tk_color(self.colors[2])
 

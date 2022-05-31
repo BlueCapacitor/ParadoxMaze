@@ -1,0 +1,9 @@
+repeat(3){
+	fd;
+	fd;
+	lt;
+	repeat(4){fd;}
+	lt;
+	repeat(6){fd;}
+	lt;
+}

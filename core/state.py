@@ -87,31 +87,30 @@ class State:
 
         targets = {tile: False for tile in self.board.get_targets()}
 
-        for time in self.robot_log.keys():
-            for robot_trace in self.robot_log[time]:
-                tile = self.board.get_tile(robot_trace.x, robot_trace.y)
-                if tile.is_fatal(self, time) and tile.is_static:
-                    out = self.fail_and_finalize(out)
-                    break
-                if not tile.is_static:
-                    crash_look = tile.crash_look(self, time)
-                    if isinstance(crash_look, bool):
-                        if not crash_look:
-                            out = self.fail_and_finalize(out)
-                    else:
-                        control_value, safe_value = crash_look
-                        if control_value.static and control_value.current_value != safe_value:
-                            out = self.fail_and_finalize(out)
-                        if len(control_value.possible_values) == 1 and \
-                                tuple(control_value.possible_values)[0] != safe_value:
-                            out = self.fail_and_finalize(out)
+        for robot_trace in self.robot_log:
+            tile = self.board.get_tile(robot_trace.x, robot_trace.y)
+            if tile.is_fatal(self, robot_trace.time) and tile.is_static:
+                out = self.fail_and_finalize(out)
+                break
+            if not tile.is_static:
+                crash_look = tile.crash_look(self, robot_trace.time)
+                if isinstance(crash_look, bool):
+                    if not crash_look:
+                        out = self.fail_and_finalize(out)
+                else:
+                    control_value, safe_value = crash_look
+                    if control_value.static and control_value.current_value != safe_value:
+                        out = self.fail_and_finalize(out)
+                    if len(control_value.possible_values) == 1 and \
+                            tuple(control_value.possible_values)[0] != safe_value:
+                        out = self.fail_and_finalize(out)
 
-                if not self.board.check_bounds(robot_trace):
-                    out = self.fail_and_finalize(out)
-                    break
-                if isinstance(tile, TargetTile):
-                    targets[tile] = True
-                    continue
+            if not self.board.check_bounds(robot_trace):
+                out = self.fail_and_finalize(out)
+                break
+            if isinstance(tile, TargetTile):
+                targets[tile] = True
+                continue
 
         if out == Result.NO_SUCCESS and all(targets.values()):
             out = Result.POTENTIAL_SUCCESS
@@ -127,19 +126,19 @@ class State:
 
     @property
     def max_time(self):
-        return self.robot_log.reduce(Table.reduce_max(template.time))
+        return self.robot_log.reduce(*Table.reduce_max(template.time))
 
     @property
     def min_time(self):
-        return self.robot_log.reduce(Table.reduce_min(template.time))
+        return self.robot_log.reduce(*Table.reduce_min(template.time))
 
     @property
     def max_charge(self):
-        return self.robot_log.reduce(Table.reduce_max(template.current_charge))
+        return self.robot_log.reduce(*Table.reduce_max(template.charge_remaining))
 
     @property
     def min_charge(self):
-        return self.robot_log.reduce(Table.reduce_min(template.current_charge))
+        return self.robot_log.reduce(*Table.reduce_min(template.charge_remaining))
 
 
 class Result(Enum):

@@ -1,0 +1,11 @@
+forever{
+	fd;
+	look;
+	ifClosed{
+		fd;
+		look;
+		ifClosed{
+			stop;
+		}
+	}
+}

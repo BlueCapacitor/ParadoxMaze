@@ -2,7 +2,6 @@ import tkinter as tk
 from os import path
 
 from main import root_path
-from ui.utilities.font import Font
 from ui.utilities.markdown import Markdown
 from ui.widgets.md_text import MDText
 

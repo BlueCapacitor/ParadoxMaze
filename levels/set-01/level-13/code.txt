@@ -1,0 +1,16 @@
+repeat(9){
+	repeat(2){
+		fd;
+		rt;
+		fd;
+		lt;
+	}
+	fd;
+	repeat(2){
+		fd;
+		lt;
+		fd;
+		rt;
+	}
+	fd;
+}

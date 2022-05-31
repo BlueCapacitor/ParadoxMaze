@@ -100,12 +100,12 @@ class Code(deque):
                         block = block_type
 
                     elif issubclass(block_type, ParametrizedCompoundInstruction):
-                        assert code_str[location] == "(",\
+                        assert code_str[location] == "(", \
                             f"{read_buffer} should be followed by (, not {code_str[location]}"
                         parameter_string = self.isolate_delimited_range(code_str[location + 1:], "(", ")")
                         location += 2 + len(parameter_string)
 
-                        assert code_str[location] == "{",\
+                        assert code_str[location] == "{", \
                             f"{read_buffer}(_) should be followed by {{, not {code_str[location]}"
                         inner_code_str = self.isolate_delimited_range(code_str[location + 1:], "{", "}")
                         location += 2 + len(inner_code_str)
@@ -115,7 +115,7 @@ class Code(deque):
                         block = block_type(parameter_string, inner=inner)
 
                     elif issubclass(block_type, ParametrizedInstruction):
-                        assert code_str[location] == "(",\
+                        assert code_str[location] == "(", \
                             f"{read_buffer} should be followed by (, not {code_str[location]}"
                         parameter_string = self.isolate_delimited_range(code_str[location + 1:], "(", ")")
                         location += 2 + len(parameter_string)
@@ -127,7 +127,7 @@ class Code(deque):
                         block = block_type(parameter_string)
 
                     elif issubclass(block_type, CompoundInstruction):
-                        assert code_str[location] == "{",\
+                        assert code_str[location] == "{", \
                             f"{read_buffer} should be followed by {{, not {code_str[location]}"
                         inner_code_str = self.isolate_delimited_range(code_str[location + 1:], "{", "}")
                         location += 2 + len(inner_code_str)

@@ -1,0 +1,25 @@
+def(fd_all){
+	forever{
+		look;
+		ifClosed{
+			break;
+		}
+		fd;
+	}
+}
+forever{
+	fun(fd_all);
+	rt;
+	look;
+	ifClosed{
+		break;
+	}
+	fd;
+	fd;
+	rt;
+	fun(fd_all);
+	lt;
+	fd;
+	fd;
+	lt;
+}

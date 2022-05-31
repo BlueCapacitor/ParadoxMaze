@@ -1,24 +1,33 @@
 from timeit import timeit
 
-from tools.template import Template
+from tools.template import Template, template
 from tools.table import Table
 
 
 def dev_test():
-    time_test()
-
-    table = Table([
-        Template()[0],
-        Template()[1],
-        Template()[2]
-    ])
-
-    for a in range(4):
-        for b in range(4):
-            for c in range(4):
-                table.append((a, b, c))
-
-    print(table[Template()[0]])
+    table = Table([],
+                  (Table.reduce_max(template[0]),
+                   Table.reduce_any(template[1]),
+                   Table.reduce_sum(template[0])))
+    print(table.reduce(*Table.reduce_max(template[0])),
+          table.reduce(*Table.reduce_any(template[1])),
+          table.reduce(*Table.reduce_sum(template[0])))
+    table.append((3, False))
+    print(table.reduce(*Table.reduce_max(template[0])),
+          table.reduce(*Table.reduce_any(template[1])),
+          table.reduce(*Table.reduce_sum(template[0])))
+    table.append((5, False))
+    print(table.reduce(*Table.reduce_max(template[0])),
+          table.reduce(*Table.reduce_any(template[1])),
+          table.reduce(*Table.reduce_sum(template[0])))
+    table.append((-1, True))
+    print(table.reduce(*Table.reduce_max(template[0])),
+          table.reduce(*Table.reduce_any(template[1])),
+          table.reduce(*Table.reduce_sum(template[0])))
+    table.append((0, False))
+    print(table.reduce(*Table.reduce_max(template[0])),
+          table.reduce(*Table.reduce_any(template[1])),
+          table.reduce(*Table.reduce_sum(template[0])))
 
 
 def time_test():

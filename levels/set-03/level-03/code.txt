@@ -1,0 +1,6 @@
+lt;
+repeat(4){fd;}
+rt;
+repeat(5){fd;}
+rt;
+repeat(4){fd;}
