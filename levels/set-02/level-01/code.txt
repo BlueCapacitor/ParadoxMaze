@@ -1,0 +1,7 @@
+forever{
+	fd;
+	look;
+	ifClosed{
+		break;
+	}
+}

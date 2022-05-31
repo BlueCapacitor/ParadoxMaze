@@ -33,10 +33,9 @@ class ContinuityID(tuple):
 
 
 class StaticRobot:
-    def __init__(self, x, y, direction, charge_remaining, initial_charge, time=0, continuity_id=None, look_value=False):
+    def __init__(self, x, y, direction, charge_remaining, initial_charge, continuity_id=None, look_value=False):
         self.x = x
         self.y = y
-        self.time = time
         self.charge_remaining = charge_remaining
         self.initial_charge = initial_charge
         self.direction = direction
@@ -56,14 +55,14 @@ class StaticRobot:
 
     def copy(self, discontinuity_type=DiscontinuityType.NONE):
         return StaticRobot(self.x, self.y, self.direction, self.charge_remaining, self.initial_charge,
-                           continuity_id=self.continuity_id, time=self.time, look_value=self.look_value)
+                           continuity_id=self.continuity_id, look_value=self.look_value)
 
-    def static_crash_look(self, state):
+    def static_crash_look(self, state, time):
         tile = state.board.get_tile(self.x, self.y)
         if tile.is_static:
-            return not tile.is_fatal(state, self.time)
+            return not tile.is_fatal(state, time)
         else:
-            match tile.crash_look(state, self.time):
+            match tile.crash_look(state, time):
                 case control_value, safe_value:
                     return control_value.current_value == safe_value
                 case value:
@@ -81,9 +80,10 @@ class Robot(StaticRobot):
     def __init__(self, x, y, direction, charge_remaining, initial_charge, code, time=0, continuity_id=None,
                  look_value=False, skip_step=False):
         super().__init__(x, y, direction, charge_remaining, initial_charge, look_value=look_value,
-                         time=time, continuity_id=continuity_id)
+                         continuity_id=continuity_id)
 
         self.code = code
+        self.time = time
         self.skip_step = skip_step
         self._peak = None
 

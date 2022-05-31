@@ -1,0 +1,41 @@
+def(branch_0){
+	fd;
+	rt;
+	rt;
+	fd;
+}
+
+def(branch_1){
+	fd;
+	fd;
+	
+	repeat(3){
+		rt;
+		fun(branch_0);
+	}
+	rt;
+	
+	fd;
+	fd;
+}
+
+def(branch_2){
+	repeat(4){
+		fd;
+	}
+	
+	repeat(3){
+		rt;
+		fun(branch_1);
+	}
+	rt;
+	
+	repeat(4){
+		fd;
+	}
+}
+
+repeat(4){
+	fun(branch_2);
+	rt;
+}

@@ -1,6 +1,5 @@
 from tiles import Drawings, get_color_for_id
 from tiles.abstract.control import ControlTile
-from tools.template import template
 
 
 class ButtonTile(ControlTile):
@@ -17,13 +16,13 @@ class ButtonTile(ControlTile):
         control_value.set_current_value(True, True)
 
     def get_drawing(self, state, time):
-        if len(state.robot_log[(template.x, template.y, template.time), (self.x, self.y, time)]) > 0:
-            return ((0.5, 0.5, 0.5),
-                    (0.5, 0.5, 0.5),
-                    (Drawings.REG_POLY, 4, 3 / 8, self.color),
-                    (Drawings.TEXT, self.control_id, (0, 0, 0)))
-        else:
-            return ((0.5, 0.5, 0.5),
-                    (0.75, 0.75, 0.75),
-                    (Drawings.REG_POLY, 4, 3 / 8, self.color),
-                    (Drawings.TEXT, self.control_id, (0, 0, 0)))
+        for robot_trace in state.get_robots_at_time(time):
+            if robot_trace.x == self.x and robot_trace.y == self.y:
+                return ((0.5, 0.5, 0.5),
+                        (0.5, 0.5, 0.5),
+                        (Drawings.REG_POLY, 4, 3 / 8, self.color),
+                        (Drawings.TEXT, self.control_id, (0, 0, 0)))
+        return ((0.5, 0.5, 0.5),
+                (0.75, 0.75, 0.75),
+                (Drawings.REG_POLY, 4, 3 / 8, self.color),
+                (Drawings.TEXT, self.control_id, (0, 0, 0)))

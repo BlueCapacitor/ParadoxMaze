@@ -1,8 +1,11 @@
-fd; fd;
+fd;
+fd;
 look;
-ifOpen{
-	lt;
-} ifClosed{
+ifClosed{
 	rt;
 }
-fd; fd;
+ifOpen{
+	lt;
+}
+fd;
+fd;
